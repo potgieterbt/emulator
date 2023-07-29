@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <vector>
-#include "chip8.h"
+#include "chip8.cpp"
 #include <SDL2/SDL.h>
 
 // Display is 64x32-pixel, 0-63 across, 0-31 down.
@@ -31,7 +31,7 @@
 int main(int argc, char *argv[]) {
   setupGraphics();
   setupInput();
-
+  chip8 myChip8;
   myChip8.initialize();
   myChip8.loadGame("pong");
 

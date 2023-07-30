@@ -2,22 +2,24 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-const int prog_start = 0x200;
-const int ETI_start = 0x600;
-const int ram_end = 0xFFF;
-unsigned short opcode, I, pc, sp;
-unsigned char memory[4096];
-unsigned char V[16];
-unsigned char gfx[64 * 32];
-unsigned char delay_timer, sound_timer;
-unsigned short stack[16];
-unsigned char key[16];
 
 class chip8 {
 public:
   void initialize();
   void loadGame(std::string game);
   void emulateCycle();
+
+private:
+  const int prog_start = 0x200;
+  const int ETI_start = 0x600;
+  const int ram_end = 0xFFF;
+  unsigned short opcode, I, pc, sp;
+  unsigned char memory[4096];
+  unsigned char V[16];
+  unsigned char gfx[64 * 32];
+  unsigned char delay_timer, sound_timer;
+  unsigned short stack[16];
+  unsigned char key[16];
 };
 
 void chip8::initialize() {
@@ -88,7 +90,53 @@ void chip8::emulateCycle() {
     }
     break;
   case 0x6000:
-    // =======================================
+    printf("set value of V%X to %X", (opcode & 0x0F00), (opcode & 0x00FF));
+    V[opcode & 0x0F00] = (opcode & 0x00FF);
+    break;
+  case 0x7000:
+    printf("Set Vx = Vx + kk");
+    V[opcode & 0x0F00] = V[opcode & 0x0F00] + (opcode & 0x00FF);
+    break;
+  case 0x8000:
+    switch (opcode & 0x000F) {
+    case 0x0000:
+      printf("Set Vx = Vy");
+      V[opcode & 0x0F00] = V[opcode & 0x00F0];
+      break;
+    case 0x0001:
+      printf("Set Vx to Vx or Vy");
+      V[opcode & 0x0F00] = V[opcode & 0x0F00] | V[opcode & 0x00F0];
+      break;
+    case 0x0002:
+      printf("set Vx to Vx and Vy");
+      V[opcode & 0x0F00] = V[opcode & 0x0F00] & V[opcode & 0x00F0];
+      break;
+    case 0x0003:
+      printf("Set Vx to Vx XOR Vy");
+      V[opcode & 0x0F00] = V[opcode & 0x0F00] ^ V[opcode & 0x00F0];
+      break;
+    case 0x0004:
+      printf("Set Vx to Vx + Vy, VF = carry");
+      V[opcode & 0x0F00] = V[opcode & 0x0F00] + V[opcode & 0x00F0];
+      if (V[opcode & 0x0F00] + V[opcode & 0x00F0] > 255) {
+        V[0xF] = 1;
+      }
+      break;
+    case 0x0005:
+      printf("Set Vx to Vx - Vy, if Vx > Vy set VF to 1, else 0");
+      V[opcode & 0x0F00] = V[opcode & 0x0F00] - V[opcode & 0x00F0];
+      if (V[opcode & 0x0F00] > V[opcode & 0x00F0]) {
+        V[0xF] = 1;
+      }
+      break;
+    case 0x0006:
+      break;
+    case 0x0007:
+      break;
+    case 0x000E:
+      break;
+    }
+  case 0x9000:
     break;
   case 0xA000:
     I = opcode & 0x0FFF;
@@ -102,6 +150,7 @@ void chip8::emulateCycle() {
   case 0xC000:
     //===========================================
     break;
+    case :
   default:
     std::printf("Unknown opcode: 0x%X\n", opcode);
     break;

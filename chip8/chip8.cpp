@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <string>
+#include <tuple>
 #include <vector>
 
 class chip8 {
@@ -20,6 +21,10 @@ private:
   unsigned char delay_timer, sound_timer;
   unsigned short stack[16];
   unsigned char key[16];
+  unsigned int n;
+  std::vector<int> sprite;
+  int loc[2] = {0, 0};
+  bool p_erase;
   const unsigned char chip8_fontset[80] = {
       0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
       0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -78,9 +83,10 @@ void chip8::emulateCycle() {
     pc += 2;
     break;
   case 0x2000:
-    I = opcode & 0x0FFF;
     printf("Call sub at 0x%X", I);
-    pc += 2;
+    stack[sp] = pc;
+    ++sp;
+    pc = opcode & 0x0FFF;
     break;
   case 0x3000:
     printf("compare value in V%X to %X", (opcode & 0x0F00), (opcode & 0x00FF));
@@ -205,36 +211,62 @@ void chip8::emulateCycle() {
     break;
   case 0xD000:
     printf("Draw n-byte sprite at mem loc I at (Vx, Vy), set VF = collision");
+    n = opcode & 0x000F;
+    for (int i = 0; i < n; ++i) {
+      sprite.push_back(memory[I + i]);
+    }
+    loc[0] = (opcode & 0x0F00);
+    loc[1] = (opcode & 0x00F0);
+    printf("Display sprite at location loc");
+    if (p_erase) {
+      V[0xF] = 1;
+    }
     pc += 2;
     break;
   case 0xE000:
     switch (opcode & 0x00FF) {
     case 0x009E:
       printf("Skip next instruction if key with value of Vx is pressed.");
-
-      pc += 2;
+      if (get_key() == V[opcode & 0x0F00]) {
+        pc += 4;
+      } else {
+        pc += 2;
+      }
       break;
     case 0x00A1:
       printf("Skip next instruction if key with value of Vx is not pressed");
-      pc += 2;
+      if (get_key() != V[opcode & 0x0F00]) {
+        pc += 4;
+      } else {
+        pc += 2;
+      }
       break;
     }
   case 0xF000:
     switch (opcode & 0x00FF) {
     case 0x0007:
       printf("Set Vx = delay timer value.");
+      V[opcode & 0x0F00] = delay_timer;
       pc += 2;
       break;
     case 0x000A:
       printf("Wait for a key press, store the value of the key in Vx.");
+      while (true) {
+        char key = get_key();
+        if (key) {
+          V[opcode & 0x0F00] = key;
+        }
+      }
       pc += 2;
       break;
     case 0x0015:
       printf("Set delay timer = Vx.");
+      delay_timer = V[opcode & 0x0F00];
       pc += 2;
       break;
     case 0x0018:
       printf("Set sound timer = Vx.");
+      sound_timer = V[opcode & 0x0F00];
       pc += 2;
       break;
     case 0x001E:
@@ -244,6 +276,7 @@ void chip8::emulateCycle() {
       break;
     case 0x0029:
       printf("Set I = location of sprite for digit Vx.");
+      I = (V[opcode & 0x0F00] - 1) * 5;
       pc += 2;
       break;
     case 0x0033:
@@ -253,10 +286,16 @@ void chip8::emulateCycle() {
       break;
     case 0x0055:
       printf("Store registers V0 through Vx in memory starting at location I.");
+      for (int i = 0; i <= (opcode & 0x0F00); ++i) {
+        memory[I+i] = V[i];
+      }
       pc += 2;
       break;
     case 0x0065:
       printf("Read registers V0 through Vx from memory starting at location I");
+      for (int i = 0; i <= (opcode & 0x0F00); ++i) {
+        V[i] = memory[I+i];
+      }
       pc += 2;
       break;
     }

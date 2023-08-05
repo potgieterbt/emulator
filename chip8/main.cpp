@@ -1,8 +1,9 @@
-
-#include <iostream>
-#include <vector>
+#include <chrono>
+#include <thread>
 #include "chip8.cpp"
 #include <SDL2/SDL.h>
+#include <iostream>
+#include <vector>
 
 // Display is 64x32-pixel, 0-63 across, 0-31 down.
 // Uses sprites, group of bytes, upto 15 bytes for a possible sprite size of
@@ -29,20 +30,19 @@
 // instruction, execute instruction, incriment PC, repeat
 
 int main(int argc, char *argv[]) {
-  setupGraphics();
-  setupInput();
+  // setupGraphics();
+  // setupInput();
   chip8 myChip8;
   myChip8.initialize();
   myChip8.loadGame("pong");
 
+  // for (;;) {
+    // myChip8.emulateCycle();
 
-  for (;;){
-    myChip8.emulateCycle();
+    // if (myChip8.drawFlag)
+    // drawGraphics();
 
-    if (myChip8.drawFlag)
-      drawGraphics();
-
-    myChip8.setKeys();
-  }
+    // myChip8.setKeys();
+  // }
   return 0;
 }

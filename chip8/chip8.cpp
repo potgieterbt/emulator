@@ -1,4 +1,7 @@
+#include <cstdint>
 #include <cstdio>
+#include <fstream>
+#include <iostream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -56,41 +59,58 @@ void chip8::initialize() {
 }
 
 void chip8::loadGame(std::string game) {
+  std::cout << game << "\n";
   std::vector<char> buffer;
+  std::ifstream gamefile("./PONG", std::ios::binary | std::ios::in);
+  char c;
+  int j = 512;
+
+  while (gamefile.is_open()) {
+    gamefile.get(c);
+    buffer.push_back((uint8_t)c);
+  }
   int bufferSize = buffer.size();
   for (int i = 0; i < bufferSize; ++i) {
     memory[i + 512] = buffer[i];
   }
+  printf("Game successfully loaded\n");
 }
-
+// Change how index i accessed (opcode & 0x0F00) -> (opcode & 0x0F00 >> 8)
 void chip8::emulateCycle() {
-  opcode = memory[pc] << 8 | memory[pc + 1];
+  opcode = (memory[pc]) << 8 | memory[pc + 1];
+
+  printf("%X\n", opcode);
   switch (opcode & 0xF000) {
 
   case 0x0000:
     switch (opcode & 0x000F) {
     case 0x0000:
       printf("clear screen");
+      pc += 2;
       break;
-    case 0x000e:
+    case 0x000E:
       printf("return from sub");
+      pc += 2;
       break;
     }
+    break;
 
   case 0x1000:
     I = opcode & 0x0FFF;
     printf("jump to 0x%X", I);
-    pc += 2;
+    pc = I;
     break;
   case 0x2000:
+    I = opcode & 0x0FFF;
     printf("Call sub at 0x%X", I);
     stack[sp] = pc;
     ++sp;
-    pc = opcode & 0x0FFF;
+    pc = I;
     break;
   case 0x3000:
-    printf("compare value in V%X to %X", (opcode & 0x0F00), (opcode & 0x00FF));
-    if ((opcode & 0x0F00) == (opcode & 0x00FF)) {
+    printf("compare value in V%X to %X", ((opcode & 0x0F00) >> 8),
+           (opcode & 0x00FF));
+    if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
       pc += 4;
     } else {
       pc += 2;
@@ -98,7 +118,7 @@ void chip8::emulateCycle() {
     break;
   case 0x4000:
     printf("compare value in V%X to %X", (opcode & 0x0F00), (opcode & 0x00FF));
-    if ((opcode & 0x0F00) != (opcode & 0x00FF)) {
+    if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
       pc += 4;
     } else {
       pc += 2;
@@ -106,91 +126,99 @@ void chip8::emulateCycle() {
     break;
   case 0x5000:
     printf("compare value in V%X with value in V%X", (opcode & 0x0F00),
-           (opcode & 0x00F0));
-    if ((opcode & 0x0F00) == (0x00F0)) {
+           (opcode & 0x00F0) >> 4);
+    if (V[(opcode & 0x0F00 >> 8)] == V[(opcode & 0x00F0 >> 4)]) {
       pc += 4;
     } else {
       pc += 2;
     }
     break;
   case 0x6000:
-    printf("set value of V%X to %X", (opcode & 0x0F00), (opcode & 0x00FF));
-    V[opcode & 0x0F00] = (opcode & 0x00FF);
+    printf("set value of V%X to %X", ((opcode & 0x0F00) >> 8),
+           (opcode & 0x00FF));
+    V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
     pc += 2;
     break;
   case 0x7000:
     printf("Set Vx = Vx + kk");
-    V[opcode & 0x0F00] = V[opcode & 0x0F00] + (opcode & 0x00FF);
+    V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] + (opcode & 0x00FF);
     pc += 2;
     break;
   case 0x8000:
     switch (opcode & 0x000F) {
     case 0x0000:
       printf("Set Vx = Vy");
-      V[opcode & 0x0F00] = V[opcode & 0x00F0];
+      V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0001:
       printf("Set Vx to Vx or Vy");
-      V[opcode & 0x0F00] = V[opcode & 0x0F00] | V[opcode & 0x00F0];
+      V[(opcode & 0x0F00) >> 8] =
+          V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0002:
       printf("set Vx to Vx and Vy");
-      V[opcode & 0x0F00] = V[opcode & 0x0F00] & V[opcode & 0x00F0];
+      V[(opcode & 0x0F00) >> 8] =
+          V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0003:
       printf("Set Vx to Vx XOR Vy");
-      V[opcode & 0x0F00] = V[opcode & 0x0F00] ^ V[opcode & 0x00F0];
+      V[(opcode & 0x0F00) >> 8] =
+          V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0004:
       printf("Set Vx to Vx + Vy, VF = carry");
-      V[opcode & 0x0F00] = V[opcode & 0x0F00] + V[opcode & 0x00F0];
-      if (V[opcode & 0x0F00] + V[opcode & 0x00F0] > 255) {
+      V[(opcode & 0x0F00) >> 8] =
+          V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4];
+      if (V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4] > 255) {
         V[0xF] = 1;
       }
       pc += 2;
       break;
     case 0x0005:
       printf("Set Vx to Vx - Vy, if Vx > Vy set VF to 1, else 0");
-      if (V[opcode & 0x0F00] > V[opcode & 0x00F0]) {
+      if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]) {
         V[0xF] = 1;
       }
-      V[opcode & 0x0F00] = V[opcode & 0x0F00] - V[opcode & 0x00F0];
+      V[(opcode & 0x0F00) >> 8] =
+          V[(opcode & 0x0F00) >> 8] - V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0006:
       printf("If least sig bit of Vx is 1, set VF to 1, else 0. Vx = Vx/2 "
              "(bitwise shift)");
-      if (V[opcode & 0x0F00] % 2 == 1) {
+      if (V[(opcode & 0x0F00) >> 8] % 2 == 1) {
         V[0xF] = 1;
       }
-      V[opcode & 0x0F00] = V[opcode & 0x0F00] >> 1;
+      V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] >> 1;
       pc += 2;
       break;
     case 0x0007:
       printf("Set Vx to Vy - Vx. If Vy > Vx, not borrow VF = 1");
-      if (V[opcode & 0x0F00] < V[opcode & 0x00F0]) {
+      if (V[(opcode & 0x0F00) >> 8] < V[(opcode & 0x00F0) >> 4]) {
         V[0xF] = 1;
       }
-      V[opcode & 0x0F00] = V[opcode & 0x00F0] - V[opcode & 0x0F00];
+      V[opcode & 0x0F00 >> 8] =
+          V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
     case 0x000E:
       printf("If most sig of Vx is 1, set VF to 1, else 0. Vx = Vx*2 (bit "
              "shift)");
-      if (V[opcode & 0x0F00] > 127) {
+      if (V[(opcode & 0x0F00) >> 8] > 127) {
         V[0xF] = 1;
       }
-      V[opcode & 0x0F00] = V[opcode & 0x0F00] << 1;
+      V[opcode & 0x0F00 >> 8] = V[opcode & 0x0F00 >> 8] << 1;
       pc += 2;
       break;
     }
+    break;
   case 0x9000:
     printf("Skip next instruction if Vx != Vy");
-    if (V[opcode & 0x0F00] != V[opcode & 0x00F0]) {
+    if (V[(opcode & 0x0F00) >> 8] != V[opcode & 0x00F0 >> 4]) {
       pc += 4;
     } else {
       pc += 2;
@@ -227,7 +255,8 @@ void chip8::emulateCycle() {
     switch (opcode & 0x00FF) {
     case 0x009E:
       printf("Skip next instruction if key with value of Vx is pressed.");
-      if (get_key() == V[opcode & 0x0F00]) {
+      // if (get_key() == V[opcode & 0x0F00]) {
+      if (1 == V[opcode & 0x0F00]) {
         pc += 4;
       } else {
         pc += 2;
@@ -235,13 +264,15 @@ void chip8::emulateCycle() {
       break;
     case 0x00A1:
       printf("Skip next instruction if key with value of Vx is not pressed");
-      if (get_key() != V[opcode & 0x0F00]) {
+      // if (get_key() != V[opcode & 0x0F00]) {
+      if (1 != V[opcode & 0x0F00]) {
         pc += 4;
       } else {
         pc += 2;
       }
       break;
     }
+    break;
   case 0xF000:
     switch (opcode & 0x00FF) {
     case 0x0007:
@@ -252,7 +283,8 @@ void chip8::emulateCycle() {
     case 0x000A:
       printf("Wait for a key press, store the value of the key in Vx.");
       while (true) {
-        char key = get_key();
+        // char key = get_key();
+        char key = 1;
         if (key) {
           V[opcode & 0x0F00] = key;
         }
@@ -287,22 +319,25 @@ void chip8::emulateCycle() {
     case 0x0055:
       printf("Store registers V0 through Vx in memory starting at location I.");
       for (int i = 0; i <= (opcode & 0x0F00); ++i) {
-        memory[I+i] = V[i];
+        memory[I + i] = V[i];
       }
       pc += 2;
       break;
     case 0x0065:
       printf("Read registers V0 through Vx from memory starting at location I");
       for (int i = 0; i <= (opcode & 0x0F00); ++i) {
-        V[i] = memory[I+i];
+        V[i] = memory[I + i];
       }
       pc += 2;
       break;
     }
+    break;
   default:
     std::printf("Unknown opcode: 0x%X\n", opcode);
     break;
   }
+
+  printf("\n%X, %X, %X\n", pc, I, stack[sp]);
 
   if (delay_timer > 0)
     --delay_timer;

@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -64,20 +65,16 @@ void chip8::initialize() {
 
 void chip8::loadGame(std::string rom_path) {
   rom_path = "./PONG";
-  std::ifstream f(rom_path, std::ios::binary | std::ios::in);
-  if (!f.is_open()) {
-    return;
-  }
-  // load in memory from 0x200(512) onwards
+  std::vector<char> buffer;
+  std::ifstream gamefile(rom_path, std::ios::binary | std::ios::in);
+
   char c;
-  int j = 512;
-  for (int i = 0x200; f.get(c); i++) {
-    if (j >= 4096) {
-      return; // file size too big memory space over so exit
-    }
+
+  for (int i = 0x200; gamefile.get(c) && i < 4096; ++i){
     memory[i] = (uint8_t)c;
-    j++;
+    printf("%X", memory[i]);
   }
+
   printf("Loaded");
 }
 // Change how index i accessed (opcode & 0x0F00) -> (opcode & 0x0F00 >> 8)

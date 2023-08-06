@@ -73,13 +73,13 @@ void chip8::loadGame(std::string rom_path) {
   for (int i = 0x200; gamefile.get(c) && i < 4096; ++i) {
     memory[i] = (uint8_t)c;
   }
-
-  printf("Loaded");
 }
-// Change how index i accessed (opcode & 0x0F00) -> (opcode & 0x0F00 >> 8)
+
 bool chip8::emulateCycle() {
   opcode = (memory[pc]) << 8 | memory[pc + 1];
   printf("\n%X\n", opcode);
+  printf("%X, %X, %X\n", pc, I, (memory[pc]) << 8 | memory[pc + 1]);
+
   switch (opcode & 0xF000) {
 
   case 0x0000:
@@ -88,7 +88,7 @@ bool chip8::emulateCycle() {
       printf("clear screen");
       pc += 2;
       break;
-    case 0x000E:
+    case 0x00EE:
       printf("return from sub");
       pc += 2;
       break;
@@ -354,7 +354,6 @@ bool chip8::emulateCycle() {
     return 0;
     break;
   }
-  printf("\n%X, %X, %X", pc, I, (memory[pc]) << 8 | memory[pc + 1]);
 
   if (delay_timer > 0)
     --delay_timer;

@@ -77,8 +77,12 @@ void chip8::loadGame(std::string rom_path) {
 
 bool chip8::emulateCycle() {
   opcode = (memory[pc]) << 8 | memory[pc + 1];
-  printf("\n%X\n", opcode);
-  printf("%X, %X, %X\n", pc, I, (memory[pc]) << 8 | memory[pc + 1]);
+
+  printf("%X, %X, %X\n", pc, opcode, sp);
+  for (int i = 0; i < 15; ++i) {
+    printf("%.2X", V[i]);
+  }
+  printf("\n");
 
   switch (opcode & 0xF000) {
 

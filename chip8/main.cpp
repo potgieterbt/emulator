@@ -37,8 +37,10 @@ int main(int argc, char *argv[]) {
   myChip8.loadGame("pong");
 
   for (;;) {
-    myChip8.emulateCycle();
-
+    bool res = myChip8.emulateCycle();
+    if (!res) {
+      break;
+    }
     // if (myChip8.drawFlag)
     // drawGraphics();
 

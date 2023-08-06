@@ -12,7 +12,7 @@ class chip8 {
 public:
   void initialize();
   void loadGame(std::string game);
-  void emulateCycle();
+  bool emulateCycle();
 
 private:
   unsigned int output;
@@ -70,22 +70,21 @@ void chip8::loadGame(std::string rom_path) {
 
   char c;
 
-  for (int i = 0x200; gamefile.get(c) && i < 4096; ++i){
+  for (int i = 0x200; gamefile.get(c) && i < 4096; ++i) {
     memory[i] = (uint8_t)c;
-    printf("%X", memory[i]);
   }
 
   printf("Loaded");
 }
 // Change how index i accessed (opcode & 0x0F00) -> (opcode & 0x0F00 >> 8)
-void chip8::emulateCycle() {
+bool chip8::emulateCycle() {
   opcode = (memory[pc]) << 8 | memory[pc + 1];
   printf("\n%X\n", opcode);
   switch (opcode & 0xF000) {
 
   case 0x0000:
-    switch (opcode & 0x000F) {
-    case 0x0000:
+    switch (opcode & 0x00FF) {
+    case 0x00E0:
       printf("clear screen");
       pc += 2;
       break;
@@ -95,8 +94,10 @@ void chip8::emulateCycle() {
       break;
     default:
       std::printf("Unknown opcode: 0x%X\n", opcode);
+      return 0;
       break;
     }
+    break;
 
   case 0x1000:
     I = opcode & 0x0FFF;
@@ -221,6 +222,8 @@ void chip8::emulateCycle() {
       std::printf("Unknown opcode: 0x%X\n", opcode);
       break;
     }
+    break;
+
   case 0x9000:
     printf("Skip next instruction if Vx != Vy");
     if (V[(opcode & 0x0F00) >> 8] != V[opcode & 0x00F0 >> 4]) {
@@ -245,11 +248,11 @@ void chip8::emulateCycle() {
   case 0xD000:
     printf("Draw n-byte sprite at mem loc I at (Vx, Vy), set VF = collision");
     n = opcode & 0x000F;
-    for (int i = 0; i < n; ++i) {
-      sprite.push_back(memory[I + i]);
-    }
-    loc[0] = (opcode & 0x0F00);
-    loc[1] = (opcode & 0x00F0);
+    //    for (int i = 0; i < n; ++i) {
+    //      sprite.push_back(memory[I + i]);
+    //    }
+    loc[0] = (opcode & 0x0F00) >> 8;
+    loc[1] = (opcode & 0x00F0) >> 4;
     printf("Display sprite at location loc");
     if (p_erase) {
       V[0xF] = 1;
@@ -280,6 +283,8 @@ void chip8::emulateCycle() {
       std::printf("Unknown opcode: 0x%X\n", opcode);
       break;
     }
+    break;
+
   case 0xF000:
     switch (opcode & 0x00FF) {
     case 0x0007:
@@ -321,6 +326,7 @@ void chip8::emulateCycle() {
     case 0x0033:
       printf(" Store BCD representation of Vx in memory locations I, I+1, and "
              "I+2.");
+
       pc += 2;
       break;
     case 0x0055:
@@ -341,10 +347,14 @@ void chip8::emulateCycle() {
       std::printf("Unknown opcode: 0x%X\n", opcode);
       break;
     }
+    break;
+
   default:
     std::printf("Unknown opcode: 0x%X\n", opcode);
+    return 0;
     break;
   }
+  printf("\n%X, %X, %X", pc, I, (memory[pc]) << 8 | memory[pc + 1]);
 
   if (delay_timer > 0)
     --delay_timer;
@@ -354,4 +364,5 @@ void chip8::emulateCycle() {
       std::printf("BEEP!\n");
     --sound_timer;
   }
+  return 1;
 }

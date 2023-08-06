@@ -78,9 +78,10 @@ void chip8::loadGame(std::string rom_path) {
 bool chip8::emulateCycle() {
   opcode = (memory[pc]) << 8 | memory[pc + 1];
 
-  printf("%X, %X, %X\n", pc, opcode, sp);
+  printf("\n");
+  printf("%.4X, %.4X, %.2X", pc, opcode, sp);
   for (int i = 0; i < 15; ++i) {
-    printf("%.2X", V[i]);
+    printf("%.2X ", V[i]);
   }
   printf("\n");
 
@@ -94,6 +95,8 @@ bool chip8::emulateCycle() {
       break;
     case 0x00EE:
       printf("return from sub");
+      sp -= 1;
+      pc = stack[sp];
       pc += 2;
       break;
     default:

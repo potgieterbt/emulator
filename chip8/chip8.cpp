@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
@@ -53,33 +54,36 @@ void chip8::initialize() {
   opcode = 0;
   I = 0;
   sp = 0;
+  for (int i = 0; i < 4096; ++i) {
+    memory[i] = 0;
+  }
   for (int i = 0; i < 80; ++i) {
     memory[i] = chip8_fontset[i];
   }
 }
 
-void chip8::loadGame(std::string game) {
-  std::cout << game << "\n";
-  std::vector<char> buffer;
-  std::ifstream gamefile("./PONG", std::ios::binary | std::ios::in);
+void chip8::loadGame(std::string rom_path) {
+  rom_path = "./PONG";
+  std::ifstream f(rom_path, std::ios::binary | std::ios::in);
+  if (!f.is_open()) {
+    return;
+  }
+  // load in memory from 0x200(512) onwards
   char c;
   int j = 512;
-
-  while (gamefile.is_open()) {
-    gamefile.get(c);
-    buffer.push_back((uint8_t)c);
+  for (int i = 0x200; f.get(c); i++) {
+    if (j >= 4096) {
+      return; // file size too big memory space over so exit
+    }
+    memory[i] = (uint8_t)c;
+    j++;
   }
-  int bufferSize = buffer.size();
-  for (int i = 0; i < bufferSize; ++i) {
-    memory[i + 512] = buffer[i];
-  }
-  printf("Game successfully loaded\n");
+  printf("Loaded");
 }
 // Change how index i accessed (opcode & 0x0F00) -> (opcode & 0x0F00 >> 8)
 void chip8::emulateCycle() {
   opcode = (memory[pc]) << 8 | memory[pc + 1];
-
-  printf("%X\n", opcode);
+  printf("\n%X\n", opcode);
   switch (opcode & 0xF000) {
 
   case 0x0000:
@@ -92,8 +96,10 @@ void chip8::emulateCycle() {
       printf("return from sub");
       pc += 2;
       break;
+    default:
+      std::printf("Unknown opcode: 0x%X\n", opcode);
+      break;
     }
-    break;
 
   case 0x1000:
     I = opcode & 0x0FFF;
@@ -214,8 +220,10 @@ void chip8::emulateCycle() {
       V[opcode & 0x0F00 >> 8] = V[opcode & 0x0F00 >> 8] << 1;
       pc += 2;
       break;
+    default:
+      std::printf("Unknown opcode: 0x%X\n", opcode);
+      break;
     }
-    break;
   case 0x9000:
     printf("Skip next instruction if Vx != Vy");
     if (V[(opcode & 0x0F00) >> 8] != V[opcode & 0x00F0 >> 4]) {
@@ -271,8 +279,10 @@ void chip8::emulateCycle() {
         pc += 2;
       }
       break;
+    default:
+      std::printf("Unknown opcode: 0x%X\n", opcode);
+      break;
     }
-    break;
   case 0xF000:
     switch (opcode & 0x00FF) {
     case 0x0007:
@@ -330,14 +340,14 @@ void chip8::emulateCycle() {
       }
       pc += 2;
       break;
+    default:
+      std::printf("Unknown opcode: 0x%X\n", opcode);
+      break;
     }
-    break;
   default:
     std::printf("Unknown opcode: 0x%X\n", opcode);
     break;
   }
-
-  printf("\n%X, %X, %X\n", pc, I, stack[sp]);
 
   if (delay_timer > 0)
     --delay_timer;

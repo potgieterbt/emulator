@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_surface.h>
 #include <cstddef>
 #include <stdio.h>
@@ -6,14 +7,6 @@
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-enum KeyPressSurfaces {
-  KEY_PRESS_SURFACE_DEFAULT,
-  KEY_PRESS_SURFACE_UP,
-  KEY_PRESS_SURFACE_DOWN,
-  KEY_PRESS_SURFACE_LEFT,
-  KEY_PRESS_SURFACE_RIGHT,
-  KEY_PRESS_SURFACE_TOTAL,
-};
 
 bool init();
 bool loadMedia();
@@ -22,8 +15,7 @@ SDL_Surface *loadSurface(std::string path);
 
 SDL_Window *gWindow = NULL;
 SDL_Surface *gScreenSurface = NULL;
-SDL_Surface *gKeyPressSurfaces[KEY_PRESS_SURFACE_TOTAL];
-SDL_Surface *gCurrentSurface = NULL;
+SDL_Surface *gStretchedSurface = NULL;
 
 int main(int argc, char *argv[]) {
   if (!init()) {
@@ -35,13 +27,18 @@ int main(int argc, char *argv[]) {
 
       bool quit = false;
       SDL_Event e;
-      gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
       while (!quit) {
         while (SDL_PollEvent(&e) != 0) {
           if (e.type == SDL_QUIT) {
             quit = true;
-          } else if (e.type == SDL_KEYDOWN) {
           }
+
+          SDL_Rect stretchRect;
+          stretchRect.x = 0;
+          stretchRect.y = 0;
+          stretchRect.w = SCREEN_WIDTH;
+          stretchRect.h = SCREEN_HEIGHT;
+
           return 0;
         }
       }
@@ -69,24 +66,16 @@ bool init() {
   return success;
 }
 
-bool loadMedia(std::string path) {
+bool loadMedia() {
   bool success = true;
-  SDL_Surface *optimizedSurface = NULL;
-  SDL_Surface *loadedSurface = SDL_LoadBMP(path.c_str());
+  SDL_Surface *optimizedSurface = SDL_LoadBMP("stretch.BMP");
 
-  if (loadedSurface == NULL) {
-    printf("Unable to load image %s! SDL Error: %s\n", path.c_str(),
-           SDL_GetError());
-  } else {
-    optimizedSurface =
-        SDL_ConvertSurface(loadedSurface, gScreenSurface->format, 0);
-    if (optimizedSurface == NULL) {
-      printf("Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-    }
-    SDL_FreeSurface(loadedSurface);
+  if (optimizedSurface == NULL) {
+    printf("Unable to load image");
+    success = false;
   }
 
-  return optimizedSurface;
+  return success;
 }
 
 void close() {

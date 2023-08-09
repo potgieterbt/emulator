@@ -1,4 +1,10 @@
+#include <SDL2/SDL_error.h>
+#include <SDL2/SDL_mutex.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_video.h>
+#include <SDL2/SDL_events.h>
 #include <chrono>
+#include <cstdio>
 #include <thread>
 #include "chip8.cpp"
 #include <SDL2/SDL.h>
@@ -29,10 +35,43 @@
 // Basic loop: read PC, get instruction at address in PC, Fetch data in
 // instruction, execute instruction, incriment PC, repeat
 
+
+uint8_t keymap[16] = {
+        SDLK_x,
+        SDLK_1,
+        SDLK_2,
+        SDLK_3,
+        SDLK_q,
+        SDLK_w,
+        SDLK_e,
+        SDLK_a,
+        SDLK_s,
+        SDLK_d,
+        SDLK_z,
+        SDLK_c,
+        SDLK_4,
+        SDLK_r,
+        SDLK_f,
+        SDLK_v,
+};
+
+
+
 int main(int argc, char *argv[]) {
-  // setupGraphics();
-  // setupInput();
+  SDL_Window *window;
+  SDL_Renderer *renderer;
+  SDL_Texture *texture;
+  const int ht = 32, wt = 64;
   chip8 myChip8;
+
+  if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+    printf("Error in initialising SDL %s", SDL_GetError());
+    SDL_Quit();
+    exit(1);
+  }
+
+  window = SDL_CreateWindow("Chip8 Emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, wt, ht, SDL_WINDOW_SHOWN);
+
   myChip8.initialize();
   myChip8.loadGame("pong");
 

@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_surface.h>
 #include <cstddef>
 #include <stdio.h>
 #include <string>
@@ -40,34 +41,10 @@ int main(int argc, char *argv[]) {
           if (e.type == SDL_QUIT) {
             quit = true;
           } else if (e.type == SDL_KEYDOWN) {
-            switch (e.key.keysym.sym) {
-
-            case SDLK_UP:
-              gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_UP];
-              break;
-
-            case SDLK_DOWN:
-              gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DOWN];
-              break;
-
-            case SDLK_LEFT:
-              gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_LEFT];
-              break;
-
-            case SDLK_RIGHT:
-              gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_RIGHT];
-              break;
-
-            default:
-              gCurrentSurface = gKeyPressSurfaces[KEY_PRESS_SURFACE_DEFAULT];
-              break;
-            }
           }
+          return 0;
         }
-        SDL_BlitSurface(gCurrentSurface, NULL, gScreenSurface, NULL);
-        SDL_UpdateWindowSurface(gWindow);
       }
-      return 0;
     }
   }
 }
@@ -98,19 +75,22 @@ bool loadMedia(std::string path) {
   SDL_Surface *loadedSurface = SDL_LoadBMP(path.c_str());
 
   if (loadedSurface == NULL) {
-    printf("Unable to load image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+    printf("Unable to load image %s! SDL Error: %s\n", path.c_str(),
+           SDL_GetError());
   } else {
-    optimizedSurface = SDL_ConvertSurface(loadedSurface, gScreenSurface->format, 0);
+    optimizedSurface =
+        SDL_ConvertSurface(loadedSurface, gScreenSurface->format, 0);
+    if (optimizedSurface == NULL) {
+      printf("Unable to optimize image %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
+    }
+    SDL_FreeSurface(loadedSurface);
   }
 
-  return success;
+  return optimizedSurface;
 }
 
 void close() {
-  for (int i = 0; i < KEY_PRESS_SURFACE_TOTAL; ++i) {
-    SDL_FreeSurface(gKeyPressSurfaces[i]);
-    gKeyPressSurfaces[i] = NULL;
-  }
+
   SDL_DestroyWindow(gWindow);
   gWindow = NULL;
   SDL_Quit();

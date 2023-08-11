@@ -1,5 +1,7 @@
+#include "chip8.h"
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <ios>
 #include <iostream>
@@ -8,49 +10,7 @@
 #include <tuple>
 #include <vector>
 
-class chip8 {
-public:
-  void initialize();
-  void loadGame(std::string game);
-  bool emulateCycle();
-
-private:
-  unsigned int output;
-  const int prog_start = 0x200;
-  const int ETI_start = 0x600;
-  const int ram_end = 0xFFF;
-  unsigned short opcode, I, pc, sp;
-  unsigned char memory[4096];
-  unsigned char V[16];
-  unsigned char gfx[64 * 32];
-  unsigned char delay_timer, sound_timer;
-  unsigned short stack[16];
-  unsigned char key[16];
-  unsigned int n;
-  std::vector<int> sprite;
-  int loc[2] = {0, 0};
-  bool p_erase;
-  const unsigned char chip8_fontset[80] = {
-      0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-      0x20, 0x60, 0x20, 0x20, 0x70, // 1
-      0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-      0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-      0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-      0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-      0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-      0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-      0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-      0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-      0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-      0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-      0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-      0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-      0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-      0xF0, 0x80, 0xF0, 0x80, 0x80  // F
-  };
-};
-
-void chip8::initialize() {
+chip8::chip8() {
   pc = 0x200;
   opcode = 0;
   I = 0;
@@ -61,6 +21,7 @@ void chip8::initialize() {
   for (int i = 0; i < 80; ++i) {
     memory[i] = chip8_fontset[i];
   }
+  memset(keypad, 0, sizeof(keypad));
 }
 
 void chip8::loadGame(std::string rom_path) {
@@ -73,6 +34,22 @@ void chip8::loadGame(std::string rom_path) {
   for (int i = 0x200; gamefile.get(c) && i < 4096; ++i) {
     memory[i] = (uint8_t)c;
   }
+};
+
+bool chip8::get_draw_flag(){
+  return draw_flag;
+}
+
+void chip8::set_draw_flag(bool flag){
+  draw_flag = flag;
+}
+
+int chip8::get_display_value(int i){
+  return gfx[i];
+}
+
+void chip8::set_keypad_value(int index, int val){
+  keypad[index] = val;
 }
 
 bool chip8::emulateCycle() {
@@ -372,3 +349,5 @@ bool chip8::emulateCycle() {
   }
   return 1;
 }
+
+chip8::~chip8(){}

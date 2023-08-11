@@ -36,21 +36,13 @@ void chip8::loadGame(std::string rom_path) {
   }
 };
 
-bool chip8::get_draw_flag(){
-  return draw_flag;
-}
+bool chip8::get_draw_flag() { return draw_flag; }
 
-void chip8::set_draw_flag(bool flag){
-  draw_flag = flag;
-}
+void chip8::set_draw_flag(bool flag) { draw_flag = flag; }
 
-int chip8::get_display_value(int i){
-  return gfx[i];
-}
+int chip8::get_display_value(int i) { return gfx[i]; }
 
-void chip8::set_keypad_value(int index, int val){
-  keypad[index] = val;
-}
+void chip8::set_keypad_value(int index, int val) { keypad[index] = val; }
 
 bool chip8::emulateCycle() {
   opcode = (memory[pc]) << 8 | memory[pc + 1];
@@ -229,20 +221,29 @@ bool chip8::emulateCycle() {
     V[opcode & 0x0F00] = (opcode & 0x00FF) & output;
     pc += 2;
     break;
-  case 0xD000:
+  case 0xD000: {
     printf("Draw n-byte sprite at mem loc I at (Vx, Vy), set VF = collision");
-    n = opcode & 0x000F;
-    //    for (int i = 0; i < n; ++i) {
-    //      sprite.push_back(memory[I + i]);
-    //    }
-    loc[0] = (opcode & 0x0F00) >> 8;
+    loc[0] = ((opcode & 0x0F00) >> 8) & n;
     loc[1] = (opcode & 0x00F0) >> 4;
-    printf("Display sprite at location loc");
-    if (p_erase) {
-      V[0xF] = 1;
+    n = opcode & 0x000F;
+    int ht = opcode & 0x000F;
+    int wt = 8;
+    for (int i = 0; i < n; ++i) {
+      int pixel = memory[I + i];
+      for (int j = 0; j < wt; ++j) {
+        if ((pixel & (0x80 >> j)) != 0) {
+          int index = ((loc[0] + j) + ((loc[1] + i) * 64)) % 2048;
+          if (gfx[index] == 1) {
+            V[0x0F] = 1;
+          }
+          gfx[index] ^= 1;
+        }
+      }
     }
+    draw_flag = true;
     pc += 2;
     break;
+  }
   case 0xE000:
     switch (opcode & 0x00FF) {
     case 0x009E:
@@ -350,4 +351,4 @@ bool chip8::emulateCycle() {
   return 1;
 }
 
-chip8::~chip8(){}
+chip8::~chip8() {}

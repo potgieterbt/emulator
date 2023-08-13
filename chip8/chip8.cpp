@@ -59,7 +59,6 @@ bool chip8::emulateCycle() {
   case 0x0000:
     switch (opcode & 0x00FF) {
     case 0x00E0:
-      printf("clear screen");
       memset(gfx, 0, sizeof(gfx));
       pc += 2;
       break;
@@ -200,7 +199,6 @@ bool chip8::emulateCycle() {
     pc += 2;
     break;
   case 0xD000: {
-    printf("Draw n-byte sprite at mem loc I at (Vx, Vy), set VF = collision");
     loc[0] = ((opcode & 0x0F00) >> 8) & n;
     loc[1] = (opcode & 0x00F0) >> 4;
     n = opcode & 0x000F;
@@ -232,7 +230,6 @@ bool chip8::emulateCycle() {
       }
       break;
     case 0x00A1:
-      printf("Skip next instruction if key with value of Vx is not pressed");
       if (keypad[V[(opcode & 0x0F00) >> 8]] == 0) {
         pc += 4;
       } else {
@@ -248,59 +245,61 @@ bool chip8::emulateCycle() {
   case 0xF000:
     switch (opcode & 0x00FF) {
     case 0x0007:
-      printf("Set Vx = delay timer value.");
-      V[opcode & 0x0F00] = delay_timer;
+      V[(opcode & 0x0F00) >> 8] = delay_timer;
       pc += 2;
       break;
-    case 0x000A:
-      printf("Wait for a key press, store the value of the key in Vx.");
-      while (true) {
-        // char key = get_key();
-        char key = 1;
-        if (key) {
-          V[opcode & 0x0F00] = key;
+    case 0x000A: {
+      bool key_pressed = false;
+      for (int i = 0; i < 16; ++i) {
+        if (keypad[i] != 0) {
+          key_pressed = true;
+          V[(opcode & 0x0F00) >> 8] = i;
         }
       }
-      pc += 2;
+      if (key_pressed) {
+        pc += 2;
+      }
       break;
+    }
     case 0x0015:
-      printf("Set delay timer = Vx.");
       delay_timer = V[opcode & 0x0F00];
       pc += 2;
       break;
     case 0x0018:
-      printf("Set sound timer = Vx.");
       sound_timer = V[opcode & 0x0F00];
       pc += 2;
       break;
     case 0x001E:
-      printf("Set I = I + Vx");
+      V[0xF] = 0;
+      if (I + V[(opcode & 0x0F00) >> 8] > 0xFFF) {
+        V[0xF] = 1;
+      }
       I = I + V[opcode & 0x0F00];
       pc += 2;
       break;
     case 0x0029:
-      printf("Set I = location of sprite for digit Vx.");
-      I = (V[opcode & 0x0F00] - 1) * 5;
+      I = (V[(opcode & 0x0F00) >> 8]) * 5;
       pc += 2;
       break;
     case 0x0033:
-      printf(" Store BCD representation of Vx in memory locations I, I+1, and "
-             "I+2.");
-
+      n = (opcode & 0x0F00) >> 8;
+      memory[I] = (uint8_t)((uint8_t)V[n] / 100);
+      memory[I + 1] = (uint8_t)((uint8_t)(V[n] / 10) % 10);
+      memory[I + 2] = (uint8_t)((uint8_t)(V[n] % 100) % 10);
       pc += 2;
       break;
     case 0x0055:
-      printf("Store registers V0 through Vx in memory starting at location I.");
-      for (int i = 0; i <= (opcode & 0x0F00); ++i) {
+      for (int i = 0; i <= (opcode & 0x0F00) >> 8; ++i) {
         memory[I + i] = V[i];
       }
+      I = I + ((opcode & 0x0F00) >> 8) + 1;
       pc += 2;
       break;
     case 0x0065:
-      printf("Read registers V0 through Vx from memory starting at location I");
-      for (int i = 0; i <= (opcode & 0x0F00); ++i) {
+      for (int i = 0; i <= (opcode & 0x0F00) >> 8; ++i) {
         V[i] = memory[I + i];
       }
+      I = I + ((opcode & 0x0F00) >> 8) + 1;
       pc += 2;
       break;
     default:
@@ -319,8 +318,6 @@ bool chip8::emulateCycle() {
     --delay_timer;
 
   if (sound_timer > 0) {
-    if (sound_timer == 1)
-      std::printf("BEEP!\n");
     --sound_timer;
   }
   return 1;

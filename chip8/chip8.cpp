@@ -170,7 +170,7 @@ bool chip8::emulateCycle() {
       if (V[(opcode & 0x0F00) >> 8] > 127) {
         V[0xF] = 1;
       }
-      V[opcode & 0x0F00 >> 8] = V[opcode & 0x0F00 >> 8] << 1;
+      V[opcode & 0x0F00 >> 8] = V[(opcode & 0x0F00) >> 8] << 1;
       pc += 2;
       break;
     default:
@@ -180,7 +180,7 @@ bool chip8::emulateCycle() {
     break;
 
   case 0x9000:
-    if (V[(opcode & 0x0F00) >> 8] != V[opcode & 0x00F0 >> 4]) {
+    if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]) {
       pc += 4;
     } else {
       pc += 2;
@@ -262,11 +262,11 @@ bool chip8::emulateCycle() {
       break;
     }
     case 0x0015:
-      delay_timer = V[opcode & 0x0F00];
+      delay_timer = V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
     case 0x0018:
-      sound_timer = V[opcode & 0x0F00];
+      sound_timer = V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
     case 0x001E:
@@ -274,7 +274,7 @@ bool chip8::emulateCycle() {
       if (I + V[(opcode & 0x0F00) >> 8] > 0xFFF) {
         V[0xF] = 1;
       }
-      I = I + V[opcode & 0x0F00];
+      I = I + V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
     case 0x0029:

@@ -199,11 +199,12 @@ bool chip8::emulateCycle() {
     pc += 2;
     break;
   case 0xD000: {
-    loc[0] = ((opcode & 0x0F00) >> 8) & n;
+    loc[0] = (opcode & 0x0F00) >> 8;
     loc[1] = (opcode & 0x00F0) >> 4;
     n = opcode & 0x000F;
-    int ht = opcode & 0x000F;
+    int ht = n;
     int wt = 8;
+    V[0x0F] = 0;
     for (int i = 0; i < n; ++i) {
       int pixel = memory[I + i];
       for (int j = 0; j < wt; ++j) {

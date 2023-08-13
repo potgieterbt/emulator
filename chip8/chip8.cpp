@@ -60,10 +60,10 @@ bool chip8::emulateCycle() {
     switch (opcode & 0x00FF) {
     case 0x00E0:
       printf("clear screen");
+      memset(gfx, 0, sizeof(gfx));
       pc += 2;
       break;
     case 0x00EE:
-      printf("return from sub");
       sp -= 1;
       pc = stack[sp];
       pc += 2;
@@ -77,19 +77,15 @@ bool chip8::emulateCycle() {
 
   case 0x1000:
     I = opcode & 0x0FFF;
-    printf("jump to 0x%X", I);
     pc = I;
     break;
   case 0x2000:
     I = opcode & 0x0FFF;
-    printf("Call sub at 0x%X", I);
     stack[sp] = pc;
     ++sp;
     pc = I;
     break;
   case 0x3000:
-    printf("compare value in V%X to %X", ((opcode & 0x0F00) >> 8),
-           (opcode & 0x00FF));
     if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
       pc += 4;
     } else {
@@ -97,7 +93,6 @@ bool chip8::emulateCycle() {
     }
     break;
   case 0x4000:
-    printf("compare value in V%X to %X", (opcode & 0x0F00), (opcode & 0x00FF));
     if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
       pc += 4;
     } else {
@@ -105,8 +100,6 @@ bool chip8::emulateCycle() {
     }
     break;
   case 0x5000:
-    printf("compare value in V%X with value in V%X", (opcode & 0x0F00),
-           (opcode & 0x00F0) >> 4);
     if (V[(opcode & 0x0F00 >> 8)] == V[(opcode & 0x00F0 >> 4)]) {
       pc += 4;
     } else {
@@ -114,52 +107,44 @@ bool chip8::emulateCycle() {
     }
     break;
   case 0x6000:
-    printf("set value of V%X to %X", ((opcode & 0x0F00) >> 8),
-           (opcode & 0x00FF));
     V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
     pc += 2;
     break;
   case 0x7000:
-    printf("Set Vx = Vx + kk");
     V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] + (opcode & 0x00FF);
     pc += 2;
     break;
   case 0x8000:
     switch (opcode & 0x000F) {
     case 0x0000:
-      printf("Set Vx = Vy");
       V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0001:
-      printf("Set Vx to Vx or Vy");
       V[(opcode & 0x0F00) >> 8] =
           V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0002:
-      printf("set Vx to Vx and Vy");
       V[(opcode & 0x0F00) >> 8] =
           V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0003:
-      printf("Set Vx to Vx XOR Vy");
       V[(opcode & 0x0F00) >> 8] =
           V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0004:
-      printf("Set Vx to Vx + Vy, VF = carry");
       V[(opcode & 0x0F00) >> 8] =
           V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4];
+      V[0xF] = 0;
       if (V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4] > 255) {
         V[0xF] = 1;
       }
       pc += 2;
       break;
     case 0x0005:
-      printf("Set Vx to Vx - Vy, if Vx > Vy set VF to 1, else 0");
       if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]) {
         V[0xF] = 1;
       }
@@ -168,16 +153,13 @@ bool chip8::emulateCycle() {
       pc += 2;
       break;
     case 0x0006:
-      printf("If least sig bit of Vx is 1, set VF to 1, else 0. Vx = Vx/2 "
-             "(bitwise shift)");
-      if (V[(opcode & 0x0F00) >> 8] % 2 == 1) {
+      if (V[opcode & 0x0001]) {
         V[0xF] = 1;
       }
       V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] >> 1;
       pc += 2;
       break;
     case 0x0007:
-      printf("Set Vx to Vy - Vx. If Vy > Vx, not borrow VF = 1");
       if (V[(opcode & 0x0F00) >> 8] < V[(opcode & 0x00F0) >> 4]) {
         V[0xF] = 1;
       }
@@ -186,8 +168,6 @@ bool chip8::emulateCycle() {
       pc += 2;
       break;
     case 0x000E:
-      printf("If most sig of Vx is 1, set VF to 1, else 0. Vx = Vx*2 (bit "
-             "shift)");
       if (V[(opcode & 0x0F00) >> 8] > 127) {
         V[0xF] = 1;
       }
@@ -201,7 +181,6 @@ bool chip8::emulateCycle() {
     break;
 
   case 0x9000:
-    printf("Skip next instruction if Vx != Vy");
     if (V[(opcode & 0x0F00) >> 8] != V[opcode & 0x00F0 >> 4]) {
       pc += 4;
     } else {
@@ -213,12 +192,11 @@ bool chip8::emulateCycle() {
     pc += 2;
     break;
   case 0xB000:
-    printf("jump to location 0x%X", (opcode & 0x0FFF));
     pc = (opcode & 0x0FFF) + V[0x0];
     break;
   case 0xC000:
-    output = 0 + (rand() % static_cast<int>(255 - 0 + 1));
-    V[opcode & 0x0F00] = (opcode & 0x00FF) & output;
+    output = (rand() % (255 + 1));
+    V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & output;
     pc += 2;
     break;
   case 0xD000: {
@@ -247,9 +225,7 @@ bool chip8::emulateCycle() {
   case 0xE000:
     switch (opcode & 0x00FF) {
     case 0x009E:
-      printf("Skip next instruction if key with value of Vx is pressed.");
-      // if (get_key() == V[opcode & 0x0F00]) {
-      if (1 == V[opcode & 0x0F00]) {
+      if (keypad[V[(opcode & 0x0F00) >> 8]] != 0) {
         pc += 4;
       } else {
         pc += 2;
@@ -257,8 +233,7 @@ bool chip8::emulateCycle() {
       break;
     case 0x00A1:
       printf("Skip next instruction if key with value of Vx is not pressed");
-      // if (get_key() != V[opcode & 0x0F00]) {
-      if (1 != V[opcode & 0x0F00]) {
+      if (keypad[V[(opcode & 0x0F00) >> 8]] == 0) {
         pc += 4;
       } else {
         pc += 2;

@@ -75,8 +75,7 @@ bool chip8::emulateCycle() {
     break;
 
   case 0x1000:
-    I = opcode & 0x0FFF;
-    pc = I;
+    pc = opcode & 0x0FFF;
     break;
   case 0x2000:
     I = opcode & 0x0FFF;
@@ -110,7 +109,7 @@ bool chip8::emulateCycle() {
     pc += 2;
     break;
   case 0x7000:
-    V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] + (opcode & 0x00FF);
+    V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
     pc += 2;
     break;
   case 0x8000:
@@ -120,46 +119,44 @@ bool chip8::emulateCycle() {
       pc += 2;
       break;
     case 0x0001:
-      V[(opcode & 0x0F00) >> 8] =
-          V[(opcode & 0x0F00) >> 8] | V[(opcode & 0x00F0) >> 4];
+      V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0002:
-      V[(opcode & 0x0F00) >> 8] =
-          V[(opcode & 0x0F00) >> 8] & V[(opcode & 0x00F0) >> 4];
+      V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0003:
-      V[(opcode & 0x0F00) >> 8] =
-          V[(opcode & 0x0F00) >> 8] ^ V[(opcode & 0x00F0) >> 4];
+      V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0004:
-      V[(opcode & 0x0F00) >> 8] =
-          V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4];
       V[0xF] = 0;
       if (V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4] > 255) {
         V[0xF] = 1;
       }
+      V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0005:
+      V[0xF] = 0;
       if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]) {
         V[0xF] = 1;
       }
-      V[(opcode & 0x0F00) >> 8] =
-          V[(opcode & 0x0F00) >> 8] - V[(opcode & 0x00F0) >> 4];
+      V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
     case 0x0006:
+      V[0xF] = 0;
       if (V[opcode & 0x0001]) {
         V[0xF] = 1;
       }
-      V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x0F00) >> 8] >> 1;
+      V[(opcode & 0x0F00) >> 8] >>= 1;
       pc += 2;
       break;
     case 0x0007:
-      if (V[(opcode & 0x0F00) >> 8] < V[(opcode & 0x00F0) >> 4]) {
+        V[0xF] = 0;
+      if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]) {
         V[0xF] = 1;
       }
       V[opcode & 0x0F00 >> 8] =
@@ -167,10 +164,11 @@ bool chip8::emulateCycle() {
       pc += 2;
       break;
     case 0x000E:
-      if (V[(opcode & 0x0F00) >> 8] > 127) {
+        V[0xF] = 0;
+      if (V[(opcode & 0x0F00) >> 8] >> 7) {
         V[0xF] = 1;
       }
-      V[opcode & 0x0F00 >> 8] = V[(opcode & 0x0F00) >> 8] << 1;
+      V[opcode & 0x0F00 >> 8] <<= 1;
       pc += 2;
       break;
     default:
@@ -250,7 +248,7 @@ bool chip8::emulateCycle() {
       break;
     case 0x000A: {
       bool key_pressed = false;
-      for (int i = 0; i < 16; ++i) {
+      for (int i = 0; i < 16; i++) {
         if (keypad[i] != 0) {
           key_pressed = true;
           V[(opcode & 0x0F00) >> 8] = i;
@@ -274,7 +272,7 @@ bool chip8::emulateCycle() {
       if (I + V[(opcode & 0x0F00) >> 8] > 0xFFF) {
         V[0xF] = 1;
       }
-      I = I + V[(opcode & 0x0F00) >> 8];
+      I += V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
     case 0x0029:
@@ -289,7 +287,7 @@ bool chip8::emulateCycle() {
       pc += 2;
       break;
     case 0x0055:
-      for (int i = 0; i <= (opcode & 0x0F00) >> 8; ++i) {
+      for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
         memory[I + i] = V[i];
       }
       I = I + ((opcode & 0x0F00) >> 8) + 1;

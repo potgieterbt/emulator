@@ -199,8 +199,8 @@ bool chip8::emulateCycle() {
     pc += 2;
     break;
   case 0xD000: {
-    loc[0] = (opcode & 0x0F00) >> 8;
-    loc[1] = (opcode & 0x00F0) >> 4;
+    loc[0] = V[(opcode & 0x0F00) >> 8];
+    loc[1] = V[(opcode & 0x00F0) >> 4];
     n = opcode & 0x000F;
     int ht = n;
     int wt = 8;

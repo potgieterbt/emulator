@@ -25,7 +25,7 @@ chip8::chip8() {
 }
 
 void chip8::loadGame(std::string rom_path) {
-  rom_path = "./PONG";
+  rom_path = "./roms/PONG";
   std::vector<char> buffer;
   std::ifstream gamefile(rom_path, std::ios::binary | std::ios::in);
 
@@ -99,7 +99,7 @@ bool chip8::emulateCycle() {
     }
     break;
   case 0x5000:
-    if (V[(opcode & 0x0F00 >> 8)] == V[(opcode & 0x00F0 >> 4)]) {
+    if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]) {
       pc += 4;
     } else {
       pc += 2;
@@ -201,11 +201,10 @@ bool chip8::emulateCycle() {
   case 0xD000: {
     loc[0] = V[(opcode & 0x0F00) >> 8];
     loc[1] = V[(opcode & 0x00F0) >> 4];
-    n = opcode & 0x000F;
-    int ht = n;
+    int ht = opcode & 0x000F;
     int wt = 8;
     V[0x0F] = 0;
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < ht; ++i) {
       int pixel = memory[I + i];
       for (int j = 0; j < wt; ++j) {
         if ((pixel & (0x80 >> j)) != 0) {

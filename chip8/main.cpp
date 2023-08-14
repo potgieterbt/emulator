@@ -38,9 +38,9 @@ uint8_t keymap[16] = {
 };
 
 int main(int argc, char *argv[]) {
-  SDL_Window *window;
-  SDL_Renderer *renderer;
-  SDL_Texture *texture;
+  SDL_Window *window = nullptr;
+  SDL_Renderer *renderer = nullptr;
+  SDL_Texture *texture = nullptr;
   const int ht = 320, wt = 640;
   chip8 myChip8;
 
@@ -104,24 +104,24 @@ int main(int argc, char *argv[]) {
           }
         }
       }
-      if (myChip8.get_draw_flag()) {
-        myChip8.set_draw_flag(false);
-        uint32_t pixels[32 * 64];
-        for (int i = 0; i < 32 * 64; i++) {
-          if (myChip8.get_display_value(i) == 0) {
-            pixels[i] = 0xFF000000;
-          } else {
-            pixels[i] = 0xFFFFFFFF;
-          }
-        }
-
-        SDL_UpdateTexture(texture, NULL, pixels, 64 * sizeof(uint32_t));
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, NULL, NULL);
-        SDL_RenderPresent(renderer);
-      }
-      usleep(1500);
     }
+    if (myChip8.get_draw_flag()) {
+      myChip8.set_draw_flag(false);
+      uint32_t pixels[32 * 64];
+      for (int i = 0; i < 32 * 64; i++) {
+        if (myChip8.get_display_value(i) == 0) {
+          pixels[i] = 0xFF000000;
+        } else {
+          pixels[i] = 0xFFFFFFFF;
+        }
+      }
+
+      SDL_UpdateTexture(texture, NULL, pixels, 64 * sizeof(uint32_t));
+      SDL_RenderClear(renderer);
+      SDL_RenderCopy(renderer, texture, NULL, NULL);
+      SDL_RenderPresent(renderer);
+    }
+    usleep(1500);
   }
   return 0;
 }

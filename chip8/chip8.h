@@ -9,7 +9,7 @@ class chip8 {
 public:
   chip8();
   ~chip8();
-  void loadGame(std::string game);
+  bool loadGame(std::string game);
   bool emulateCycle();
   uint8_t gfx[64 * 32];
   uint8_t key[16];

@@ -1,6 +1,7 @@
 #include "chip8.cpp"
 #include <SDL2/SDL.h>
 #include <chrono>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
@@ -51,8 +52,11 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  myChip8.loadGame("pong");
+  uint32_t pixels[2048];
 
+  if (!myChip8.loadGame(argv[1])) {
+
+  }
   for (;;) {
     bool res = myChip8.emulateCycle();
     if (!res) {
@@ -63,33 +67,31 @@ int main(int argc, char *argv[]) {
       if (event.type == SDL_QUIT) {
         exit(0);
       }
+
       if (event.type == SDL_KEYDOWN) {
         if (event.key.keysym.sym == SDLK_ESCAPE) {
           exit(0);
         }
-        for (int i : keymap) {
-          if (event.key.keysym.sym == i) {
-            myChip8.set_keypad_value(i, 1);
+
+        for (int i = 0; i < 16; ++i) {
+          if (event.key.keysym.sym == keymap[i]) {
+            myChip8.key[i] = 1;
           }
         }
       }
       if (event.type == SDL_KEYUP) {
         for (int i = 0; i < 16; ++i) {
           if (event.key.keysym.sym == keymap[i]) {
-            myChip8.set_keypad_value(i, 0);
+            myChip8.key[i] = 0;
           }
         }
       }
     }
-    if (myChip8.get_draw_flag()) {
-      myChip8.set_draw_flag(false);
-      uint32_t pixels[32 * 64];
-      for (int i = 0; i < 32 * 64; i++) {
-        if (myChip8.get_display_value(i) == 0) {
-          pixels[i] = 0xFF000000;
-        } else {
-          pixels[i] = 0xFFFFFFFF;
-        }
+    if (myChip8.draw_flag) {
+      myChip8.draw_flag = false;
+      for (int i = 0; i < 2048; i++) {
+        uint8_t pixel = myChip8.gfx[i];
+        pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
       }
 
       SDL_UpdateTexture(texture, NULL, pixels, 64 * sizeof(uint32_t));

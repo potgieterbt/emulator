@@ -34,13 +34,13 @@ unsigned char chip8_fontset[80] = {
 chip8::chip8() {}
 chip8::~chip8() {}
 
-void chip8::init(){
+void chip8::init() {
   pc = 0x200;
   opcode = 0;
   I = 0;
   sp = 0;
 
-  for (int i = 0; i < 2048; ++i){
+  for (int i = 0; i < 2048; ++i) {
     gfx[i] = 0;
   }
 
@@ -54,7 +54,7 @@ void chip8::init(){
     memory[i] = 0;
   }
 
-  for (int i = 0; i < 80; ++i){
+  for (int i = 0; i < 80; ++i) {
     memory[i] = chip8_fontset[i];
   }
 
@@ -64,16 +64,20 @@ void chip8::init(){
   srand(time(NULL));
 }
 
-void chip8::loadGame(std::string rom_path) {
+bool chip8::loadGame(std::string rom_path) {
   init();
   rom_path = rom_path;
   std::ifstream gamefile(rom_path, std::ios::binary | std::ios::in);
+  if (!gamefile) {
+    return false;
+  }
 
   char c;
 
   for (int i = 0x200; gamefile.get(c) && i < 4096; ++i) {
     memory[i] = (uint8_t)c;
   }
+  return true;
 };
 
 bool chip8::emulateCycle() {
@@ -92,13 +96,16 @@ bool chip8::emulateCycle() {
     switch (opcode & 0x00FF) {
     case 0x00E0:
       memset(gfx, 0, sizeof(gfx));
+      draw_flag = true;
       pc += 2;
       break;
+
     case 0x00EE:
       sp -= 1;
       pc = stack[sp];
       pc += 2;
       break;
+
     default:
       std::printf("Unknown opcode: 0x%X\n", opcode);
       return 0;
@@ -109,12 +116,13 @@ bool chip8::emulateCycle() {
   case 0x1000:
     pc = opcode & 0x0FFF;
     break;
+
   case 0x2000:
-    I = opcode & 0x0FFF;
     stack[sp] = pc;
     ++sp;
-    pc = I;
+    pc = opcode & 0x0FFF;
     break;
+
   case 0x3000:
     if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
       pc += 4;
@@ -122,6 +130,7 @@ bool chip8::emulateCycle() {
       pc += 2;
     }
     break;
+
   case 0x4000:
     if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
       pc += 4;
@@ -129,6 +138,7 @@ bool chip8::emulateCycle() {
       pc += 2;
     }
     break;
+
   case 0x5000:
     if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]) {
       pc += 4;
@@ -136,32 +146,40 @@ bool chip8::emulateCycle() {
       pc += 2;
     }
     break;
+
   case 0x6000:
     V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
     pc += 2;
     break;
+
   case 0x7000:
     V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
     pc += 2;
     break;
+
   case 0x8000:
     switch (opcode & 0x000F) {
+
     case 0x0000:
       V[(opcode & 0x0F00) >> 8] = V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
+
     case 0x0001:
       V[(opcode & 0x0F00) >> 8] |= V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
+
     case 0x0002:
       V[(opcode & 0x0F00) >> 8] &= V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
+
     case 0x0003:
       V[(opcode & 0x0F00) >> 8] ^= V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
+
     case 0x0004:
       V[0xF] = 0;
       if (V[(opcode & 0x0F00) >> 8] + V[(opcode & 0x00F0) >> 4] > 255) {
@@ -170,6 +188,7 @@ bool chip8::emulateCycle() {
       V[(opcode & 0x0F00) >> 8] += V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
+
     case 0x0005:
       V[0xF] = 0;
       if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]) {
@@ -178,23 +197,23 @@ bool chip8::emulateCycle() {
       V[(opcode & 0x0F00) >> 8] -= V[(opcode & 0x00F0) >> 4];
       pc += 2;
       break;
+
     case 0x0006:
-      V[0xF] = 0;
-      if (V[opcode & 0x0001]) {
-        V[0xF] = 1;
-      }
+      V[0xF] = V[(opcode & 0x0F00) >> 8] & 0x1;
       V[(opcode & 0x0F00) >> 8] >>= 1;
       pc += 2;
       break;
+
     case 0x0007:
       V[0xF] = 0;
-      if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]) {
+      if (V[(opcode & 0x0F00) >> 8] < V[(opcode & 0x00F0) >> 4]) {
         V[0xF] = 1;
       }
       V[opcode & 0x0F00 >> 8] =
           V[(opcode & 0x00F0) >> 4] - V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
+
     case 0x000E:
       V[0xF] = 0;
       if (V[(opcode & 0x0F00) >> 8] >> 7) {
@@ -203,6 +222,7 @@ bool chip8::emulateCycle() {
       V[opcode & 0x0F00 >> 8] <<= 1;
       pc += 2;
       break;
+
     default:
       std::printf("Unknown opcode: 0x%X\n", opcode);
       break;
@@ -216,29 +236,34 @@ bool chip8::emulateCycle() {
       pc += 2;
     }
     break;
+
   case 0xA000:
     I = opcode & 0x0FFF;
     pc += 2;
     break;
+
   case 0xB000:
     pc = (opcode & 0x0FFF) + V[0x0];
     break;
+
   case 0xC000:
-    output = (rand() % (255 + 1));
-    V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & output;
+    V[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF) & (rand() % (0xFF + 1));
     pc += 2;
     break;
+
   case 0xD000: {
-    loc[0] = V[(opcode & 0x0F00) >> 8];
-    loc[1] = V[(opcode & 0x00F0) >> 4];
+    unsigned short x = V[(opcode & 0x0F00) >> 8];
+    unsigned short y = V[(opcode & 0x00F0) >> 4];
     int ht = opcode & 0x000F;
     int wt = 8;
+    unsigned short pixel;
+
     V[0x0F] = 0;
     for (int i = 0; i < ht; ++i) {
-      int pixel = memory[I + i];
+      pixel = memory[I + i];
       for (int j = 0; j < wt; ++j) {
         if ((pixel & (0x80 >> j)) != 0) {
-          int index = ((loc[0] + j) + ((loc[1] + i) * 64)) % 2048;
+          int index = ((x + j) + ((y + i) * 64));
           if (gfx[index] == 1) {
             V[0x0F] = 1;
           }
@@ -246,26 +271,30 @@ bool chip8::emulateCycle() {
         }
       }
     }
+
     draw_flag = true;
     pc += 2;
-    break;
-  }
+  } break;
+
   case 0xE000:
+
     switch (opcode & 0x00FF) {
     case 0x009E:
-      if (keypad[V[(opcode & 0x0F00) >> 8]] != 0) {
+      if (key[V[(opcode & 0x0F00) >> 8]] != 0) {
         pc += 4;
       } else {
         pc += 2;
       }
       break;
+
     case 0x00A1:
-      if (keypad[V[(opcode & 0x0F00) >> 8]] == 0) {
+      if (key[V[(opcode & 0x0F00) >> 8]] == 0) {
         pc += 4;
       } else {
         pc += 2;
       }
       break;
+
     default:
       std::printf("Unknown opcode: 0x%X\n", opcode);
       break;
@@ -274,31 +303,36 @@ bool chip8::emulateCycle() {
 
   case 0xF000:
     switch (opcode & 0x00FF) {
+
     case 0x0007:
       V[(opcode & 0x0F00) >> 8] = delay_timer;
       pc += 2;
       break;
+
     case 0x000A: {
       bool key_pressed = false;
       for (int i = 0; i < 16; i++) {
-        if (keypad[i] != 0) {
+        if (key[i] != 0) {
           key_pressed = true;
           V[(opcode & 0x0F00) >> 8] = i;
         }
       }
-      if (key_pressed) {
-        pc += 2;
+      if (!key_pressed) {
+        return true;
       }
-      break;
-    }
+      pc += 2;
+    } break;
+
     case 0x0015:
       delay_timer = V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
+
     case 0x0018:
       sound_timer = V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
+
     case 0x001E:
       V[0xF] = 0;
       if (I + V[(opcode & 0x0F00) >> 8] > 0xFFF) {
@@ -307,31 +341,36 @@ bool chip8::emulateCycle() {
       I += V[(opcode & 0x0F00) >> 8];
       pc += 2;
       break;
+
     case 0x0029:
       I = (V[(opcode & 0x0F00) >> 8]) * 5;
       pc += 2;
       break;
+
     case 0x0033:
       n = (opcode & 0x0F00) >> 8;
-      memory[I] = (uint8_t)((uint8_t)V[n] / 100);
-      memory[I + 1] = (uint8_t)((uint8_t)(V[n] / 10) % 10);
-      memory[I + 2] = (uint8_t)((uint8_t)(V[n] % 100) % 10);
+      memory[I] = (V[n] / 100);
+      memory[I + 1] = (V[n] / 10) % 10;
+      memory[I + 2] = V[n] % 10;
       pc += 2;
       break;
+
     case 0x0055:
       for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
         memory[I + i] = V[i];
       }
-      I = I + ((opcode & 0x0F00) >> 8) + 1;
+      I += ((opcode & 0x0F00) >> 8) + 1;
       pc += 2;
       break;
+
     case 0x0065:
-      for (int i = 0; i <= (opcode & 0x0F00) >> 8; ++i) {
+      for (int i = 0; i <= ((opcode & 0x0F00) >> 8); ++i) {
         V[i] = memory[I + i];
       }
-      I = I + ((opcode & 0x0F00) >> 8) + 1;
+      I += ((opcode & 0x0F00) >> 8) + 1;
       pc += 2;
       break;
+
     default:
       std::printf("Unknown opcode: 0x%X\n", opcode);
       break;

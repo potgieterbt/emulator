@@ -1,6 +1,8 @@
 #include "chip8.h"
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <ios>
@@ -10,22 +12,60 @@
 #include <tuple>
 #include <vector>
 
-chip8::chip8() {
+unsigned char chip8_fontset[80] = {
+    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+    0x20, 0x60, 0x20, 0x20, 0x70, // 1
+    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+};
+
+chip8::chip8() {}
+chip8::~chip8() {}
+
+void chip8::init(){
   pc = 0x200;
   opcode = 0;
   I = 0;
   sp = 0;
+
+  for (int i = 0; i < 2048; ++i){
+    gfx[i] = 0;
+  }
+
+  for (int i = 0; i < 16; ++i) {
+    stack[i] = 0;
+    key[i] = 0;
+    V[i] = 0;
+  }
+
   for (int i = 0; i < 4096; ++i) {
     memory[i] = 0;
   }
-  for (int i = 0; i < 80; ++i) {
+
+  for (int i = 0; i < 80; ++i){
     memory[i] = chip8_fontset[i];
   }
-  memset(keypad, 0, sizeof(keypad));
+
+  delay_timer = 0;
+  sound_timer = 0;
+
+  srand(time(NULL)
 }
 
 void chip8::loadGame(std::string rom_path) {
-  rom_path = "./roms/PONG";
+  rom_path = "./roms/BLINKY";
   std::vector<char> buffer;
   std::ifstream gamefile(rom_path, std::ios::binary | std::ios::in);
 
@@ -35,14 +75,6 @@ void chip8::loadGame(std::string rom_path) {
     memory[i] = (uint8_t)c;
   }
 };
-
-bool chip8::get_draw_flag() { return draw_flag; }
-
-void chip8::set_draw_flag(bool flag) { draw_flag = flag; }
-
-int chip8::get_display_value(int i) { return gfx[i]; }
-
-void chip8::set_keypad_value(int index, int val) { keypad[index] = val; }
 
 bool chip8::emulateCycle() {
   opcode = (memory[pc]) << 8 | memory[pc + 1];
@@ -155,7 +187,7 @@ bool chip8::emulateCycle() {
       pc += 2;
       break;
     case 0x0007:
-        V[0xF] = 0;
+      V[0xF] = 0;
       if (V[(opcode & 0x0F00) >> 8] > V[(opcode & 0x00F0) >> 4]) {
         V[0xF] = 1;
       }
@@ -164,7 +196,7 @@ bool chip8::emulateCycle() {
       pc += 2;
       break;
     case 0x000E:
-        V[0xF] = 0;
+      V[0xF] = 0;
       if (V[(opcode & 0x0F00) >> 8] >> 7) {
         V[0xF] = 1;
       }
@@ -320,5 +352,3 @@ bool chip8::emulateCycle() {
   }
   return 1;
 }
-
-chip8::~chip8() {}

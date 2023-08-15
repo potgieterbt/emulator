@@ -8,49 +8,21 @@
 class chip8 {
 public:
   chip8();
-  void loadGame(std::string game);
-  bool get_draw_flag();
-  void set_draw_flag(bool);
-  int get_display_value(int);
-  void set_keypad_value(int, int);
-  bool emulateCycle();
   ~chip8();
+  void loadGame(std::string game);
+  bool emulateCycle();
+  uint8_t gfx[64 * 32];
+  uint8_t key[16];
+  bool draw_flag;
 
 private:
-  int keypad[16];
-  const int prog_start = 0x200;
-  const int ETI_start = 0x600;
-  const int ram_end = 0xFFF;
-  bool draw_flag;
+  void init();
   unsigned int output;
-  unsigned short opcode, I, pc, sp;
-  unsigned char memory[4096];
-  unsigned char V[16];
-  unsigned char gfx[64 * 32];
+  uint16_t opcode, I, pc, sp;
+  uint8_t memory[4096];
+  uint8_t V[16];
   unsigned char delay_timer, sound_timer;
-  unsigned short stack[16];
-  unsigned char key[16];
+  uint16_t stack[16];
   unsigned int n;
-  std::vector<int> sprite;
-  bool p_erase;
-  int loc[2] = {0, 0};
-  unsigned char chip8_fontset[80] = {
-      0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-      0x20, 0x60, 0x20, 0x20, 0x70, // 1
-      0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-      0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-      0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-      0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-      0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-      0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-      0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-      0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-      0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-      0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-      0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-      0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-      0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-      0xF0, 0x80, 0xF0, 0x80, 0x80  // F
-  };
 };
-#endif //CHIP8_CHIP8EMULATOR_H
+#endif // CHIP8_CHIP8EMULATOR_H

@@ -61,12 +61,12 @@ void chip8::init(){
   delay_timer = 0;
   sound_timer = 0;
 
-  srand(time(NULL)
+  srand(time(NULL));
 }
 
 void chip8::loadGame(std::string rom_path) {
-  rom_path = "./roms/BLINKY";
-  std::vector<char> buffer;
+  init();
+  rom_path = rom_path;
   std::ifstream gamefile(rom_path, std::ios::binary | std::ios::in);
 
   char c;

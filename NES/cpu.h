@@ -15,4 +15,26 @@ private:
   uint16_t pc;
   uint8_t sp;
   uint8_t S;
+
+  // Opcodes:
+  void ADC();
+  void AND();
+  void ASL();
+  void BCC();
+  void BCS();
+  void BEQ();
+  void BIT();
+  void BMI();
+  void BNE();
+  void BPL();
+  void BRK();
+  void BVC();
+  void BVS();
+  void CLC();
+  void CLD();
+  void CLI();
+  void CLV();
+  void CMP();
+  void CPX();
+  void CPY();
 };

@@ -25,203 +25,32 @@ void Chip::emulateCycle() {
     break;
 
   case 0x04:
-    mode = Implicit;
-    NOP();
-    break;
-
   case 0x05:
-    mode = Zero;
-    ORA();
-    break;
-
   case 0x06:
-    mode = Zero;
-    ASL();
-    break;
-
   case 0x07:
-    // Illegal opcode
-    break;
-
   case 0x08:
-    mode = Implicit;
-    PHP();
-    break;
-
   case 0x09:
-    mode = Immediate;
-    ORA();
-    break;
-
   case 0x0A:
-    mode = Implicit;
-    ASL();
-    break;
-
   case 0x0B:
-    //Illegal opcode
-    break;
-
   case 0x0C:
-    NOP();
-    break;
-
   case 0x0D:
-    mode = Absolute;
-    ORA();
-    break;
-
   case 0x0E:
-    mode = Absolute;
-    ASL();
-    break;
-
   case 0x0F:
-    //Illegal opcode
-    break;
-
-
-  case 0x10:
-    mode = Relative;
-    BPL();
-    break;
-
-  case 0x11:
-    mode = IndirectIdx;
-    ORA();
-    break;
-
-  case 0x12:
-    //Illegal opcode
-    break;
-
-  case 0x13:
-    //Illegal opcode
-    break;
-
-  case 0x14:
-    NOP();
-    break;
-
-  case 0x15:
-    mode = IdxIndirect;
-    ORA();
-    break;
-
-  case 0x16:
-    mode = IdxIndirect;
-    ASL();
-    break;
-
-  case 0x17:
-    //Illegal opcode
-    break;
-
-  case 0x18:
-    mode = Implicit;
-    CLC();
-    break;
-
-  case 0x19:
-    mode = Absolutey;
-    ORA();
-    break;
-
-  case 0x1A:
-    NOP();
-    break;
-
-  case 0x1B:
-    //Illegal opcode
-    break;
-
-  case 0x1C:
-    NOP();
-    break;
-
-  case 0x1D:
-    mode = Absolutex;
-    ORA();
-    break;
-
-  case 0x1E:
-    mode = Absolutex;
-    ASL();
-    break;
-
-  case 0x1F:
-    //Illegal opcode
-    break;
-
   case 0x20:
-    mode = Absolute;
-    JSR();
-    break;
-
   case 0x21:
-    mode = IndirectIdx;
-    AND();
-    break;
-
   case 0x22:
-    //Illegal opcode
-    break;
-
   case 0x23:
-    //Illegal opcode
-    break;
-
   case 0x24:
-    mode = Zero;
-    BIT();
-    break;
-
   case 0x25:
-    mode = Zero;
-    AND();
-    break;
-
   case 0x26:
-    mode = Zero;
-    ROL();
-    break;
-
   case 0x27:
-    //Illegal opcode
-    break;
-
   case 0x28:
-    mode = Implicit;
-    PLP();
-    break;
-
   case 0x29:
-    mode = Immediate;
-    AND();
-    break;
-
   case 0x2A:
-    mode = Implicit;
-    ROL();
-    break;
-
   case 0x2B:
-    //Illegal opcode
-    break;
-
   case 0x2C:
-    mode = Absolute;
-    BIT();
-    break;
-
   case 0x2D:
-    mode = Absolute;
-    AND();
-    break;
-
   case 0x2E:
-
-
   case 0x2F:
   case 0x30:
   case 0x31:

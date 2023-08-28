@@ -16,6 +16,23 @@ private:
   uint8_t sp;
   uint8_t S;
 
+  enum addressing {
+    Implicit,
+    Accumulator,
+    Immediate,
+    Relative,
+    Absolute,
+    Absolutex,
+    Absolutey,
+    Zero,
+    Zerox,
+    Zeroy,
+    Indirect,
+    IdxIndirect,
+    IndirectIdx,
+  };
+  addressing mode;
+
   // Opcodes:
   void ADC();
   void AND();
@@ -37,4 +54,40 @@ private:
   void CMP();
   void CPX();
   void CPY();
+  void DEC();
+  void DEX();
+  void DEY();
+  void EOR();
+  void INC();
+  void INX();
+  void INY();
+  void JMP();
+  void JSR();
+  void LDA();
+  void LDX();
+  void LDY();
+  void LSR();
+  void NOP();
+  void ORA();
+  void PHA();
+  void PHP();
+  void PLA();
+  void PLP();
+  void ROL();
+  void ROR();
+  void RTI();
+  void RTS();
+  void SBC();
+  void SEC();
+  void SED();
+  void SEI();
+  void STA();
+  void STX();
+  void STY();
+  void TAX();
+  void TAY();
+  void TSX();
+  void TXA();
+  void TXS();
+  void TYA();
 };

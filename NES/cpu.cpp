@@ -220,10 +220,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0x2E:
-
+    mode = Absolute;
+    LSR();
+    break;
 
   case 0x2F:
+    //Illegal opcode
+    break;
+
   case 0x30:
+
+
   case 0x31:
   case 0x32:
   case 0x33:

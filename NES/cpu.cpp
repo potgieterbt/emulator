@@ -229,57 +229,239 @@ void Chip::emulateCycle() {
     break;
 
   case 0x30:
-
+    mode = Relative;
+    BMI();
+    break;
 
   case 0x31:
+    mode = IndirectIdx;
+    AND();
+    break;
+
   case 0x32:
+    //Illegal opcode
+    break;
+
   case 0x33:
+    //Illegal opcode
+    break;
+
   case 0x34:
+    mode = Zerox;
+    NOP();
+    break;
+
   case 0x35:
+    mode = Zerox;
+    AND();
+    break;
+
   case 0x36:
+    mode = Zerox;
+    ROL();
+    break;
+
   case 0x37:
+    //Illegal opcode
+    break;
+
   case 0x38:
+    mode = Implicit;
+    SEC();
+    break;
+
   case 0x39:
+    mode = Absolutey;
+    AND();
+    break;
+
   case 0x3A:
+    NOP();
+    break;
+
   case 0x3B:
+    //Illegal opcode
+    break;
+
   case 0x3C:
+    mode = Absolutex;
+    NOP();
+    break;
+
   case 0x3D:
+    mode = Absolutex;
+    AND();
+    break;
+
   case 0x3E:
+    mode = Absolutex;
+    ROL();
+    break;
+
   case 0x3F:
+    //Illegal opcode
+    break;
+
   case 0x40:
+    mode = Implicit;
+    RTI();
+    break;
+
   case 0x41:
+    mode = IdxIndirect;
+    EOR();
+    break;
+
   case 0x42:
+    //Illegal opcode
+    break;
+
   case 0x43:
+    //Illegal opcode
+    break;
+
   case 0x44:
+    mode = Zero;
+    NOP();
+    break;
+
   case 0x45:
+    mode = Zero;
+    EOR();
+    break;
+
   case 0x46:
+    mode = Zero;
+    LSR();
+    break;
+
   case 0x47:
+    //Illegal opcode
+    break;
+
   case 0x48:
+    mode = Implicit;
+    PHA();
+    break;
+
   case 0x49:
+    mode = Immediate;
+    EOR();
+    break;
+
   case 0x4A:
+    mode = Accumulator;
+    LSR();
+    break;
+
   case 0x4B:
+    //Illegal opcode
+    break;
+
   case 0x4C:
+    mode = Absolute;
+    JMP();
+    break;
+
   case 0x4D:
+    mode = Absolute;
+    EOR();
+    break;
+
   case 0x4E:
+    mode = Absolute;
+    LSR();
+    break;
+
   case 0x4F:
+    //Illegal opcode
+    break;
+
   case 0x50:
+    mode = Relative;
+    BVC();
+    break;
+
   case 0x51:
+    mode = IndirectIdx;
+    EOR();
+    break;
+
   case 0x52:
+    //Illegal opcode
+    break;
+
   case 0x53:
+    //Illegal opcode
+    break;
+
   case 0x54:
+    mode = IdxIndirect;
+    NOP();
+    break;
+
   case 0x55:
+    mode = IdxIndirect;
+    EOR();
+    break;
+
   case 0x56:
+    mode = IdxIndirect;
+    LSR();
+    break;
+
   case 0x57:
+    //Illegal opcode
+    break;
+
   case 0x58:
+    mode = Implicit;
+    CLI();
+    break;
+
   case 0x59:
+    mode = IndirectIdx;
+    EOR();
+    break;
+
   case 0x5A:
+    mode = Implicit;
+    NOP();
+    break;
+
   case 0x5B:
+    //Illegal opcode
+    break;
+
   case 0x5C:
+    mode = IdxIndirect;
+    NOP();
+    break;
+
   case 0x5D:
+    mode = IdxIndirect;
+    EOR();
+    break;
+
   case 0x5E:
+    mode = IdxIndirect;
+    LSR();
+    break;
+
   case 0x5F:
+    //Illegal opcode
+    break;
+
   case 0x60:
+    mode = Implicit;
+    RTS();
+    break;
+
   case 0x61:
+    mode = IdxIndirect;
+    ADC();
+    break;
+
   case 0x62:
   case 0x63:
   case 0x64:

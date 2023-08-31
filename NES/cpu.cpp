@@ -3,7 +3,11 @@
 
 void Chip::init() {}
 
+RAM memory;
+
 void Chip::emulateCycle() {
+
+  uint8_t opcode = memory.Read();
 
   switch (opcode) {
   case 0x00:
@@ -549,11 +553,27 @@ void Chip::emulateCycle() {
   case 0x7F:
   case 0x80:
   case 0x81:
+    mode = IdxIndirect;
+    STA();
+    break;
+
   case 0x82:
   case 0x83:
   case 0x84:
+    mode = Zero;
+    STY();
+    break;
+
   case 0x85:
+    mode = Zero;
+    STA();
+    break;
+
   case 0x86:
+    mode = Zero;
+    STX();
+    break;
+
   case 0x87:
   case 0x88:
     mode = Implicit;
@@ -562,10 +582,26 @@ void Chip::emulateCycle() {
 
   case 0x89:
   case 0x8A:
+    mode = Implicit;
+    TXA();
+    break;
+
   case 0x8B:
   case 0x8C:
+    mode = Absolute;
+    STY();
+    break;
+
   case 0x8D:
+    mode = Absolute;
+    STA();
+    break;
+
   case 0x8E:
+    mode = Absolute;
+    STX();
+    break;
+
   case 0x8F:
   case 0x90:
     mode = Relative;
@@ -573,18 +609,50 @@ void Chip::emulateCycle() {
     break;
 
   case 0x91:
+    mode = IndirectIdx;
+    STA();
+    break;
+
   case 0x92:
   case 0x93:
   case 0x94:
+    mode = Zerox;
+    STY();
+    break;
+
   case 0x95:
+    mode = Zerox;
+    STA();
+    break;
+
   case 0x96:
+    mode = Zeroy;
+    STX();
+    break;
+
   case 0x97:
   case 0x98:
+    mode = Implicit;
+    TYA();
+    break;
+
   case 0x99:
+    mode = Absolutey;
+    STA();
+    break;
+
   case 0x9A:
+    mode = Implicit;
+    TXS();
+    break;
+
   case 0x9B:
   case 0x9C:
   case 0x9D:
+    mode = Absolutex;
+    STA();
+    break;
+
   case 0x9E:
   case 0x9F:
   case 0xA0:
@@ -620,12 +688,20 @@ void Chip::emulateCycle() {
 
   case 0xA7:
   case 0xA8:
+    mode = Implicit;
+    TAY();
+    break;
+
   case 0xA9:
     mode = Immediate;
     LDA();
     break;
 
   case 0xAA:
+    mode = Implicit;
+    TAX();
+    break;
+
   case 0xAB:
   case 0xAC:
     mode = Absolute;
@@ -682,6 +758,10 @@ void Chip::emulateCycle() {
     break;
 
   case 0xBA:
+    mode = Implicit;
+    TSX();
+    break;
+
   case 0xBB:
   case 0xBC:
     mode = Absolutex;

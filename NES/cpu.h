@@ -9,7 +9,6 @@ public:
 
 private:
   void init();
-  uint8_t memory[65536];
   uint16_t opcode, I;
   uint8_t A, X, Y;
   uint16_t pc;

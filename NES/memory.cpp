@@ -10,6 +10,3 @@
 // NMI/RESET/IRQ vectors 0xFFFA - 0xFFFF
 //
 
-#include <cstdint>
-uint8_t memory[65536];
-

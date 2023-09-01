@@ -7,7 +7,7 @@ RAM memory;
 
 void Chip::emulateCycle() {
 
-  uint8_t opcode = memory.Read();
+  uint8_t opcode = memory.Read(pc);
 
   switch (opcode) {
   case 0x00:
@@ -514,8 +514,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0x72:
+    // Illegal opcode
+    break;
+
   case 0x73:
+    // Illegal opcode
+    break;
+
   case 0x74:
+    // Illegal opcode
+    break;
+
   case 0x75:
     mode = Zerox;
     ADC();
@@ -527,6 +536,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0x77:
+    // Illegal opcode
+    break;
+
   case 0x78:
     mode = Implicit;
     SEI();
@@ -538,8 +550,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0x7A:
+    // Illegal opcode
+    break;
+
   case 0x7B:
+    // Illegal opcode
+    break;
+
   case 0x7C:
+    // Illegal opcode
+    break;
+
   case 0x7D:
     mode = Absolutex;
     ADC();
@@ -551,14 +572,26 @@ void Chip::emulateCycle() {
     break;
 
   case 0x7F:
+    // Illegal opcode
+    break;
+
   case 0x80:
+    // Illegal opcode
+    break;
+
   case 0x81:
     mode = IdxIndirect;
     STA();
     break;
 
   case 0x82:
+    // Illegal opcode
+    break;
+
   case 0x83:
+    // Illegal opcode
+    break;
+
   case 0x84:
     mode = Zero;
     STY();
@@ -575,18 +608,27 @@ void Chip::emulateCycle() {
     break;
 
   case 0x87:
+    // Illegal opcode
+    break;
+
   case 0x88:
     mode = Implicit;
     DEY();
     break;
 
   case 0x89:
+    // Illegal opcode
+    break;
+
   case 0x8A:
     mode = Implicit;
     TXA();
     break;
 
   case 0x8B:
+    // Illegal opcode
+    break;
+
   case 0x8C:
     mode = Absolute;
     STY();
@@ -603,6 +645,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0x8F:
+    // Illegal opcode
+    break;
+
   case 0x90:
     mode = Relative;
     BCC();
@@ -614,7 +659,13 @@ void Chip::emulateCycle() {
     break;
 
   case 0x92:
+    // Illegal opcode
+    break;
+
   case 0x93:
+    // Illegal opcode
+    break;
+
   case 0x94:
     mode = Zerox;
     STY();
@@ -631,6 +682,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0x97:
+    // Illegal opcode
+    break;
+
   case 0x98:
     mode = Implicit;
     TYA();
@@ -647,14 +701,26 @@ void Chip::emulateCycle() {
     break;
 
   case 0x9B:
+    // Illegal opcode
+    break;
+
   case 0x9C:
+    // Illegal opcode
+    break;
+
   case 0x9D:
     mode = Absolutex;
     STA();
     break;
 
   case 0x9E:
+    // Illegal opcode
+    break;
+
   case 0x9F:
+    // Illegal opcode
+    break;
+
   case 0xA0:
     mode = Immediate;
     LDY();
@@ -671,6 +737,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xA3:
+    // Illegal opcode
+    break;
+
   case 0xA4:
     mode = Zero;
     LDY();
@@ -687,6 +756,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xA7:
+    // Illegal opcode
+    break;
+
   case 0xA8:
     mode = Implicit;
     TAY();
@@ -703,6 +775,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xAB:
+    // Illegal opcode
+    break;
+
   case 0xAC:
     mode = Absolute;
     LDY();
@@ -719,6 +794,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xAF:
+    // Illegal opcode
+    break;
+
   case 0xB0:
     mode = Relative;
     BCS();
@@ -730,7 +808,13 @@ void Chip::emulateCycle() {
     break;
 
   case 0xB2:
+    // Illegal opcode
+    break;
+
   case 0xB3:
+    // Illegal opcode
+    break;
+
   case 0xB4:
     mode = Zerox;
     LDY();
@@ -747,6 +831,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xB7:
+    // Illegal opcode
+    break;
+
   case 0xB8:
     mode = Implicit;
     CLV();
@@ -763,6 +850,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xBB:
+    // Illegal opcode
+    break;
+
   case 0xBC:
     mode = Absolutex;
     LDY();
@@ -779,6 +869,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xBF:
+    // Illegal opcode
+    break;
+
   case 0xC0:
     mode = Immediate;
     CPY();
@@ -790,7 +883,13 @@ void Chip::emulateCycle() {
     break;
 
   case 0xC2:
+    // Illegal opcode
+    break;
+
   case 0xC3:
+    // Illegal opcode
+    break;
+
   case 0xC4:
     mode = Zero;
     CPY();
@@ -807,6 +906,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xC7:
+    // Illegal opcode
+    break;
+
   case 0xC8:
     mode = Implicit;
     INY();
@@ -823,6 +925,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xCB:
+    // Illegal opcode
+    break;
+
   case 0xCC:
     mode = Absolute;
     CPY();
@@ -839,6 +944,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xCF:
+    // Illegal opcode
+    break;
+
   case 0xD0:
     mode = Relative;
     BNE();
@@ -850,8 +958,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0xD2:
+    // Illegal opcode
+    break;
+
   case 0xD3:
+    // Illegal opcode
+    break;
+
   case 0xD4:
+    // Illegal opcode
+    break;
+
   case 0xD5:
     mode = Zerox;
     CMP();
@@ -863,6 +980,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xD7:
+    // Illegal opcode
+    break;
+
   case 0xD8:
     mode = Implicit;
     CLD();
@@ -874,8 +994,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0xDA:
+    // Illegal opcode
+    break;
+
   case 0xDB:
+    // Illegal opcode
+    break;
+
   case 0xDC:
+    // Illegal opcode
+    break;
+
   case 0xDD:
     mode = Absolutex;
     CMP();
@@ -887,6 +1016,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xDF:
+    // Illegal opcode
+    break;
+
   case 0xE0:
     mode = Immediate;
     CPX();
@@ -898,7 +1030,13 @@ void Chip::emulateCycle() {
     break;
 
   case 0xE2:
+    // Illegal opcode
+    break;
+
   case 0xE3:
+    // Illegal opcode
+    break;
+
   case 0xE4:
     mode = Zero;
     CPX();
@@ -915,6 +1053,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xE7:
+    // Illegal opcode
+    break;
+
   case 0xE8:
     mode = Implicit;
     INX();
@@ -931,6 +1072,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xEB:
+    // Illegal opcode
+    break;
+
   case 0xEC:
     mode = Absolute;
     CPX();
@@ -947,6 +1091,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xEF:
+    // Illegal opcode
+    break;
+
   case 0xF0:
     mode = Relative;
     BEQ();
@@ -958,8 +1105,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0xF2:
+    // Illegal opcode
+    break;
+
   case 0xF3:
+    // Illegal opcode
+    break;
+
   case 0xF4:
+    // Illegal opcode
+    break;
+
   case 0xF5:
     mode = Zerox;
     SBC();
@@ -971,6 +1127,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xF7:
+    // Illegal opcode
+    break;
+
   case 0xF8:
     mode = Implicit;
     SED();
@@ -982,8 +1141,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0xFA:
+    // Illegal opcode
+    break;
+
   case 0xFB:
+    // Illegal opcode
+    break;
+
   case 0xFC:
+    // Illegal opcode
+    break;
+
   case 0xFD:
     mode = Absolutex;
     SBC();
@@ -995,6 +1163,9 @@ void Chip::emulateCycle() {
     break;
 
   case 0xFF:
+    // Illegal opcode
+    break;
+
 
   default:
     break;

@@ -1172,4 +1172,19 @@ void Chip::emulateCycle() {
   }
 }
 
-void Chip::ADC() {}
+void Chip::ADC() {
+
+}
+void Chip::AND() {}
+void Chip::ASL() {}
+void Chip::BCC() {}
+void Chip::BCS() {}
+void Chip::BEQ() {}
+void Chip::BIT() {}
+void Chip::BMI() {}
+void Chip::BNE() {}
+void Chip::BPL() {}
+void Chip::BRK() {}
+void Chip::BVC() {}
+void Chip::BVS() {}
+void Chip::CLC() {}

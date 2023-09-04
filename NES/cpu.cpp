@@ -1166,25 +1166,705 @@ void Chip::emulateCycle() {
     // Illegal opcode
     break;
 
-
   default:
     break;
   }
 }
 
-void Chip::ADC() {
-
+void Chip::ADC(addressing mode) {
+  int value;
+  switch (mode) {
+  case Immediate:
+    // set value to the byte after the opcode
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case Absolutey:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
+    break;
+  default:
+    break;
+  }
 }
-void Chip::AND() {}
-void Chip::ASL() {}
-void Chip::BCC() {}
-void Chip::BCS() {}
-void Chip::BEQ() {}
-void Chip::BIT() {}
-void Chip::BMI() {}
-void Chip::BNE() {}
-void Chip::BPL() {}
-void Chip::BRK() {}
-void Chip::BVC() {}
-void Chip::BVS() {}
-void Chip::CLC() {}
+void Chip::AND() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    // set value to the byte after the opcode
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case Absolutey:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
+    break;
+  default:
+    break;
+  }
+}
+
+void Chip::ASL() {
+  int value;
+
+  switch (mode) {
+  case Accumulator:
+    // set value to the byte after the opcode
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BCC() {
+  int value;
+  switch (mode) {
+  case Relative:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BCS() {
+  int value;
+  switch (mode) {
+  case Relative:
+    break;
+  default:
+    break;
+  }
+}
+
+void Chip::BEQ() {
+  int value;
+  switch (mode) {
+  case Zero:
+    break;
+  case Absolute:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BIT() {
+  int value;
+  switch (mode) {
+  case Relative:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BMI() {
+  int value;
+  switch (mode) {
+  case Relative:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BNE() {
+  int value;
+  switch (mode) {
+  case Relative:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BPL() {
+  int value;
+  switch (mode) {
+  case Relative:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BRK() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BVC() {
+  int value;
+  switch (mode) {
+  case Relative:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::BVS() {
+  int value;
+  switch (mode) {
+  case Relative:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::CLC() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+
+void Chip::CLD() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::CLI() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::CLV() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::CMP() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case Absolutey:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::CPX() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Absolute:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::CPY() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Absolute:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::DEC() {
+  int value;
+  switch (mode) {
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::DEX() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::DEY() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::EOR() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case Absolutey:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::INC() {
+  int value;
+  switch (mode) {
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::INX() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::INY() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::JMP() {
+  int value;
+  switch (mode) {
+  case Absolute:
+    break;
+  case Indirect:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::JSR() {
+  int value;
+  switch (mode) {
+  case Absolute:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::LDA() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case Absolutey:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::LDX() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::LDY() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::LSR() {
+  int value;
+  switch (mode) {
+  case Accumulator:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::NOP() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::ORA() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case Absolutey:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::PHA() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::PHP() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::PLA() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::PLP() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::ROL() {
+  int value;
+  switch (mode) {
+  case Accumulator:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::ROR() {
+  int value;
+  switch (mode) {
+  case Accumulator:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::RTI() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::RTS() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::SBC() {
+  int value;
+  switch (mode) {
+  case Immediate:
+    break;
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::SEC() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::SED() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::SEI() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::STA() {
+  int value;
+  switch (mode) {
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::STX() {
+  int value;
+  switch (mode) {
+  case Zero:
+    break;
+  case Zeroy:
+    break;
+  case Absolute:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::STY() {
+  int value;
+  switch (mode) {
+  case Zero:
+    break;
+  case Zerox:
+    break;
+  case Absolute:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::TAX() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::TAY() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::TSX() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::TXA() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::TXS() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+void Chip::TYA() {
+  int value;
+  switch (mode) {
+  case Implicit:
+    break;
+  default:
+    break;
+  }
+}

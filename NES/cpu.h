@@ -6,15 +6,6 @@ public:
   Chip();
   ~Chip();
   void emulateCycle();
-
-private:
-  void init();
-  uint16_t opcode, I;
-  uint8_t A, X, Y;
-  uint16_t pc;
-  uint8_t sp;
-  uint8_t S;
-
   enum addressing {
     Implicit,
     Accumulator,
@@ -30,6 +21,15 @@ private:
     IdxIndirect,
     IndirectIdx,
   };
+
+private:
+  void init();
+  uint16_t opcode, I;
+  uint8_t A, X, Y;
+  uint16_t pc;
+  uint8_t sp;
+  uint8_t S;
+
   addressing mode;
 
   // Opcodes:

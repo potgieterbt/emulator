@@ -1176,6 +1176,7 @@ void Chip::ADC(addressing mode) {
   switch (mode) {
   case Immediate:
     // set value to the byte after the opcode
+    A = A + (opcode & 0x00FF) + (S & 128);
     break;
   case Zero:
     break;

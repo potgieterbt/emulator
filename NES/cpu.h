@@ -33,7 +33,7 @@ private:
   addressing mode;
 
   // Opcodes:
-  void ADC();
+  void ADC(addressing);
   void AND();
   void ASL();
   void BCC();

@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "memory.h"
+#include <cstdint>
 
 void Chip::init() {}
 
@@ -1864,6 +1865,33 @@ void Chip::TYA() {
   int value;
   switch (mode) {
   case Implicit:
+    break;
+  default:
+    break;
+  }
+}
+
+uint16_t Chip::get_addr(addressing mode) {
+  switch (mode) {
+  case Immediate:
+    return pc;
+    break;
+  case Zero:
+    return memory.Read(pc);
+    break;
+  case Zerox:
+    break;
+  case Zeroy:
+    break;
+  case Absolute:
+    break;
+  case Absolutex:
+    break;
+  case Absolutey:
+    break;
+  case IdxIndirect:
+    break;
+  case IndirectIdx:
     break;
   default:
     break;

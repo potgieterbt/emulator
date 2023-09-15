@@ -33,6 +33,7 @@ private:
   addressing mode;
 
   // Opcodes:
+  uint16_t get_addr(addressing);
   void ADC(addressing);
   void AND();
   void ASL();

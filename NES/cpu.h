@@ -34,6 +34,7 @@ private:
 
   // Opcodes:
   uint16_t get_addr(addressing);
+  uint8_t Read(uint16_t);
   void ADC(addressing);
   void AND();
   void ASL();

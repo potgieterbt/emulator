@@ -1,6 +1,3 @@
-
-
-
 #include <cstdint>
 
 class RAM {

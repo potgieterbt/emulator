@@ -6,8 +6,6 @@ void Chip::init() {}
 
 RAM memory;
 
-
-
 void Chip::emulateCycle() {
 
   uint8_t opcode = memory.Read(pc);
@@ -1176,11 +1174,11 @@ void Chip::emulateCycle() {
 
 void Chip::ADC(addressing mode) {
   int value;
+  uint16_t addr = get_addr(mode);
   switch (mode) {
   case Immediate:
     // set value to the byte after the opcode
-   ;
-    A = A + (opcode & 0x00FF) + (S & 128);
+    A = A + Read(addr) + (S & 128);
     break;
   case Zero:
     break;
@@ -1889,13 +1887,13 @@ uint16_t Chip::get_addr(addressing mode) {
     return (Y + memory.Read(pc) % 256);
     break;
   case Absolute:
-    return memory.Read(pc);
+    return memory.Read_16(pc);
     break;
   case Absolutex:
-    return X + memory.Read(pc);
+    return memory.Read_16(pc);
     break;
   case Absolutey:
-    return Y + memory.Read(pc);
+    return memory.Read_16(pc);
     break;
   case IdxIndirect:
     return (Y + memory.Read(pc) % 256);

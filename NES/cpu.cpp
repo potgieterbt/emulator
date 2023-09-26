@@ -1184,6 +1184,7 @@ void Chip::ADC(addressing mode) {
     S &= 0b11111110;
   }
   uint16_t sum = A + val + (S & 0b000000001);
+  setCarry(sum > 0xFF);
   uint8_t res = sum;
   setOverflow((val ^ res) & (res ^ A) & 0x80 != 0);
   A = res;
@@ -1191,7 +1192,7 @@ void Chip::ADC(addressing mode) {
   setZero(A == 0);
 }
 
-void Chip::AND() {
+void Chip::AND(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = memory.Read(addr);
 
@@ -1200,120 +1201,126 @@ void Chip::AND() {
   setZero(A == 0);
 }
 
-void Chip::ASL() {
+void Chip::ASL(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
+  setCarry(val & 0x80);
+  A <<= val;
+  setZero(A == 0);
+  setNegative(A & 0x80);
 }
 
-void Chip::BCC() {}
+void Chip::BCC(addressing mode) {}
 
-void Chip::BCS() {}
+void Chip::BCS(addressing mode) {}
 
-void Chip::BEQ() {}
+void Chip::BEQ(addressing mode) {}
 
-void Chip::BIT() {}
+void Chip::BIT(addressing mode) {}
 
-void Chip::BMI() {}
+void Chip::BMI(addressing mode) {}
 
-void Chip::BNE() {}
+void Chip::BNE(addressing mode) {}
 
-void Chip::BPL() {}
+void Chip::BPL(addressing mode) {}
 
-void Chip::BRK() {}
+void Chip::BRK(addressing mode) {}
 
-void Chip::BVC() {}
+void Chip::BVC(addressing mode) {}
 
-void Chip::BVS() {}
+void Chip::BVS(addressing mode) {}
 
-void Chip::CLC() {}
+void Chip::CLC(addressing mode) {}
 
-void Chip::CLD() {}
+void Chip::CLD(addressing mode) {}
 
-void Chip::CLI() {}
+void Chip::CLI(addressing mode) {}
 
-void Chip::CLV() {}
+void Chip::CLV(addressing mode) {}
 
-void Chip::CMP() {}
+void Chip::CMP(addressing mode) {}
 
-void Chip::CPX() {}
+void Chip::CPX(addressing mode) {}
 
-void Chip::CPY() {}
+void Chip::CPY(addressing mode) {}
 
-void Chip::DEC() {}
+void Chip::DEC(addressing mode) {}
 
-void Chip::DEX() {}
+void Chip::DEX(addressing mode) {}
 
-void Chip::DEY() {}
+void Chip::DEY(addressing mode) {}
 
-void Chip::EOR() {}
+void Chip::EOR(addressing mode) {}
 
-void Chip::INC() {}
+void Chip::INC(addressing mode) {}
 
-void Chip::INX() {}
+void Chip::INX(addressing mode) {}
 
-void Chip::INY() {}
+void Chip::INY(addressing mode) {}
 
-void Chip::JMP() {}
+void Chip::JMP(addressing mode) {}
 
-void Chip::JSR() {}
+void Chip::JSR(addressing mode) {}
 
-void Chip::LDA() {
+void Chip::LDA(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = memory.Read(addr);
 
   A = val;
 }
 
-void Chip::LDX() {}
+void Chip::LDX(addressing mode) {}
 
-void Chip::LDY() {}
+void Chip::LDY(addressing mode) {}
 
-void Chip::LSR() {}
+void Chip::LSR(addressing mode) {}
 
-void Chip::NOP() {}
+void Chip::NOP(addressing mode) {}
 
-void Chip::ORA() {}
+void Chip::ORA(addressing mode) {}
 
-void Chip::PHA() {}
+void Chip::PHA(addressing mode) {}
 
-void Chip::PHP() {}
+void Chip::PHP(addressing mode) {}
 
-void Chip::PLA() {}
+void Chip::PLA(addressing mode) {}
 
-void Chip::PLP() {}
+void Chip::PLP(addressing mode) {}
 
-void Chip::ROL() {}
+void Chip::ROL(addressing mode) {}
 
-void Chip::ROR() {}
+void Chip::ROR(addressing mode) {}
 
-void Chip::RTI() {}
+void Chip::RTI(addressing mode) {}
 
-void Chip::RTS() {}
+void Chip::RTS(addressing mode) {}
 
-void Chip::SBC() {}
+void Chip::SBC(addressing mode) {}
 
-void Chip::SEC() {}
+void Chip::SEC(addressing mode) {}
 
-void Chip::SED() {}
+void Chip::SED(addressing mode) {}
 
-void Chip::SEI() {}
+void Chip::SEI(addressing mode) {}
 
-void Chip::STA() {}
+void Chip::STA(addressing mode) {}
 
-void Chip::STX() {}
+void Chip::STX(addressing mode) {}
 
-void Chip::STY() {}
+void Chip::STY(addressing mode) {}
 
-void Chip::TAX() {}
+void Chip::TAX(addressing mode) {}
 
-void Chip::TAY() {}
+void Chip::TAY(addressing mode) {}
 
-void Chip::TSX() {}
+void Chip::TSX(addressing mode) {}
 
-void Chip::TXA() {}
+void Chip::TXA(addressing mode) {}
 
-void Chip::TXS() {}
+void Chip::TXS(addressing mode) {}
 
-void Chip::TYA() {}
+void Chip::TYA(addressing mode) {}
 
 uint16_t Chip::get_addr(addressing mode) {
   switch (mode) {

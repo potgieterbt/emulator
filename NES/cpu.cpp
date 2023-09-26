@@ -1,6 +1,7 @@
 #include "cpu.h"
 #include "memory.h"
 #include <cstdint>
+#include <cstring>
 
 void Chip::init() {}
 
@@ -9,6 +10,7 @@ RAM memory;
 void Chip::emulateCycle() {
 
   uint8_t opcode = memory.Read(pc);
+  pc += 1;
 
   switch (opcode) {
   case 0x00:
@@ -1173,704 +1175,145 @@ void Chip::emulateCycle() {
 }
 
 void Chip::ADC(addressing mode) {
-  int value;
   uint16_t addr = get_addr(mode);
-  switch (mode) {
-  case Immediate:
-    // set value to the byte after the opcode
-    A = A + Read(addr) + (S & 128);
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  case Absolutey:
-    break;
-  case IdxIndirect:
-    break;
-  case IndirectIdx:
-    break;
-  default:
-    break;
+  uint8_t val = memory.Read(addr);
+
+  if (A + val + (S & 0b000000001) > 0xFF) {
+    S |= 0b00000001;
+  } else {
+    S &= 0b11111110;
   }
+  uint16_t sum = A + val + (S & 0b000000001);
+  uint8_t res = sum;
+  setOverflow((val ^ res) & (res ^ A) & 0x80 != 0);
+  A = res;
+  setNegative(A & 0x80);
+  setZero(A == 0);
 }
+
 void Chip::AND() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    // set value to the byte after the opcode
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  case Absolutey:
-    break;
-  case IdxIndirect:
-    break;
-  case IndirectIdx:
-    break;
-  default:
-    break;
-  }
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+
+  A &= val;
+  setNegative(A & 0x80);
+  setZero(A == 0);
 }
 
 void Chip::ASL() {
-  int value;
 
-  switch (mode) {
-  case Accumulator:
-    // set value to the byte after the opcode
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BCC() {
-  int value;
-  switch (mode) {
-  case Relative:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BCS() {
-  int value;
-  switch (mode) {
-  case Relative:
-    break;
-  default:
-    break;
-  }
 }
 
-void Chip::BEQ() {
-  int value;
-  switch (mode) {
-  case Zero:
-    break;
-  case Absolute:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BIT() {
-  int value;
-  switch (mode) {
-  case Relative:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BMI() {
-  int value;
-  switch (mode) {
-  case Relative:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BNE() {
-  int value;
-  switch (mode) {
-  case Relative:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BPL() {
-  int value;
-  switch (mode) {
-  case Relative:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BRK() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BVC() {
-  int value;
-  switch (mode) {
-  case Relative:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::BVS() {
-  int value;
-  switch (mode) {
-  case Relative:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::CLC() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
+void Chip::BCC() {}
 
-void Chip::CLD() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::CLI() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::CLV() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::CMP() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  case Absolutey:
-    break;
-  case IdxIndirect:
-    break;
-  case IndirectIdx:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::CPX() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Absolute:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::CPY() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Absolute:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::DEC() {
-  int value;
-  switch (mode) {
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::DEX() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::DEY() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::EOR() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  case Absolutey:
-    break;
-  case IdxIndirect:
-    break;
-  case IndirectIdx:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::INC() {
-  int value;
-  switch (mode) {
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::INX() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::INY() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::JMP() {
-  int value;
-  switch (mode) {
-  case Absolute:
-    break;
-  case Indirect:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::JSR() {
-  int value;
-  switch (mode) {
-  case Absolute:
-    break;
-  default:
-    break;
-  }
-}
+void Chip::BCS() {}
+
+void Chip::BEQ() {}
+
+void Chip::BIT() {}
+
+void Chip::BMI() {}
+
+void Chip::BNE() {}
+
+void Chip::BPL() {}
+
+void Chip::BRK() {}
+
+void Chip::BVC() {}
+
+void Chip::BVS() {}
+
+void Chip::CLC() {}
+
+void Chip::CLD() {}
+
+void Chip::CLI() {}
+
+void Chip::CLV() {}
+
+void Chip::CMP() {}
+
+void Chip::CPX() {}
+
+void Chip::CPY() {}
+
+void Chip::DEC() {}
+
+void Chip::DEX() {}
+
+void Chip::DEY() {}
+
+void Chip::EOR() {}
+
+void Chip::INC() {}
+
+void Chip::INX() {}
+
+void Chip::INY() {}
+
+void Chip::JMP() {}
+
+void Chip::JSR() {}
+
 void Chip::LDA() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  case Absolutey:
-    break;
-  case IdxIndirect:
-    break;
-  case IndirectIdx:
-    break;
-  default:
-    break;
-  }
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+
+  A = val;
 }
-void Chip::LDX() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::LDY() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::LSR() {
-  int value;
-  switch (mode) {
-  case Accumulator:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::NOP() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::ORA() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  case Absolutey:
-    break;
-  case IdxIndirect:
-    break;
-  case IndirectIdx:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::PHA() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::PHP() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::PLA() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::PLP() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::ROL() {
-  int value;
-  switch (mode) {
-  case Accumulator:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::ROR() {
-  int value;
-  switch (mode) {
-  case Accumulator:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::RTI() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::RTS() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::SBC() {
-  int value;
-  switch (mode) {
-  case Immediate:
-    break;
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  case IdxIndirect:
-    break;
-  case IndirectIdx:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::SEC() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::SED() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::SEI() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::STA() {
-  int value;
-  switch (mode) {
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  case Absolutex:
-    break;
-  case IdxIndirect:
-    break;
-  case IndirectIdx:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::STX() {
-  int value;
-  switch (mode) {
-  case Zero:
-    break;
-  case Zeroy:
-    break;
-  case Absolute:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::STY() {
-  int value;
-  switch (mode) {
-  case Zero:
-    break;
-  case Zerox:
-    break;
-  case Absolute:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::TAX() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::TAY() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::TSX() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::TXA() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::TXS() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
-void Chip::TYA() {
-  int value;
-  switch (mode) {
-  case Implicit:
-    break;
-  default:
-    break;
-  }
-}
+
+void Chip::LDX() {}
+
+void Chip::LDY() {}
+
+void Chip::LSR() {}
+
+void Chip::NOP() {}
+
+void Chip::ORA() {}
+
+void Chip::PHA() {}
+
+void Chip::PHP() {}
+
+void Chip::PLA() {}
+
+void Chip::PLP() {}
+
+void Chip::ROL() {}
+
+void Chip::ROR() {}
+
+void Chip::RTI() {}
+
+void Chip::RTS() {}
+
+void Chip::SBC() {}
+
+void Chip::SEC() {}
+
+void Chip::SED() {}
+
+void Chip::SEI() {}
+
+void Chip::STA() {}
+
+void Chip::STX() {}
+
+void Chip::STY() {}
+
+void Chip::TAX() {}
+
+void Chip::TAY() {}
+
+void Chip::TSX() {}
+
+void Chip::TXA() {}
+
+void Chip::TXS() {}
+
+void Chip::TYA() {}
 
 uint16_t Chip::get_addr(addressing mode) {
   switch (mode) {
@@ -1881,26 +1324,32 @@ uint16_t Chip::get_addr(addressing mode) {
     return memory.Read(pc);
     break;
   case Zerox:
-    return (X + memory.Read(pc) % 256);
+    return (X + memory.Read(pc)) % (0xFFFF + 1);
     break;
   case Zeroy:
-    return (Y + memory.Read(pc) % 256);
+    return (Y + memory.Read(pc)) % (0xFFFF + 1);
     break;
   case Absolute:
     return memory.Read_16(pc);
     break;
   case Absolutex:
-    return memory.Read_16(pc);
+    return (memory.Read_16(pc) + X) % (0xFFFF + 1);
     break;
   case Absolutey:
-    return memory.Read_16(pc);
+    return (memory.Read_16(pc) + Y) % (0xFFFF + 1);
     break;
-  case IdxIndirect:
-    return (Y + memory.Read(pc) % 256);
+  case IdxIndirect: {
+    uint8_t base = memory.Read(pc);
+    uint8_t ptr = (base + X) % (0xFF + 1);
+    return (Read(base + 1) << 8) | Read(base);
     break;
-  case IndirectIdx:
-    return (Y + memory.Read(pc) % 256);
+  }
+  case IndirectIdx: {
+    uint8_t base = memory.Read(pc);
+    return (Y +
+            ((Read((base + 1) % (0xFF + 1)) << 8) | Read(base)) % (0xFF + 1));
     break;
+  }
   default:
     break;
   }

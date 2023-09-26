@@ -15,12 +15,12 @@ void Chip::emulateCycle() {
   switch (opcode) {
   case 0x00:
     mode = Implicit;
-    BRK();
+    BRK(mode);
     break;
 
   case 0x01:
     mode = IdxIndirect;
-    ORA();
+    ORA(mode);
     break;
 
   case 0x02:
@@ -33,17 +33,17 @@ void Chip::emulateCycle() {
 
   case 0x04:
     mode = Implicit;
-    NOP();
+    NOP(mode);
     break;
 
   case 0x05:
     mode = Zero;
-    ORA();
+    ORA(mode);
     break;
 
   case 0x06:
     mode = Zero;
-    ASL();
+    ASL(mode);
     break;
 
   case 0x07:
@@ -52,17 +52,17 @@ void Chip::emulateCycle() {
 
   case 0x08:
     mode = Implicit;
-    PHP();
+    PHP(mode);
     break;
 
   case 0x09:
     mode = Immediate;
-    ORA();
+    ORA(mode);
     break;
 
   case 0x0A:
     mode = Implicit;
-    ASL();
+    ASL(mode);
     break;
 
   case 0x0B:
@@ -70,17 +70,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0x0C:
-    NOP();
+    NOP(mode);
     break;
 
   case 0x0D:
     mode = Absolute;
-    ORA();
+    ORA(mode);
     break;
 
   case 0x0E:
     mode = Absolute;
-    ASL();
+    ASL(mode);
     break;
 
   case 0x0F:
@@ -89,12 +89,12 @@ void Chip::emulateCycle() {
 
   case 0x10:
     mode = Relative;
-    BPL();
+    BPL(mode);
     break;
 
   case 0x11:
     mode = IndirectIdx;
-    ORA();
+    ORA(mode);
     break;
 
   case 0x12:
@@ -106,17 +106,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0x14:
-    NOP();
+    NOP(mode);
     break;
 
   case 0x15:
     mode = IdxIndirect;
-    ORA();
+    ORA(mode);
     break;
 
   case 0x16:
     mode = IdxIndirect;
-    ASL();
+    ASL(mode);
     break;
 
   case 0x17:
@@ -125,16 +125,16 @@ void Chip::emulateCycle() {
 
   case 0x18:
     mode = Implicit;
-    CLC();
+    CLC(mode);
     break;
 
   case 0x19:
     mode = Absolutey;
-    ORA();
+    ORA(mode);
     break;
 
   case 0x1A:
-    NOP();
+    NOP(mode);
     break;
 
   case 0x1B:
@@ -142,17 +142,17 @@ void Chip::emulateCycle() {
     break;
 
   case 0x1C:
-    NOP();
+    NOP(mode);
     break;
 
   case 0x1D:
     mode = Absolutex;
-    ORA();
+    ORA(mode);
     break;
 
   case 0x1E:
     mode = Absolutex;
-    ASL();
+    ASL(mode);
     break;
 
   case 0x1F:
@@ -161,12 +161,12 @@ void Chip::emulateCycle() {
 
   case 0x20:
     mode = Absolute;
-    JSR();
+    JSR(mode);
     break;
 
   case 0x21:
     mode = IndirectIdx;
-    AND();
+    AND(mode);
     break;
 
   case 0x22:
@@ -179,17 +179,17 @@ void Chip::emulateCycle() {
 
   case 0x24:
     mode = Zero;
-    BIT();
+    BIT(mode);
     break;
 
   case 0x25:
     mode = Zero;
-    AND();
+    AND(mode);
     break;
 
   case 0x26:
     mode = Zero;
-    ROL();
+    ROL(mode);
     break;
 
   case 0x27:
@@ -198,17 +198,17 @@ void Chip::emulateCycle() {
 
   case 0x28:
     mode = Implicit;
-    PLP();
+    PLP(mode);
     break;
 
   case 0x29:
     mode = Immediate;
-    AND();
+    AND(mode);
     break;
 
   case 0x2A:
     mode = Implicit;
-    ROL();
+    ROL(mode);
     break;
 
   case 0x2B:
@@ -217,17 +217,17 @@ void Chip::emulateCycle() {
 
   case 0x2C:
     mode = Absolute;
-    BIT();
+    BIT(mode);
     break;
 
   case 0x2D:
     mode = Absolute;
-    AND();
+    AND(mode);
     break;
 
   case 0x2E:
     mode = Absolute;
-    LSR();
+    LSR(mode);
     break;
 
   case 0x2F:
@@ -236,12 +236,12 @@ void Chip::emulateCycle() {
 
   case 0x30:
     mode = Relative;
-    BMI();
+    BMI(mode);
     break;
 
   case 0x31:
     mode = IndirectIdx;
-    AND();
+    AND(mode);
     break;
 
   case 0x32:
@@ -254,17 +254,17 @@ void Chip::emulateCycle() {
 
   case 0x34:
     mode = Zerox;
-    NOP();
+    NOP(mode);
     break;
 
   case 0x35:
     mode = Zerox;
-    AND();
+    AND(mode);
     break;
 
   case 0x36:
     mode = Zerox;
-    ROL();
+    ROL(mode);
     break;
 
   case 0x37:
@@ -273,16 +273,16 @@ void Chip::emulateCycle() {
 
   case 0x38:
     mode = Implicit;
-    SEC();
+    SEC(mode);
     break;
 
   case 0x39:
     mode = Absolutey;
-    AND();
+    AND(mode);
     break;
 
   case 0x3A:
-    NOP();
+    NOP(mode);
     break;
 
   case 0x3B:
@@ -291,17 +291,17 @@ void Chip::emulateCycle() {
 
   case 0x3C:
     mode = Absolutex;
-    NOP();
+    NOP(mode);
     break;
 
   case 0x3D:
     mode = Absolutex;
-    AND();
+    AND(mode);
     break;
 
   case 0x3E:
     mode = Absolutex;
-    ROL();
+    ROL(mode);
     break;
 
   case 0x3F:
@@ -310,12 +310,12 @@ void Chip::emulateCycle() {
 
   case 0x40:
     mode = Implicit;
-    RTI();
+    RTI(mode);
     break;
 
   case 0x41:
     mode = IdxIndirect;
-    EOR();
+    EOR(mode);
     break;
 
   case 0x42:
@@ -328,17 +328,17 @@ void Chip::emulateCycle() {
 
   case 0x44:
     mode = Zero;
-    NOP();
+    NOP(mode);
     break;
 
   case 0x45:
     mode = Zero;
-    EOR();
+    EOR(mode);
     break;
 
   case 0x46:
     mode = Zero;
-    LSR();
+    LSR(mode);
     break;
 
   case 0x47:
@@ -347,17 +347,17 @@ void Chip::emulateCycle() {
 
   case 0x48:
     mode = Implicit;
-    PHA();
+    PHA(mode);
     break;
 
   case 0x49:
     mode = Immediate;
-    EOR();
+    EOR(mode);
     break;
 
   case 0x4A:
     mode = Accumulator;
-    LSR();
+    LSR(mode);
     break;
 
   case 0x4B:
@@ -366,17 +366,17 @@ void Chip::emulateCycle() {
 
   case 0x4C:
     mode = Absolute;
-    JMP();
+    JMP(mode);
     break;
 
   case 0x4D:
     mode = Absolute;
-    EOR();
+    EOR(mode);
     break;
 
   case 0x4E:
     mode = Absolute;
-    LSR();
+    LSR(mode);
     break;
 
   case 0x4F:
@@ -385,12 +385,12 @@ void Chip::emulateCycle() {
 
   case 0x50:
     mode = Relative;
-    BVC();
+    BVC(mode);
     break;
 
   case 0x51:
     mode = IndirectIdx;
-    EOR();
+    EOR(mode);
     break;
 
   case 0x52:
@@ -403,17 +403,17 @@ void Chip::emulateCycle() {
 
   case 0x54:
     mode = IdxIndirect;
-    NOP();
+    NOP(mode);
     break;
 
   case 0x55:
     mode = IdxIndirect;
-    EOR();
+    EOR(mode);
     break;
 
   case 0x56:
     mode = IdxIndirect;
-    LSR();
+    LSR(mode);
     break;
 
   case 0x57:
@@ -422,17 +422,17 @@ void Chip::emulateCycle() {
 
   case 0x58:
     mode = Implicit;
-    CLI();
+    CLI(mode);
     break;
 
   case 0x59:
     mode = IndirectIdx;
-    EOR();
+    EOR(mode);
     break;
 
   case 0x5A:
     mode = Implicit;
-    NOP();
+    NOP(mode);
     break;
 
   case 0x5B:
@@ -441,17 +441,17 @@ void Chip::emulateCycle() {
 
   case 0x5C:
     mode = IdxIndirect;
-    NOP();
+    NOP(mode);
     break;
 
   case 0x5D:
     mode = IdxIndirect;
-    EOR();
+    EOR(mode);
     break;
 
   case 0x5E:
     mode = IdxIndirect;
-    LSR();
+    LSR(mode);
     break;
 
   case 0x5F:
@@ -460,12 +460,12 @@ void Chip::emulateCycle() {
 
   case 0x60:
     mode = Implicit;
-    RTS();
+    RTS(mode);
     break;
 
   case 0x61:
     mode = IdxIndirect;
-    ADC();
+    ADC(mode);
     break;
 
   case 0x62:
@@ -473,47 +473,47 @@ void Chip::emulateCycle() {
   case 0x64:
   case 0x65:
     mode = Zero;
-    ADC();
+    ADC(mode);
     break;
 
   case 0x66:
     mode = Zero;
-    ROR();
+    ROR(mode);
     break;
 
   case 0x67:
   case 0x68:
   case 0x69:
     mode = Immediate;
-    ADC();
+    ADC(mode);
     break;
 
   case 0x6A:
     mode = Accumulator;
-    ROR();
+    ROR(mode);
     break;
 
   case 0x6B:
   case 0x6C:
   case 0x6D:
     mode = Absolute;
-    ADC();
+    ADC(mode);
     break;
 
   case 0x6E:
     mode = Absolute;
-    ROR();
+    ROR(mode);
     break;
 
   case 0x6F:
   case 0x70:
     mode = Relative;
-    BVS();
+    BVS(mode);
     break;
 
   case 0x71:
     mode = Absolute;
-    ADC();
+    ADC(mode);
     break;
 
   case 0x72:
@@ -530,12 +530,12 @@ void Chip::emulateCycle() {
 
   case 0x75:
     mode = Zerox;
-    ADC();
+    ADC(mode);
     break;
 
   case 0x76:
     mode = Zerox;
-    ROR();
+    ROR(mode);
     break;
 
   case 0x77:
@@ -544,12 +544,12 @@ void Chip::emulateCycle() {
 
   case 0x78:
     mode = Implicit;
-    SEI();
+    SEI(mode);
     break;
 
   case 0x79:
     mode = Absolutey;
-    ADC();
+    ADC(mode);
     break;
 
   case 0x7A:
@@ -566,12 +566,12 @@ void Chip::emulateCycle() {
 
   case 0x7D:
     mode = Absolutex;
-    ADC();
+    ADC(mode);
     break;
 
   case 0x7E:
     mode = Absolutex;
-    ROR();
+    ROR(mode);
     break;
 
   case 0x7F:
@@ -584,7 +584,7 @@ void Chip::emulateCycle() {
 
   case 0x81:
     mode = IdxIndirect;
-    STA();
+    STA(mode);
     break;
 
   case 0x82:
@@ -597,17 +597,17 @@ void Chip::emulateCycle() {
 
   case 0x84:
     mode = Zero;
-    STY();
+    STY(mode);
     break;
 
   case 0x85:
     mode = Zero;
-    STA();
+    STA(mode);
     break;
 
   case 0x86:
     mode = Zero;
-    STX();
+    STX(mode);
     break;
 
   case 0x87:
@@ -616,7 +616,7 @@ void Chip::emulateCycle() {
 
   case 0x88:
     mode = Implicit;
-    DEY();
+    DEY(mode);
     break;
 
   case 0x89:
@@ -625,7 +625,7 @@ void Chip::emulateCycle() {
 
   case 0x8A:
     mode = Implicit;
-    TXA();
+    TXA(mode);
     break;
 
   case 0x8B:
@@ -634,17 +634,17 @@ void Chip::emulateCycle() {
 
   case 0x8C:
     mode = Absolute;
-    STY();
+    STY(mode);
     break;
 
   case 0x8D:
     mode = Absolute;
-    STA();
+    STA(mode);
     break;
 
   case 0x8E:
     mode = Absolute;
-    STX();
+    STX(mode);
     break;
 
   case 0x8F:
@@ -653,12 +653,12 @@ void Chip::emulateCycle() {
 
   case 0x90:
     mode = Relative;
-    BCC();
+    BCC(mode);
     break;
 
   case 0x91:
     mode = IndirectIdx;
-    STA();
+    STA(mode);
     break;
 
   case 0x92:
@@ -671,17 +671,17 @@ void Chip::emulateCycle() {
 
   case 0x94:
     mode = Zerox;
-    STY();
+    STY(mode);
     break;
 
   case 0x95:
     mode = Zerox;
-    STA();
+    STA(mode);
     break;
 
   case 0x96:
     mode = Zeroy;
-    STX();
+    STX(mode);
     break;
 
   case 0x97:
@@ -690,17 +690,17 @@ void Chip::emulateCycle() {
 
   case 0x98:
     mode = Implicit;
-    TYA();
+    TYA(mode);
     break;
 
   case 0x99:
     mode = Absolutey;
-    STA();
+    STA(mode);
     break;
 
   case 0x9A:
     mode = Implicit;
-    TXS();
+    TXS(mode);
     break;
 
   case 0x9B:
@@ -713,7 +713,7 @@ void Chip::emulateCycle() {
 
   case 0x9D:
     mode = Absolutex;
-    STA();
+    STA(mode);
     break;
 
   case 0x9E:
@@ -726,17 +726,17 @@ void Chip::emulateCycle() {
 
   case 0xA0:
     mode = Immediate;
-    LDY();
+    LDY(mode);
     break;
 
   case 0xA1:
     mode = IdxIndirect;
-    LDA();
+    LDA(mode);
     break;
 
   case 0xA2:
     mode = Immediate;
-    LDX();
+    LDX(mode);
     break;
 
   case 0xA3:
@@ -745,17 +745,17 @@ void Chip::emulateCycle() {
 
   case 0xA4:
     mode = Zero;
-    LDY();
+    LDY(mode);
     break;
 
   case 0xA5:
     mode = Zero;
-    LDA();
+    LDA(mode);
     break;
 
   case 0xA6:
     mode = Zero;
-    LDX();
+    LDX(mode);
     break;
 
   case 0xA7:
@@ -764,17 +764,17 @@ void Chip::emulateCycle() {
 
   case 0xA8:
     mode = Implicit;
-    TAY();
+    TAY(mode);
     break;
 
   case 0xA9:
     mode = Immediate;
-    LDA();
+    LDA(mode);
     break;
 
   case 0xAA:
     mode = Implicit;
-    TAX();
+    TAX(mode);
     break;
 
   case 0xAB:
@@ -783,17 +783,17 @@ void Chip::emulateCycle() {
 
   case 0xAC:
     mode = Absolute;
-    LDY();
+    LDY(mode);
     break;
 
   case 0xAD:
     mode = Absolute;
-    LDA();
+    LDA(mode);
     break;
 
   case 0xAE:
     mode = Absolute;
-    LDX();
+    LDX(mode);
     break;
 
   case 0xAF:
@@ -802,12 +802,12 @@ void Chip::emulateCycle() {
 
   case 0xB0:
     mode = Relative;
-    BCS();
+    BCS(mode);
     break;
 
   case 0xB1:
     mode = IndirectIdx;
-    LDA();
+    LDA(mode);
     break;
 
   case 0xB2:
@@ -820,17 +820,17 @@ void Chip::emulateCycle() {
 
   case 0xB4:
     mode = Zerox;
-    LDY();
+    LDY(mode);
     break;
 
   case 0xB5:
     mode = Zerox;
-    LDA();
+    LDA(mode);
     break;
 
   case 0xB6:
     mode = Zerox;
-    LDX();
+    LDX(mode);
     break;
 
   case 0xB7:
@@ -839,17 +839,17 @@ void Chip::emulateCycle() {
 
   case 0xB8:
     mode = Implicit;
-    CLV();
+    CLV(mode);
     break;
 
   case 0xB9:
     mode = Absolutey;
-    LDA();
+    LDA(mode);
     break;
 
   case 0xBA:
     mode = Implicit;
-    TSX();
+    TSX(mode);
     break;
 
   case 0xBB:
@@ -858,17 +858,17 @@ void Chip::emulateCycle() {
 
   case 0xBC:
     mode = Absolutex;
-    LDY();
+    LDY(mode);
     break;
 
   case 0xBD:
     mode = Absolutex;
-    LDA();
+    LDA(mode);
     break;
 
   case 0xBE:
     mode = Absolutey;
-    LDX();
+    LDX(mode);
     break;
 
   case 0xBF:
@@ -877,12 +877,12 @@ void Chip::emulateCycle() {
 
   case 0xC0:
     mode = Immediate;
-    CPY();
+    CPY(mode);
     break;
 
   case 0xC1:
     mode = IdxIndirect;
-    CMP();
+    CMP(mode);
     break;
 
   case 0xC2:
@@ -895,17 +895,17 @@ void Chip::emulateCycle() {
 
   case 0xC4:
     mode = Zero;
-    CPY();
+    CPY(mode);
     break;
 
   case 0xC5:
     mode = Zero;
-    CMP();
+    CMP(mode);
     break;
 
   case 0xC6:
     mode = Zero;
-    DEC();
+    DEC(mode);
     break;
 
   case 0xC7:
@@ -914,17 +914,17 @@ void Chip::emulateCycle() {
 
   case 0xC8:
     mode = Implicit;
-    INY();
+    INY(mode);
     break;
 
   case 0xC9:
     mode = Immediate;
-    CMP();
+    CMP(mode);
     break;
 
   case 0xCA:
     mode = Implicit;
-    DEX();
+    DEX(mode);
     break;
 
   case 0xCB:
@@ -933,17 +933,17 @@ void Chip::emulateCycle() {
 
   case 0xCC:
     mode = Absolute;
-    CPY();
+    CPY(mode);
     break;
 
   case 0xCD:
     mode = Absolute;
-    CMP();
+    CMP(mode);
     break;
 
   case 0xCE:
     mode = Absolute;
-    DEC();
+    DEC(mode);
     break;
 
   case 0xCF:
@@ -952,12 +952,12 @@ void Chip::emulateCycle() {
 
   case 0xD0:
     mode = Relative;
-    BNE();
+    BNE(mode);
     break;
 
   case 0xD1:
     mode = IndirectIdx;
-    CMP();
+    CMP(mode);
     break;
 
   case 0xD2:
@@ -974,12 +974,12 @@ void Chip::emulateCycle() {
 
   case 0xD5:
     mode = Zerox;
-    CMP();
+    CMP(mode);
     break;
 
   case 0xD6:
     mode = Zerox;
-    DEC();
+    DEC(mode);
     break;
 
   case 0xD7:
@@ -988,12 +988,12 @@ void Chip::emulateCycle() {
 
   case 0xD8:
     mode = Implicit;
-    CLD();
+    CLD(mode);
     break;
 
   case 0xD9:
     mode = Absolutey;
-    CMP();
+    CMP(mode);
     break;
 
   case 0xDA:
@@ -1010,12 +1010,12 @@ void Chip::emulateCycle() {
 
   case 0xDD:
     mode = Absolutex;
-    CMP();
+    CMP(mode);
     break;
 
   case 0xDE:
     mode = Absolutex;
-    DEC();
+    DEC(mode);
     break;
 
   case 0xDF:
@@ -1024,12 +1024,12 @@ void Chip::emulateCycle() {
 
   case 0xE0:
     mode = Immediate;
-    CPX();
+    CPX(mode);
     break;
 
   case 0xE1:
     mode = IdxIndirect;
-    SBC();
+    SBC(mode);
     break;
 
   case 0xE2:
@@ -1042,17 +1042,17 @@ void Chip::emulateCycle() {
 
   case 0xE4:
     mode = Zero;
-    CPX();
+    CPX(mode);
     break;
 
   case 0xE5:
     mode = Zerox;
-    SBC();
+    SBC(mode);
     break;
 
   case 0xE6:
     mode = Zero;
-    INC();
+    INC(mode);
     break;
 
   case 0xE7:
@@ -1061,17 +1061,17 @@ void Chip::emulateCycle() {
 
   case 0xE8:
     mode = Implicit;
-    INX();
+    INX(mode);
     break;
 
   case 0xE9:
     mode = Immediate;
-    SBC();
+    SBC(mode);
     break;
 
   case 0xEA:
     mode = Implicit;
-    NOP();
+    NOP(mode);
     break;
 
   case 0xEB:
@@ -1080,17 +1080,17 @@ void Chip::emulateCycle() {
 
   case 0xEC:
     mode = Absolute;
-    CPX();
+    CPX(mode);
     break;
 
   case 0xED:
     mode = Absolute;
-    SBC();
+    SBC(mode);
     break;
 
   case 0xEE:
     mode = Absolute;
-    INC();
+    INC(mode);
     break;
 
   case 0xEF:
@@ -1099,12 +1099,12 @@ void Chip::emulateCycle() {
 
   case 0xF0:
     mode = Relative;
-    BEQ();
+    BEQ(mode);
     break;
 
   case 0xF1:
     mode = IndirectIdx;
-    SBC();
+    SBC(mode);
     break;
 
   case 0xF2:
@@ -1121,12 +1121,12 @@ void Chip::emulateCycle() {
 
   case 0xF5:
     mode = Zerox;
-    SBC();
+    SBC(mode);
     break;
 
   case 0xF6:
     mode = Zerox;
-    INC();
+    INC(mode);
     break;
 
   case 0xF7:
@@ -1135,12 +1135,12 @@ void Chip::emulateCycle() {
 
   case 0xF8:
     mode = Implicit;
-    SED();
+    SED(mode);
     break;
 
   case 0xF9:
     mode = Absolutey;
-    SBC();
+    SBC(mode);
     break;
 
   case 0xFA:
@@ -1157,12 +1157,12 @@ void Chip::emulateCycle() {
 
   case 0xFD:
     mode = Absolutex;
-    SBC();
+    SBC(mode);
     break;
 
   case 0xFE:
     mode = Absolutex;
-    INC();
+    INC(mode);
     break;
 
   case 0xFF:

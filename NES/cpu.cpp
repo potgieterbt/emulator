@@ -1211,19 +1211,70 @@ void Chip::ASL(addressing mode) {
   setNegative(A & 0x80);
 }
 
-void Chip::BCC(addressing mode) {}
+void Chip::BCC(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
-void Chip::BCS(addressing mode) {}
+  if (!(S & 0b00000001)) {
+    pc += val;
+  }
+}
 
-void Chip::BEQ(addressing mode) {}
+void Chip::BCS(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
-void Chip::BIT(addressing mode) {}
+  if (S & 0b00000001) {
+    pc += val;
+  }
+}
 
-void Chip::BMI(addressing mode) {}
+void Chip::BEQ(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
-void Chip::BNE(addressing mode) {}
+  if (S & 0b00000010) {
+    pc += val;
+  }
+}
 
-void Chip::BPL(addressing mode) {}
+void Chip::BIT(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+
+  uint8_t res = A & val;
+
+  setZero(res == 0);
+  setOverflow(res & 0b01000000);
+  setNegative(res & 0b10000000);
+}
+
+void Chip::BMI(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+
+  if (S & 0b10000000) {
+    pc += val;
+  }
+}
+
+void Chip::BNE(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+
+  if (~S & 0b00000010) {
+    pc += val;
+  }
+}
+
+void Chip::BPL(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+
+  if (~S & 0b10000000) {
+    pc += val;
+  }
+}
 
 void Chip::BRK(addressing mode) {}
 

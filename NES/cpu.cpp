@@ -1276,7 +1276,9 @@ void Chip::BPL(addressing mode) {
   }
 }
 
-void Chip::BRK(addressing mode) {}
+void Chip::BRK(addressing mode) {
+
+}
 
 void Chip::BVC(addressing mode) {}
 

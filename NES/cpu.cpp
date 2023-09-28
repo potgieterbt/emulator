@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstring>
 
-void Chip::init() {}
+void Chip::init() { sp = 0xFF; }
 
 RAM memory;
 
@@ -1277,20 +1277,40 @@ void Chip::BPL(addressing mode) {
 }
 
 void Chip::BRK(addressing mode) {
-
+  ++pc;
+  --sp;
+  memory.Write_16((0x0100 + sp), pc);
+  uint8_t S_cp = S & 0b00110000;
+  --sp;
+  memory.Write((0x0100 + sp), S_cp);
+  pc = memory.Read_16(0xFFFE);
 }
 
-void Chip::BVC(addressing mode) {}
+void Chip::BVC(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
-void Chip::BVS(addressing mode) {}
+  if (~S & 0b01000000) {
+    pc += val;
+  }
+}
 
-void Chip::CLC(addressing mode) {}
+void Chip::BVS(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
-void Chip::CLD(addressing mode) {}
+  if (S & 0b01000000) {
+    pc += val;
+  }
+}
 
-void Chip::CLI(addressing mode) {}
+void Chip::CLC(addressing mode) { setCarry(false); }
 
-void Chip::CLV(addressing mode) {}
+void Chip::CLD(addressing mode) { setDecimal(false); }
+
+void Chip::CLI(addressing mode) { setInterruptDisable(false); }
+
+void Chip::CLV(addressing mode) { setOverflow(false); }
 
 void Chip::CMP(addressing mode) {}
 
@@ -1401,16 +1421,18 @@ uint16_t Chip::get_addr(addressing mode) {
   case IdxIndirect: {
     uint8_t base = memory.Read(pc);
     uint8_t ptr = (base + X) % (0xFF + 1);
-    return (Read(base + 1) << 8) | Read(base);
+    return (memory.Read(base + 1) << 8) | memory.Read(base);
     break;
   }
   case IndirectIdx: {
     uint8_t base = memory.Read(pc);
     return (Y +
-            ((Read((base + 1) % (0xFF + 1)) << 8) | Read(base)) % (0xFF + 1));
+            ((memory.Read((base + 1) % (0xFF + 1)) << 8) | memory.Read(base)) %
+                (0xFF + 1));
     break;
   }
   default:
+    return -1;
     break;
   }
 }

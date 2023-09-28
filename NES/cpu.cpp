@@ -1178,11 +1178,6 @@ void Chip::ADC(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = memory.Read(addr);
 
-  if (A + val + (S & 0b000000001) > 0xFF) {
-    S |= 0b00000001;
-  } else {
-    S &= 0b11111110;
-  }
   uint16_t sum = A + val + (S & 0b000000001);
   setCarry(sum > 0xFF);
   uint8_t res = sum;
@@ -1456,54 +1451,179 @@ void Chip::LSR(addressing mode) {
     setZero(res == 0);
     setNegative(res & 0b10000000);
   }
-
 }
 
 void Chip::NOP(addressing mode) {}
 
-void Chip::ORA(addressing mode) {}
+void Chip::ORA(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
-void Chip::PHA(addressing mode) {}
+  A |= val;
 
-void Chip::PHP(addressing mode) {}
+  setZero(A == 0);
+  setNegative(A & 0b10000000);
+}
 
-void Chip::PLA(addressing mode) {}
+void Chip::PHA(addressing mode) {
+  uint8_t A_cp = A;
 
-void Chip::PLP(addressing mode) {}
+  --sp;
+  memory.Write((0x0100 + sp), A_cp);
+}
 
-void Chip::ROL(addressing mode) {}
+void Chip::PHP(addressing mode) {
+  uint8_t S_cp = S;
 
-void Chip::ROR(addressing mode) {}
+  --sp;
+  memory.Write((0x0100 + sp), S_cp);
+}
 
-void Chip::RTI(addressing mode) {}
+void Chip::PLA(addressing mode) {
+  A = memory.Read((0x0100 + sp));
+  ++sp;
 
-void Chip::RTS(addressing mode) {}
+  setZero(A == 0);
+  setNegative(A & 0b10000000);
+}
 
-void Chip::SBC(addressing mode) {}
+void Chip::PLP(addressing mode) {
+  S = memory.Read((0x0100 + sp));
+  ++sp;
+}
 
-void Chip::SEC(addressing mode) {}
+void Chip::ROL(addressing mode) {
+  uint8_t val;
+  if (mode == Accumulator) {
+    val = A;
+    A = (val << 1) + (S & 1);
 
-void Chip::SED(addressing mode) {}
+    setCarry(val & 0b10000000);
+    setZero(A == 0);
+    setNegative(A & 0b10000000);
+  } else {
+    uint16_t addr = get_addr(mode);
+    val = memory.Read(addr);
+    uint8_t res = (val << 1) + (S & 1);
 
-void Chip::SEI(addressing mode) {}
+    memory.Write(addr, res);
 
-void Chip::STA(addressing mode) {}
+    setCarry(val & 0b10000000);
+    setZero(res == 0);
+    setNegative(res & 0b10000000);
+  }
+}
 
-void Chip::STX(addressing mode) {}
+void Chip::ROR(addressing mode) {
+  uint8_t val;
+  if (mode == Accumulator) {
+    val = A;
+    A = (val >> 1) + ((S & 1) << 7);
 
-void Chip::STY(addressing mode) {}
+    setCarry(val & 1);
+    setZero(A == 0);
+    setNegative(A & 0b10000000);
+  } else {
+    uint16_t addr = get_addr(mode);
+    val = memory.Read(addr);
+    uint8_t res = (val >> 1) + ((S & 1) << 7);
 
-void Chip::TAX(addressing mode) {}
+    memory.Write(addr, res);
 
-void Chip::TAY(addressing mode) {}
+    setCarry(val & 1);
+    setZero(res == 0);
+    setNegative(res & 0b10000000);
+  }
+}
 
-void Chip::TSX(addressing mode) {}
+void Chip::RTI(addressing mode) {
+  S = memory.Read(0x0100 + sp);
+  ++sp;
+  pc = memory.Read_16(0x0100 + sp);
+  ++sp;
+}
 
-void Chip::TXA(addressing mode) {}
+void Chip::RTS(addressing mode) {
+  pc = memory.Read_16(0x0100 + sp);
+  ++sp;
+}
 
-void Chip::TXS(addressing mode) {}
+void Chip::SBC(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+  val = ~val - 1;
 
-void Chip::TYA(addressing mode) {}
+  int sum = A + val + (S & 0b000000001);
+  setCarry(sum > 0xFF);
+  uint8_t res = sum;
+  setOverflow((val ^ res) & (res ^ A) & 0x80 != 0);
+  A = res;
+  setNegative(A & 0x80);
+  setZero(A == 0);
+}
+
+void Chip::SEC(addressing mode) { setCarry(true); }
+
+void Chip::SED(addressing mode) { setDecimal(true); }
+
+void Chip::SEI(addressing mode) { setInterruptDisable(true); }
+
+void Chip::STA(addressing mode) {
+  uint16_t addr = get_addr(mode);
+
+  memory.Write(addr, A);
+}
+
+void Chip::STX(addressing mode) {
+  uint16_t addr = get_addr(mode);
+
+  memory.Write(addr, X);
+}
+
+void Chip::STY(addressing mode) {
+  uint16_t addr = get_addr(mode);
+
+  memory.Write(addr, Y);
+}
+
+void Chip::TAX(addressing mode) {
+  X = A;
+
+  setZero(X == 0);
+  setNegative(X & 0b10000000);
+}
+
+void Chip::TAY(addressing mode) {
+  Y = A;
+
+  setZero(Y == 0);
+  setNegative(Y & 0b10000000);
+}
+
+void Chip::TSX(addressing mode) {
+  X = S;
+
+  setZero(X == 0);
+  setNegative(X & 0b10000000);
+}
+
+void Chip::TXA(addressing mode) {
+  A = X;
+
+  setZero(A == 0);
+  setNegative(A & 0b10000000);
+}
+
+void Chip::TXS(addressing mode) {
+  S = X;
+}
+
+void Chip::TYA(addressing mode) {
+  A = Y;
+
+  setZero(A == 0);
+  setNegative(A & 0b10000000);
+}
 
 uint16_t Chip::get_addr(addressing mode) {
   switch (mode) {

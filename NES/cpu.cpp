@@ -1448,12 +1448,13 @@ void Chip::LSR(addressing mode) {
   } else {
     uint16_t addr = get_addr(mode);
     val = memory.Read(addr);
+    uint8_t res = val >> 1;
 
-    memory.Write(addr, val >> 1);
+    memory.Write(addr, res);
 
     setCarry(val & 1);
-    setZero(A == 0);
-    setNegative(A & 0b10000000);
+    setZero(res == 0);
+    setNegative(res & 0b10000000);
   }
 
 }

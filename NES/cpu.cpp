@@ -1312,42 +1312,151 @@ void Chip::CLI(addressing mode) { setInterruptDisable(false); }
 
 void Chip::CLV(addressing mode) { setOverflow(false); }
 
-void Chip::CMP(addressing mode) {}
+void Chip::CMP(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+}
 
-void Chip::CPX(addressing mode) {}
+void Chip::CPX(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+}
 
-void Chip::CPY(addressing mode) {}
+void Chip::CPY(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+}
 
-void Chip::DEC(addressing mode) {}
+void Chip::DEC(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+  uint8_t res = val - 1;
 
-void Chip::DEX(addressing mode) {}
+  memory.Write(addr, (res));
+  setZero(res == 0);
+  setNegative(res & 0b10000000);
+}
 
-void Chip::DEY(addressing mode) {}
+void Chip::DEX(addressing mode) {
+  X -= 1;
+  setZero(X == 0);
+  setNegative(X & 0b10000000);
+}
 
-void Chip::EOR(addressing mode) {}
+void Chip::DEY(addressing mode) {
+  Y -= 1;
+  setZero(Y == 0);
+  setNegative(Y & 0b10000000);
+}
 
-void Chip::INC(addressing mode) {}
+void Chip::EOR(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
-void Chip::INX(addressing mode) {}
+  A ^= val;
+  setZero(A == 0);
+  setNegative(A & 0b10000000);
+}
 
-void Chip::INY(addressing mode) {}
+void Chip::INC(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+  uint8_t res = val + 1;
 
-void Chip::JMP(addressing mode) {}
+  memory.Write(addr, res);
+  setZero(res == 0);
+  setNegative(res & 0b10000000);
+}
 
-void Chip::JSR(addressing mode) {}
+void Chip::INX(addressing mode) {
+  X += 1;
+  setZero(X == 0);
+  setNegative(X & 0b10000000);
+}
+
+void Chip::INY(addressing mode) {
+  Y += 1;
+  setZero(Y == 0);
+  setNegative(Y & 0b10000000);
+}
+
+void Chip::JMP(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint16_t val;
+  if (mode == Indirect) {
+    if ((addr & 0x00FF) == 0x00FF) {
+      val = (memory.Read(addr & 0xFF00) << 8) | memory.Read(addr);
+    } else {
+      val = memory.Read_16(addr);
+    }
+  } else if (mode == Absolute) {
+    val = memory.Read_16(addr);
+  }
+
+  pc = val;
+}
+
+void Chip::JSR(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint16_t val = memory.Read_16(addr);
+
+  --sp;
+  memory.Write_16(0x0100 + sp, pc);
+
+  pc = val;
+}
 
 void Chip::LDA(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = memory.Read(addr);
 
   A = val;
+
+  setZero(A == 0);
+  setNegative(A & 0b10000000);
 }
 
-void Chip::LDX(addressing mode) {}
+void Chip::LDX(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
 
-void Chip::LDY(addressing mode) {}
+  X = val;
 
-void Chip::LSR(addressing mode) {}
+  setZero(X == 0);
+  setNegative(X & 0b10000000);
+}
+
+void Chip::LDY(addressing mode) {
+  uint16_t addr = get_addr(mode);
+  uint8_t val = memory.Read(addr);
+
+  Y = val;
+
+  setZero(Y == 0);
+  setNegative(Y & 0b10000000);
+}
+
+void Chip::LSR(addressing mode) {
+  uint8_t val;
+  if (mode == Accumulator) {
+    val = A;
+    A = val >> 1;
+
+    setCarry(val & 1);
+    setZero(A == 0);
+    setNegative(A & 0b10000000);
+  } else {
+    uint16_t addr = get_addr(mode);
+    val = memory.Read(addr);
+
+    memory.Write(addr, val >> 1);
+
+    setCarry(val & 1);
+    setZero(A == 0);
+    setNegative(A & 0b10000000);
+  }
+
+}
 
 void Chip::NOP(addressing mode) {}
 

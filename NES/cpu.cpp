@@ -8,7 +8,6 @@ void Chip::init() { sp = 0xFF; }
 RAM memory;
 
 void Chip::emulateCycle() {
-
   uint8_t opcode = memory.Read(pc);
   pc += 1;
 

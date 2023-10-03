@@ -1,10 +1,12 @@
 // Stack pointer indexes into 256-byte stack at 0x0100-0x01FF
 #include <cstdint>
+#include "bus.h"
 
 class Chip {
 public:
   Chip();
   ~Chip();
+  bus Bus;
   void emulateCycle();
   enum addressing {
     Implicit,

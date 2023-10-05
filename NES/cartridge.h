@@ -1,10 +1,10 @@
 #include <cstdint>
 #include <vector>
 
-class MyClass {
+class Cart {
 public:
-  MyClass();
-  ~MyClass();
+  Cart();
+  ~Cart();
   const std::vector<uint8_t> &getROM();
   const std::vector<uint8_t> &getVROM();
 

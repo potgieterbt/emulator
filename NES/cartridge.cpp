@@ -58,6 +58,9 @@ bool Cart::loadFromFile(std::string path) {
     std::cout << "ROM has no PRG-ROM banks. Loading ROM failed\n";
   }
 
+  uint8_t vbanks = header[5];
+  std::cout << "8KB CHR-ROM Banks: " << +vbanks << "\n";
+
   if (header[6] & 0x8) {
     nameTableMirroring = NameTableMirroring::FourScreen;
     std::cout << "Name Table Mirroring: FourScreen\n";
@@ -67,8 +70,35 @@ bool Cart::loadFromFile(std::string path) {
               << (nameTableMirroring == 0 ? "Horizontal" : "Vertical") << "\n";
   }
 
-  mapperNumber = ((header[6]>> 4) & 0xf) | (header[7] & 0xf0);
+  mapperNumber = ((header[6] >> 4) & 0xf) | (header[7] & 0xf0);
   std::cout << "Mapper #: " << +mapperNumber << "\n";
 
+  if (header[6] & 0x4) {
+    std::cout << "Trainer is not supported.\n";
+    return false;
+  }
+
+  if ((header[0xA] & 0x3) == 0x2 || (header[0xA] & 0x1)) {
+    std::cout << "PAL ROM not supported.\n";
+    return false;
+  } else {
+    std::cout << "ROM is NTSC compatible.\n";
+  }
+
+  PRG_ROM.resize(0x4000 * banks);
+  if (!romFile.read(reinterpret_cast<char *>(&PRG_ROM[0]), 0x4000 * banks)) {
+    std::cout << "Reading PRG-ROM from image file failed.\n";
+    return false;
+  }
+
+  if (vbanks) {
+    CHR_ROM.resize(0x2000 * vbanks);
+    if (!romFile.read(reinterpret_cast<char *>(&CHR_ROM[0]), 0x2000 * vbanks)) {
+      std::cout << "Reading CHR-ROM from image file failed.\n";
+      return false;
+    }
+  } else {
+    std::cout << "Cartridge with CHR-RAM.\n";
+  }
   return true;
 }

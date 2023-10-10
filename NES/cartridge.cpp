@@ -23,7 +23,7 @@ uint8_t Cart::getMapper() { return mapperNumber; }
 
 uint8_t Cart::getNameTableMirroring() { return nameTableMirroring; }
 
-bool Cart::hasExtendedRAM() { return true; }
+bool Cart::hasExtendedRAM() { return extendedRAM; }
 
 bool Cart::loadFromFile(std::string path) {
   std::ifstream romFile(path, std::ios_base::binary | std::ios_base::in);

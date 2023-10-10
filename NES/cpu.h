@@ -4,9 +4,8 @@
 
 class Chip {
 public:
-  Chip();
+  Chip(bus Bus);
   ~Chip();
-  bus Bus;
   void emulateCycle();
   enum addressing {
     Implicit,

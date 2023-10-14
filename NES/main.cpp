@@ -1,8 +1,9 @@
-#include "cpu.h"
 #include "cartridge.h"
+#include "cpu.h"
 #include <array>
 #include <cstdint>
 #include <vector>
+#include "ppu.h"
 
 uint8_t snk[] = {
     0x20, 0x06, 0x06, 0x20, 0x38, 0x06, 0x20, 0x0d, 0x06, 0x20, 0x2a, 0x06,
@@ -34,7 +35,8 @@ uint8_t snk[] = {
 
 int main(int argc, char *argv[]) {
   Cart rom;
-  bus Bus;
-  Chip chip(Bus);
+  Mapper *mapper = rom.getMapper();
+  PPU ppu = PPU(mapper);
+  Chip chip = Chip(*mapper, &ppu);
   return 0;
 }

@@ -1,3 +1,4 @@
+#include "mapper.h"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -10,7 +11,7 @@ public:
   bool loadFromFile(std::string path);
   const std::vector<uint8_t> &getROM();
   const std::vector<uint8_t> &getVROM();
-  uint8_t getMapper();
+  Mapper *getMapper();
   uint8_t getNameTableMirroring();
   bool hasExtendedRAM();
 

@@ -2,7 +2,7 @@
 
 class PPU {
 public:
-  PPU(Mapper);
+  PPU(Mapper *mapper);
 
 private:
 };

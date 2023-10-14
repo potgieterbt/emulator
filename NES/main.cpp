@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "cartridge.h"
 #include <array>
 #include <cstdint>
 #include <vector>
@@ -32,6 +33,7 @@ uint8_t snk[] = {
     0x60, 0xa2, 0x00, 0xea, 0xea, 0xca, 0xd0, 0xfb, 0x60};
 
 int main(int argc, char *argv[]) {
+  Cart rom;
   bus Bus;
   Chip chip(Bus);
   return 0;

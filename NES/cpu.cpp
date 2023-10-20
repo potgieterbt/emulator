@@ -2,8 +2,6 @@
 #include <cstdint>
 #include <cstring>
 
-void Chip::init() { sp = 0xFF; }
-
 void Chip::emulateCycle() {
   uint8_t opcode = Bus.Read(pc);
   pc += 1;

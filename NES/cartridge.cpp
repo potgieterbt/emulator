@@ -1,4 +1,5 @@
 #include "cartridge.h"
+#include "mapper.h"
 #include <cstdint>
 #include <fstream>
 #include <ios>
@@ -19,7 +20,7 @@ const std::vector<uint8_t> &Cart::getROM() { return PRG_ROM; }
 
 const std::vector<uint8_t> &Cart::getVROM() { return CHR_ROM; }
 
-uint8_t Cart::getMapper() { return mapperNumber; }
+Mapper *Cart::getMapper() { return &mapper; }
 
 uint8_t Cart::getNameTableMirroring() { return nameTableMirroring; }
 
@@ -70,7 +71,8 @@ bool Cart::loadFromFile(std::string path) {
               << (nameTableMirroring == 0 ? "Horizontal" : "Vertical") << "\n";
   }
 
-  mapperNumber = ((header[6] >> 4) & 0xf) | (header[7] & 0xf0);
+  uint8_t mapperNumber = ((header[6] >> 4) & 0xf) | (header[7] & 0xf0);
+  Mapper mapper = Mapper(mapperNumber, PRG_ROM, CHR_ROM, nameTableMirroring);
   std::cout << "Mapper #: " << +mapperNumber << "\n";
 
   if (header[6] & 0x4) {

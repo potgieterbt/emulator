@@ -1,4 +1,5 @@
 #include "cartridge.h"
+#include "controller.h"
 #include "cpu.h"
 #include "ppu.h"
 #include <array>
@@ -12,6 +13,7 @@ int main(int argc, char *argv[]) {
   rom.loadFromFile(file);
   Mapper *mapper = rom.getMapper();
   PPU ppu = PPU(mapper);
-  Chip chip = Chip(mapper, &ppu);
+  controller Cont;
+  Chip chip = Chip(mapper, &ppu, &Cont);
   return 0;
 }

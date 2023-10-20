@@ -5,6 +5,6 @@
 
 class Mapper {
 public:
-  Mapper(std::vector<uint8_t> &prgCode, std::vector<uint8_t> &chrROM,
+  Mapper(uint8_t type, std::vector<uint8_t> &prgCode, std::vector<uint8_t> &chrROM,
          int mirroring);
 };

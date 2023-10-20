@@ -19,7 +19,7 @@ private:
   std::vector<uint8_t> PRG_ROM;
   std::vector<uint8_t> CHR_ROM;
   uint8_t nameTableMirroring;
-  uint8_t mapperNumber;
+  Mapper mapper;
   bool extendedRAM;
   bool chrRAM;
 };

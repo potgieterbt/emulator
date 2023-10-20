@@ -1,11 +1,12 @@
 // Stack pointer indexes into 256-byte stack at 0x0100-0x01FF
 #include "bus.h"
+#include "controller.h"
 #include "ppu.h"
 #include <cstdint>
 
 class Chip {
 public:
-  Chip(Mapper *, PPU *);
+  Chip(Mapper *, PPU *, controller *);
   ~Chip();
   void emulateCycle();
   enum addressing {
@@ -25,11 +26,11 @@ public:
   };
 
 private:
-  void init();
+  bus Bus;
   uint16_t opcode, I;
   uint8_t A, X, Y;
   uint16_t pc;
-  uint8_t sp;
+  uint8_t sp = 0xFE;
   uint8_t S;
 
   addressing mode;

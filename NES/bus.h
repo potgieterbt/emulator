@@ -1,6 +1,7 @@
+#pragma once
+
 #include <cstdint>
 
-namespace nesem {
 
 class bus {
 public:
@@ -13,4 +14,3 @@ private:
   void init();
   uint8_t cpu_ram[2048];
 };
-} // namespace nes

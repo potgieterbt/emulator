@@ -5,7 +5,6 @@
 
 class Cart {
 public:
-  void init();
   Cart();
   ~Cart();
   bool loadFromFile(std::string path);

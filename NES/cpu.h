@@ -8,6 +8,10 @@ class Chip {
 public:
   Chip(Mapper *, PPU *, controller *);
   ~Chip();
+  uint8_t readMem(uint16_t addr);
+  void writeMem(uint16_t addr, uint8_t val);
+  uint16_t readMem_16(uint16_t addr);
+  void writeMem_16(uint16_t addr, uint16_t val);
   void emulateCycle();
   enum addressing {
     Implicit,

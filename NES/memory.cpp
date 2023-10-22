@@ -9,4 +9,9 @@
 // *  0x8000 - 0xFFFF - ROM and mapper register
 // NMI/RESET/IRQ vectors 0xFFFA - 0xFFFF
 //
+#include "memory.h"
+#include <cstring>
 
+RAM::RAM(){
+  memset(memory, 0, sizeof(memory));
+}

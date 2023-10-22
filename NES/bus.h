@@ -2,7 +2,6 @@
 
 #include <cstdint>
 
-
 class bus {
 public:
   uint8_t Read(const uint16_t);

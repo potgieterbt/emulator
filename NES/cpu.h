@@ -1,12 +1,13 @@
 // Stack pointer indexes into 256-byte stack at 0x0100-0x01FF
-#include "bus.h"
 #include "controller.h"
 #include "ppu.h"
 #include <cstdint>
 
+class Bus;
+
 class Chip {
 public:
-  Chip(Mapper *, PPU *, controller *);
+  Chip();
   ~Chip();
   uint8_t readMem(uint16_t addr);
   void writeMem(uint16_t addr, uint8_t val);
@@ -29,26 +30,63 @@ public:
     IndirectIdx,
   };
 
-private:
-  bus Bus;
-  uint16_t opcode, I;
+  uint16_t opcode;
   uint8_t A, X, Y;
   uint16_t pc;
   uint8_t sp = 0xFE;
   uint8_t S;
 
+  void reset();
+  void irq();
+  void nmi();
+  void clock();
+
+  bool complete();
+
+  void conBus(Bus *n) { bus = n; }
+
+  enum flags {
+    C = (1 << 0),
+    Z = (1 << 1),
+    I = (1 << 2),
+    D = (1 << 3),
+    B = (1 << 4),
+    U = (1 << 5),
+    V = (1 << 6),
+    N = (1 << 7),
+  };
+
   addressing mode;
 
-  uint16_t get_addr(addressing);
-  void setNegative(bool val);
-  void setOverflow(bool val);
-  void setBreak4(bool val);
-  void setBreak5(bool val);
-  void setDecimal(bool val);
-  void setInterruptDisable(bool val);
-  void setZero(bool val);
-  void setCarry(bool val);
+  uint8_t GetFlag(flags f);
+  void SetFlag(flags f, bool v);
 
+  uint16_t get_addr(addressing);
+
+  uint8_t fetched;
+  uint16_t temp;
+  uint16_t addr_abs;
+  uint16_t addr_rel;
+  uint8_t cycles;
+  uint32_t clock_count;
+
+  //  void setNegative(bool val);
+  //  void setOverflow(bool val);
+  //  void setBreak4(bool val);
+  //  void setBreak5(bool val);
+  //  void setDecimal(bool val);
+  //  void setInterruptDisable(bool val);
+  //  void setZero(bool val);
+  //  void setCarry(bool val);
+
+  Bus *bus = nullptr;
+
+  uint8_t read(uint16_t addr);
+  void write(uint16_t addr, uint8_t val);
+
+  uint8_t fetch();
+
+private:
   // Opcodes:
   void ADC(addressing);
   void AND(addressing);

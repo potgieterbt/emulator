@@ -7,37 +7,20 @@ const uint16_t RAM_MIRRORS_END = 0x1FFF;
 const uint16_t PPU_REGISTERS = 0x2000;
 const uint16_t PPU_REGISTERS_MIRRORS_END = 0x3FFF;
 
-void bus::init() { memset(cpu_ram, 0, sizeof(cpu_ram)); }
-
-uint8_t bus::Read(const uint16_t addr) {
-  switch (addr) {
-  case RAM ... RAM_MIRRORS_END: {
-    uint16_t mirror_down_addr = addr & 0b0000011111111111;
-    return cpu_ram[mirror_down_addr];
-  }
-
-  case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END: {
-    uint16_t mirror_down_addr = addr & 0b0010000000000111;
-    return 0;
-  }
-  default:
-    return 0;
-  }
+Bus::Bus() {
+  cpu.conBus(this);
+  memset(cpu_ram, 0, sizeof(cpu_ram));
 }
 
-void bus::Write(const uint16_t addr, const uint8_t val) {
-  switch (addr) {
-  case RAM ... RAM_MIRRORS_END: {
-    uint16_t mirror_down_addr = addr & 0b11111111111;
-    cpu_ram[mirror_down_addr] = val;
-    return;
-  }
+Bus::~Bus() {}
 
-  case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END: {
-    uint16_t mirror_down_addr = addr & 0b0010000000000111;
-    return;
+uint8_t Bus::Read(const uint16_t addr, bool bReadOnly) {
+  if (addr >= 0x0000 && addr <= 0xFFFF) {
+    return cpu_ram[addr];
   }
-  default:
-    return;
-  }
+  return 0x00;
+}
+
+void Bus::Write(const uint16_t addr, const uint8_t val) {
+    cpu_ram[addr] = val;
 }

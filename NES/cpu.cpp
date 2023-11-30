@@ -3,7 +3,7 @@
 #include <cstring>
 
 void Chip::emulateCycle() {
-  uint8_t opcode = Bus.Read(pc);
+  uint8_t opcode = bus.Read(pc);
   pc += 1;
 
   switch (opcode) {

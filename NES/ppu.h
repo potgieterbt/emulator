@@ -4,6 +4,10 @@
 #include <cstdint>
 #include <vector>
 
+enum Mirroring {
+
+};
+
 class PPU {
 public:
   PPU(Mapper *mapper);
@@ -15,6 +19,7 @@ private:
   uint8_t oam_data[256];
 
   //Mirroring
+  Mirroring mirroring;
 
   // Registers:
   // Controller

@@ -30,7 +30,7 @@ public:
   };
 
 private:
-  bus Bus;
+  Bus Bus;
   uint16_t opcode, I;
   uint8_t A, X, Y;
   uint16_t pc;

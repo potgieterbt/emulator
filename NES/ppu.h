@@ -15,9 +15,13 @@ public:
 
 private:
   std::vector<uint8_t> chr_rom;
-  uint8_t palette_table[32];
   uint8_t vram[2048];
   uint8_t oam_data[256];
+
+  uint8_t tblName[2][1024];
+  uint8_t tblPattern[2][4096];
+  uint8_t tblPalette[32];
+
 
   //Mirroring
   Mirroring mirroring;

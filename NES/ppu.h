@@ -5,23 +5,81 @@
 #include <sys/types.h>
 #include <vector>
 
-enum Mirroring {};
 
 class PPU {
 public:
   PPU(Mapper *mapper);
+
+  // Methods
+
   uint8_t Read(uint16_t addr);
   void Write(uint16_t addr, uint8_t val);
 
+  void tick();
+  void reset();
+  // void genNMI();
+
+
+  // Register methods
+  void setCTRL(uint8_t value);
+  void setMask(uint8_t value);
+  void setOAMAddress(uint8_t value);
+  void setOAMData(uint8_t value);
+  void setScroll(uint8_t value);
+  void setDataAddress(uint8_t value);
+  void setData(uint8_t value);
+
+  uint8_t getStatus();
+  uint8_t getOAMData();
+  uint8_t getData();
+
+  // Variables
+
+  const uint16_t scanlineCycleLength = 341;
+  const uint16_t scanlineEndCycle = 340;
+  const uint8_t visibleScanLines = 240;
+  const uint16_t scanlineVisibleDots = 256;
+  const uint16_t frameEndScanline = 261;
+
+  const int attributeOffset = 0x3C0;
+
 private:
+  // Methods
+
+  uint8_t readOAM(uint8_t addr);
+  void writeOAM(uint8_t addr, uint8_t value);
+
+  // Variables
+
+  enum Mirroring {
+    Vertical,
+    Horizontal,
+    oneScreenUpper,
+    oneScreenLower,
+  };
+
+  enum State {
+    preRender,
+    Render,
+    postRender,
+    verticalBlank
+  };
+
   std::vector<uint8_t> chr_rom;
   uint8_t vram[2048];
   uint8_t oam_data[256];
 
   uint8_t tblName[2][1024];
-  uint8_t tblPattern[2][4096];
+  uint8_t tblAttribute[4][64];
+  // uint8_t tblPattern[2][4096];
+  uint8_t tblPattern[2][16];
   uint8_t tblPalette[32];
 
+  // Internal Registers
+  uint16_t v;
+  uint16_t t;
+  uint8_t x;
+  int w;
 
   //Mirroring
   Mirroring mirroring;

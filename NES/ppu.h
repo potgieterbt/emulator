@@ -28,6 +28,7 @@ private:
 
   // Registers:
   // Controller
+  // Access: write
   union {
     struct {
       uint8_t nametable_x : 1;
@@ -43,6 +44,7 @@ private:
   } ppuctrl;
 
   // Mask
+  // Access: write
   union {
     struct {
       uint8_t greyscale: 1;
@@ -58,6 +60,7 @@ private:
   } ppumask;
 
   // Status Read-only
+  // Access: read
   union {
     struct {
       uint8_t unused : 5;
@@ -69,21 +72,27 @@ private:
   } ppustatus;
 
   // OAM Address
+  // Access: write
   uint8_t oamaddr = 0;
 
   // OAM Data
+  // Access: read, write
   uint8_t oamdata;
 
   // Scroll
+  // Access: write twice
   uint8_t ppuscroll = 0;
 
   // Address
+  // Access: write twice
   uint8_t ppuaddr = 0;
 
   // Data
+  // Access: read, write
   uint8_t ppudata = 0;
 
   // OAM DMA
+  // Access: write
   uint8_t oamdma = 0;
 
 };

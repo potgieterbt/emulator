@@ -8,13 +8,6 @@
 #include <sys/types.h>
 #include <vector>
 
-enum NameTableMirroring {
-  Horizontal = 0,
-  Vertical = 1,
-  FourScreen = 8,
-  OneScreenLower,
-  OneScreenHigher,
-};
 
 const std::vector<uint8_t> &Cart::getROM() { return PRG_ROM; }
 

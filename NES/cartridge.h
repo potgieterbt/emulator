@@ -1,3 +1,4 @@
+#include "mirroring.h"
 #include "mapper.h"
 #include <cstdint>
 #include <string>

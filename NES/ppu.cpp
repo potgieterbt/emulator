@@ -8,9 +8,9 @@
 #include <cstdint>
 #include <vector>
 
-PPU::PPU(Mapper *mapper) {
-  chr_rom =  mapper->getChr();
-}
+PPU::PPU(Mapper *mapper) : chr_rom(mapper->getChr()) {}
+
+void genNMI();
 
 void PPU::tick() {}
 
@@ -22,10 +22,14 @@ void PPU::Write(uint16_t addr, uint8_t val) {}
 
 uint8_t PPU::Read(uint16_t addr) {
   switch (addr) {
-    case 0x0000 ... 0x1FFF: return 0;
-    case 0x2000 ... 0x3EFF: return 0;
-    case 0x3F00 ... 0x3FFF: return 0;
-    default: return 0;
+  case 0x0000 ... 0x1FFF:
+    return 0;
+  case 0x2000 ... 0x3EFF:
+    return 0;
+  case 0x3F00 ... 0x3FFF:
+    return chr_rom[1];
+  default:
+    return 0;
   }
 }
 

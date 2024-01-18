@@ -7,7 +7,7 @@
 
 class Chip {
 public:
-  Chip(Mapper &, PPU &, controller &);
+  Chip(Mapper &mapper, PPU &ppu, controller &cont);
   ~Chip();
   PPU _ppu;
   Mapper _mapper;
@@ -34,7 +34,7 @@ public:
   };
 
 private:
-  Bus Bus;
+  Bus bus;
   uint16_t opcode, I;
   uint8_t A, X, Y;
   uint16_t pc;
@@ -42,7 +42,6 @@ private:
   uint8_t S;
 
   addressing mode;
-
 
   uint16_t get_addr(addressing);
   void setNegative(bool val);

@@ -59,7 +59,7 @@ private:
     verticalBlank
   };
 
-  std::vector<uint8_t> chr_rom;
+  const std::vector<uint8_t> chr_rom;
   uint8_t vram[2048];
   // Sprite oam_data[64];
 

@@ -5,10 +5,10 @@
 #include "ppu.h"
 #include <cstdint>
 
-class Chip {
+class CPU {
 public:
-  Chip(Mapper &mapper, PPU &ppu, controller &cont);
-  ~Chip();
+  CPU(Mapper &mapper, PPU &ppu, controller &cont);
+  ~CPU();
   PPU _ppu;
   Mapper _mapper;
   controller _cont;
@@ -42,6 +42,8 @@ private:
   uint8_t S;
 
   addressing mode;
+
+  void NMI();
 
   uint16_t get_addr(addressing);
   void setNegative(bool val);

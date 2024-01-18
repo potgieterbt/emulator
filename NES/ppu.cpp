@@ -10,13 +10,25 @@
 
 PPU::PPU(Mapper *mapper) : chr_rom(mapper->getChr()) {}
 
-void genNMI();
+bool PPU::genNMI() {
+  if (NMI_occurred) {
+    NMI_occurred = false;
+    return true;
+  }
+  return false;
+}
 
-void PPU::tick() {}
-
-void PPU::init() {}
-
-void PPU::reset() {}
+void PPU::tick() {
+  if ((scanline >= 0 && scanline < visibleScanLines) ||
+      scanline == frameEndScanline) {
+    return;
+  } else if (scanline >= 240 && scanline <= 260) {
+    ppuctrl.val |= 0x80;
+    if (ppuctrl.val & 0x80) {
+      NMI_occurred = true;
+    }
+  }
+}
 
 void PPU::Write(uint16_t addr, uint8_t val) {}
 
@@ -32,15 +44,3 @@ uint8_t PPU::Read(uint16_t addr) {
     return 0;
   }
 }
-
-void setCTRL(uint8_t value) {}
-void setMask(uint8_t value) {}
-void setOAMAddress(uint8_t value) {}
-void setOAMData(uint8_t value) {}
-void setScroll(uint8_t value) {}
-void setDataAddress(uint8_t value) {}
-void setData(uint8_t value) {}
-
-uint8_t getStatus() { return 0; }
-uint8_t getOAMData() { return 0; }
-uint8_t getData() { return 0; }

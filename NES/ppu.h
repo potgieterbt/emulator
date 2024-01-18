@@ -25,7 +25,7 @@ public:
   void tick();
   void init();
   void reset();
-  void genNMI();
+  bool genNMI();
 
 
   // Register methods
@@ -34,6 +34,8 @@ public:
   void registerWrite(uint16_t addr, uint8_t val);
 
   // Variables
+
+  bool NMI_occurred = false;
 
   const uint16_t scanlineCycleLength = 341;
   const uint16_t scanlineEndCycle = 340;
@@ -51,6 +53,7 @@ private:
 
   // Variables
 
+  uint16_t scanline = 0;
 
   enum State {
     preRender,

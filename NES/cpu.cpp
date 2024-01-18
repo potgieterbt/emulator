@@ -14,10 +14,10 @@ const uint16_t CARTRIDGE_SPACE = 0x4020;
 const uint16_t CARTRIDGE_SPACE_END = 0xFFFF;
 
 
-Chip::Chip(Mapper &mapper, PPU &ppu, controller &cont)
+CPU::CPU(Mapper &mapper, PPU &ppu, controller &cont)
     : _ppu(ppu), _mapper(mapper), _cont(cont) {}
 
-uint8_t Chip::readMem(uint16_t addr) {
+uint8_t CPU::readMem(uint16_t addr) {
   switch (addr) {
   case RAM ... RAM_MIRRORS_END:
     return bus.Read(addr & 0b0000011111111111);
@@ -28,7 +28,7 @@ uint8_t Chip::readMem(uint16_t addr) {
   }
 }
 
-void Chip::writeMem(uint16_t addr, uint8_t val) {
+void CPU::writeMem(uint16_t addr, uint8_t val) {
   switch (addr) {
   case RAM ... RAM_MIRRORS_END:
     writeMem(addr & 0b0000011111111111, val);
@@ -39,7 +39,12 @@ void Chip::writeMem(uint16_t addr, uint8_t val) {
   }
 }
 
-void Chip::emulateCycle() {
+void CPU::NMI() {
+  SEI(addressing::Implicit);
+
+}
+
+void CPU::emulateCycle() {
   uint8_t opcode = readMem(pc);
   pc += 1;
 
@@ -1205,7 +1210,7 @@ void Chip::emulateCycle() {
   }
 }
 
-void Chip::ADC(addressing mode) {
+void CPU::ADC(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1218,7 +1223,7 @@ void Chip::ADC(addressing mode) {
   setZero(A == 0);
 }
 
-void Chip::AND(addressing mode) {
+void CPU::AND(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1227,7 +1232,7 @@ void Chip::AND(addressing mode) {
   setZero(A == 0);
 }
 
-void Chip::ASL(addressing mode) {
+void CPU::ASL(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1237,7 +1242,7 @@ void Chip::ASL(addressing mode) {
   setNegative(A & 0x80);
 }
 
-void Chip::BCC(addressing mode) {
+void CPU::BCC(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1246,7 +1251,7 @@ void Chip::BCC(addressing mode) {
   }
 }
 
-void Chip::BCS(addressing mode) {
+void CPU::BCS(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1255,7 +1260,7 @@ void Chip::BCS(addressing mode) {
   }
 }
 
-void Chip::BEQ(addressing mode) {
+void CPU::BEQ(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1264,7 +1269,7 @@ void Chip::BEQ(addressing mode) {
   }
 }
 
-void Chip::BIT(addressing mode) {
+void CPU::BIT(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1275,7 +1280,7 @@ void Chip::BIT(addressing mode) {
   setNegative(res & 0b10000000);
 }
 
-void Chip::BMI(addressing mode) {
+void CPU::BMI(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1284,7 +1289,7 @@ void Chip::BMI(addressing mode) {
   }
 }
 
-void Chip::BNE(addressing mode) {
+void CPU::BNE(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1293,7 +1298,7 @@ void Chip::BNE(addressing mode) {
   }
 }
 
-void Chip::BPL(addressing mode) {
+void CPU::BPL(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1302,7 +1307,7 @@ void Chip::BPL(addressing mode) {
   }
 }
 
-void Chip::BRK(addressing mode) {
+void CPU::BRK(addressing mode) {
   ++pc;
   --sp;
   writeMem_16((0x0100 + sp), pc);
@@ -1312,7 +1317,7 @@ void Chip::BRK(addressing mode) {
   pc = readMem_16(0xFFFE);
 }
 
-void Chip::BVC(addressing mode) {
+void CPU::BVC(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1321,7 +1326,7 @@ void Chip::BVC(addressing mode) {
   }
 }
 
-void Chip::BVS(addressing mode) {
+void CPU::BVS(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1330,30 +1335,30 @@ void Chip::BVS(addressing mode) {
   }
 }
 
-void Chip::CLC(addressing mode) { setCarry(false); }
+void CPU::CLC(addressing mode) { setCarry(false); }
 
-void Chip::CLD(addressing mode) { setDecimal(false); }
+void CPU::CLD(addressing mode) { setDecimal(false); }
 
-void Chip::CLI(addressing mode) { setInterruptDisable(false); }
+void CPU::CLI(addressing mode) { setInterruptDisable(false); }
 
-void Chip::CLV(addressing mode) { setOverflow(false); }
+void CPU::CLV(addressing mode) { setOverflow(false); }
 
-void Chip::CMP(addressing mode) {
+void CPU::CMP(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 }
 
-void Chip::CPX(addressing mode) {
+void CPU::CPX(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 }
 
-void Chip::CPY(addressing mode) {
+void CPU::CPY(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 }
 
-void Chip::DEC(addressing mode) {
+void CPU::DEC(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
   uint8_t res = val - 1;
@@ -1363,19 +1368,19 @@ void Chip::DEC(addressing mode) {
   setNegative(res & 0b10000000);
 }
 
-void Chip::DEX(addressing mode) {
+void CPU::DEX(addressing mode) {
   X -= 1;
   setZero(X == 0);
   setNegative(X & 0b10000000);
 }
 
-void Chip::DEY(addressing mode) {
+void CPU::DEY(addressing mode) {
   Y -= 1;
   setZero(Y == 0);
   setNegative(Y & 0b10000000);
 }
 
-void Chip::EOR(addressing mode) {
+void CPU::EOR(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1384,7 +1389,7 @@ void Chip::EOR(addressing mode) {
   setNegative(A & 0b10000000);
 }
 
-void Chip::INC(addressing mode) {
+void CPU::INC(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
   uint8_t res = val + 1;
@@ -1394,7 +1399,7 @@ void Chip::INC(addressing mode) {
   setNegative(res & 0b10000000);
 }
 
-void Chip::INX(addressing mode) {
+void CPU::INX(addressing mode) {
   X += 1;
   setZero(X == 0);
   setNegative(X & 0b10000000);
@@ -1422,7 +1427,7 @@ void Chip::JMP(addressing mode) {
   pc = val;
 }
 
-void Chip::JSR(addressing mode) {
+void CPU::JSR(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint16_t val = readMem_16(addr);
 
@@ -1432,7 +1437,7 @@ void Chip::JSR(addressing mode) {
   pc = val;
 }
 
-void Chip::LDA(addressing mode) {
+void CPU::LDA(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1442,7 +1447,7 @@ void Chip::LDA(addressing mode) {
   setNegative(A & 0b10000000);
 }
 
-void Chip::LDX(addressing mode) {
+void CPU::LDX(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1452,7 +1457,7 @@ void Chip::LDX(addressing mode) {
   setNegative(X & 0b10000000);
 }
 
-void Chip::LDY(addressing mode) {
+void CPU::LDY(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1462,7 +1467,7 @@ void Chip::LDY(addressing mode) {
   setNegative(Y & 0b10000000);
 }
 
-void Chip::LSR(addressing mode) {
+void CPU::LSR(addressing mode) {
   uint8_t val;
   if (mode == Accumulator) {
     val = A;
@@ -1484,9 +1489,9 @@ void Chip::LSR(addressing mode) {
   }
 }
 
-void Chip::NOP(addressing mode) {}
+void CPU::NOP(addressing mode) {}
 
-void Chip::ORA(addressing mode) {
+void CPU::ORA(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
 
@@ -1496,21 +1501,21 @@ void Chip::ORA(addressing mode) {
   setNegative(A & 0b10000000);
 }
 
-void Chip::PHA(addressing mode) {
+void CPU::PHA(addressing mode) {
   uint8_t A_cp = A;
 
   --sp;
   writeMem((0x0100 + sp), A_cp);
 }
 
-void Chip::PHP(addressing mode) {
+void CPU::PHP(addressing mode) {
   uint8_t S_cp = S;
 
   --sp;
   writeMem((0x0100 + sp), S_cp);
 }
 
-void Chip::PLA(addressing mode) {
+void CPU::PLA(addressing mode) {
   A = readMem((0x0100 + sp));
   ++sp;
 
@@ -1518,12 +1523,12 @@ void Chip::PLA(addressing mode) {
   setNegative(A & 0b10000000);
 }
 
-void Chip::PLP(addressing mode) {
+void CPU::PLP(addressing mode) {
   S = readMem((0x0100 + sp));
   ++sp;
 }
 
-void Chip::ROL(addressing mode) {
+void CPU::ROL(addressing mode) {
   uint8_t val;
   if (mode == Accumulator) {
     val = A;
@@ -1545,7 +1550,7 @@ void Chip::ROL(addressing mode) {
   }
 }
 
-void Chip::ROR(addressing mode) {
+void CPU::ROR(addressing mode) {
   uint8_t val;
   if (mode == Accumulator) {
     val = A;
@@ -1567,19 +1572,19 @@ void Chip::ROR(addressing mode) {
   }
 }
 
-void Chip::RTI(addressing mode) {
+void CPU::RTI(addressing mode) {
   S = readMem(0x0100 + sp);
   ++sp;
   pc = readMem_16(0x0100 + sp);
   ++sp;
 }
 
-void Chip::RTS(addressing mode) {
+void CPU::RTS(addressing mode) {
   pc = readMem_16(0x0100 + sp);
   ++sp;
 }
 
-void Chip::SBC(addressing mode) {
+void CPU::SBC(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
   val = ~val - 1;
@@ -1593,68 +1598,68 @@ void Chip::SBC(addressing mode) {
   setZero(A == 0);
 }
 
-void Chip::SEC(addressing mode) { setCarry(true); }
+void CPU::SEC(addressing mode) { setCarry(true); }
 
-void Chip::SED(addressing mode) { setDecimal(true); }
+void CPU::SED(addressing mode) { setDecimal(true); }
 
-void Chip::SEI(addressing mode) { setInterruptDisable(true); }
+void CPU::SEI(addressing mode) { setInterruptDisable(true); }
 
-void Chip::STA(addressing mode) {
+void CPU::STA(addressing mode) {
   uint16_t addr = get_addr(mode);
 
   writeMem(addr, A);
 }
 
-void Chip::STX(addressing mode) {
+void CPU::STX(addressing mode) {
   uint16_t addr = get_addr(mode);
 
   writeMem(addr, X);
 }
 
-void Chip::STY(addressing mode) {
+void CPU::STY(addressing mode) {
   uint16_t addr = get_addr(mode);
 
   writeMem(addr, Y);
 }
 
-void Chip::TAX(addressing mode) {
+void CPU::TAX(addressing mode) {
   X = A;
 
   setZero(X == 0);
   setNegative(X & 0b10000000);
 }
 
-void Chip::TAY(addressing mode) {
+void CPU::TAY(addressing mode) {
   Y = A;
 
   setZero(Y == 0);
   setNegative(Y & 0b10000000);
 }
 
-void Chip::TSX(addressing mode) {
+void CPU::TSX(addressing mode) {
   X = S;
 
   setZero(X == 0);
   setNegative(X & 0b10000000);
 }
 
-void Chip::TXA(addressing mode) {
+void CPU::TXA(addressing mode) {
   A = X;
 
   setZero(A == 0);
   setNegative(A & 0b10000000);
 }
 
-void Chip::TXS(addressing mode) { S = X; }
+void CPU::TXS(addressing mode) { S = X; }
 
-void Chip::TYA(addressing mode) {
+void CPU::TYA(addressing mode) {
   A = Y;
 
   setZero(A == 0);
   setNegative(A & 0b10000000);
 }
 
-uint16_t Chip::get_addr(addressing mode) {
+uint16_t CPU::get_addr(addressing mode) {
   switch (mode) {
   case Immediate:
     return pc;

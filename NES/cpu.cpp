@@ -2,8 +2,45 @@
 #include <cstdint>
 #include <cstring>
 
+const uint16_t RAM = 0x0000;
+const uint16_t RAM_MIRRORS_END = 0x1FFF;
+const uint16_t PPU_REGISTERS = 0x2000;
+const uint16_t PPU_REGISTERS_MIRRORS_END = 0x3FFF;
+const uint16_t APU_IO_REGISTERS = 0x4000;
+const uint16_t APU_IO_REGISTERS_END = 0x4017;
+const uint16_t APU_IO_REGISTERS_DISABLED = 0x4018;
+const uint16_t APU_IO_REGISTERS_DISABLED_END = 0x401F;
+const uint16_t CARTRIDGE_SPACE = 0x4020;
+const uint16_t CARTRIDGE_SPACE_END = 0xFFFF;
+
+
+Chip::Chip(Mapper &mapper, PPU &ppu, controller &cont)
+    : _ppu(ppu), _mapper(mapper), _cont(cont) {}
+
+uint8_t Chip::readMem(uint16_t addr) {
+  switch (addr) {
+  case RAM ... RAM_MIRRORS_END:
+    return bus.Read(addr & 0b0000011111111111);
+  case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END:
+    return _ppu.Read(addr & 0b0010000000000111);
+  default:
+    return 0;
+  }
+}
+
+void Chip::writeMem(uint16_t addr, uint8_t val) {
+  switch (addr) {
+  case RAM ... RAM_MIRRORS_END:
+    writeMem(addr & 0b0000011111111111, val);
+  case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END:
+    _ppu.Write(addr & 0b0010000000000111, val);
+  default:
+    return;
+  }
+}
+
 void Chip::emulateCycle() {
-  uint8_t opcode = Bus.Read(pc);
+  uint8_t opcode = readMem(pc);
   pc += 1;
 
   switch (opcode) {
@@ -1170,7 +1207,7 @@ void Chip::emulateCycle() {
 
 void Chip::ADC(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   uint16_t sum = A + val + (S & 0b000000001);
   setCarry(sum > 0xFF);
@@ -1183,7 +1220,7 @@ void Chip::ADC(addressing mode) {
 
 void Chip::AND(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   A &= val;
   setNegative(A & 0x80);
@@ -1192,7 +1229,7 @@ void Chip::AND(addressing mode) {
 
 void Chip::ASL(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   setCarry(val & 0x80);
   A <<= val;
@@ -1202,7 +1239,7 @@ void Chip::ASL(addressing mode) {
 
 void Chip::BCC(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   if (!(S & 0b00000001)) {
     pc += val;
@@ -1211,7 +1248,7 @@ void Chip::BCC(addressing mode) {
 
 void Chip::BCS(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   if (S & 0b00000001) {
     pc += val;
@@ -1220,7 +1257,7 @@ void Chip::BCS(addressing mode) {
 
 void Chip::BEQ(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   if (S & 0b00000010) {
     pc += val;
@@ -1229,7 +1266,7 @@ void Chip::BEQ(addressing mode) {
 
 void Chip::BIT(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   uint8_t res = A & val;
 
@@ -1240,7 +1277,7 @@ void Chip::BIT(addressing mode) {
 
 void Chip::BMI(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   if (S & 0b10000000) {
     pc += val;
@@ -1249,7 +1286,7 @@ void Chip::BMI(addressing mode) {
 
 void Chip::BNE(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   if (~S & 0b00000010) {
     pc += val;
@@ -1258,7 +1295,7 @@ void Chip::BNE(addressing mode) {
 
 void Chip::BPL(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   if (~S & 0b10000000) {
     pc += val;
@@ -1268,16 +1305,16 @@ void Chip::BPL(addressing mode) {
 void Chip::BRK(addressing mode) {
   ++pc;
   --sp;
-  Bus.Write_16((0x0100 + sp), pc);
+  writeMem_16((0x0100 + sp), pc);
   uint8_t S_cp = S & 0b00110000;
   --sp;
-  Bus.Write((0x0100 + sp), S_cp);
-  pc = Bus.Read_16(0xFFFE);
+  writeMem((0x0100 + sp), S_cp);
+  pc = readMem_16(0xFFFE);
 }
 
 void Chip::BVC(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   if (~S & 0b01000000) {
     pc += val;
@@ -1286,7 +1323,7 @@ void Chip::BVC(addressing mode) {
 
 void Chip::BVS(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   if (S & 0b01000000) {
     pc += val;
@@ -1303,25 +1340,25 @@ void Chip::CLV(addressing mode) { setOverflow(false); }
 
 void Chip::CMP(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 }
 
 void Chip::CPX(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 }
 
 void Chip::CPY(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 }
 
 void Chip::DEC(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
   uint8_t res = val - 1;
 
-  Bus.Write(addr, (res));
+  writeMem(addr, (res));
   setZero(res == 0);
   setNegative(res & 0b10000000);
 }
@@ -1340,7 +1377,7 @@ void Chip::DEY(addressing mode) {
 
 void Chip::EOR(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   A ^= val;
   setZero(A == 0);
@@ -1349,10 +1386,10 @@ void Chip::EOR(addressing mode) {
 
 void Chip::INC(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
   uint8_t res = val + 1;
 
-  Bus.Write(addr, res);
+  writeMem(addr, res);
   setZero(res == 0);
   setNegative(res & 0b10000000);
 }
@@ -1374,12 +1411,12 @@ void Chip::JMP(addressing mode) {
   uint16_t val;
   if (mode == Indirect) {
     if ((addr & 0x00FF) == 0x00FF) {
-      val = (Bus.Read(addr & 0xFF00) << 8) | Bus.Read(addr);
+      val = (readMem(addr & 0xFF00) << 8) | bus.Read(addr);
     } else {
-      val = Bus.Read_16(addr);
+      val = readMem_16(addr);
     }
   } else if (mode == Absolute) {
-    val = Bus.Read_16(addr);
+    val = readMem_16(addr);
   }
 
   pc = val;
@@ -1387,17 +1424,17 @@ void Chip::JMP(addressing mode) {
 
 void Chip::JSR(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint16_t val = Bus.Read_16(addr);
+  uint16_t val = readMem_16(addr);
 
   --sp;
-  Bus.Write_16(0x0100 + sp, pc);
+  writeMem_16(0x0100 + sp, pc);
 
   pc = val;
 }
 
 void Chip::LDA(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   A = val;
 
@@ -1407,7 +1444,7 @@ void Chip::LDA(addressing mode) {
 
 void Chip::LDX(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   X = val;
 
@@ -1417,7 +1454,7 @@ void Chip::LDX(addressing mode) {
 
 void Chip::LDY(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   Y = val;
 
@@ -1436,10 +1473,10 @@ void Chip::LSR(addressing mode) {
     setNegative(A & 0b10000000);
   } else {
     uint16_t addr = get_addr(mode);
-    val = Bus.Read(addr);
+    val = readMem(addr);
     uint8_t res = val >> 1;
 
-    Bus.Write(addr, res);
+    writeMem(addr, res);
 
     setCarry(val & 1);
     setZero(res == 0);
@@ -1451,7 +1488,7 @@ void Chip::NOP(addressing mode) {}
 
 void Chip::ORA(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
 
   A |= val;
 
@@ -1463,18 +1500,18 @@ void Chip::PHA(addressing mode) {
   uint8_t A_cp = A;
 
   --sp;
-  Bus.Write((0x0100 + sp), A_cp);
+  writeMem((0x0100 + sp), A_cp);
 }
 
 void Chip::PHP(addressing mode) {
   uint8_t S_cp = S;
 
   --sp;
-  Bus.Write((0x0100 + sp), S_cp);
+  writeMem((0x0100 + sp), S_cp);
 }
 
 void Chip::PLA(addressing mode) {
-  A = Bus.Read((0x0100 + sp));
+  A = readMem((0x0100 + sp));
   ++sp;
 
   setZero(A == 0);
@@ -1482,7 +1519,7 @@ void Chip::PLA(addressing mode) {
 }
 
 void Chip::PLP(addressing mode) {
-  S = Bus.Read((0x0100 + sp));
+  S = readMem((0x0100 + sp));
   ++sp;
 }
 
@@ -1497,10 +1534,10 @@ void Chip::ROL(addressing mode) {
     setNegative(A & 0b10000000);
   } else {
     uint16_t addr = get_addr(mode);
-    val = Bus.Read(addr);
+    val = readMem(addr);
     uint8_t res = (val << 1) + (S & 1);
 
-    Bus.Write(addr, res);
+    writeMem(addr, res);
 
     setCarry(val & 0b10000000);
     setZero(res == 0);
@@ -1519,10 +1556,10 @@ void Chip::ROR(addressing mode) {
     setNegative(A & 0b10000000);
   } else {
     uint16_t addr = get_addr(mode);
-    val = Bus.Read(addr);
+    val = readMem(addr);
     uint8_t res = (val >> 1) + ((S & 1) << 7);
 
-    Bus.Write(addr, res);
+    writeMem(addr, res);
 
     setCarry(val & 1);
     setZero(res == 0);
@@ -1531,20 +1568,20 @@ void Chip::ROR(addressing mode) {
 }
 
 void Chip::RTI(addressing mode) {
-  S = Bus.Read(0x0100 + sp);
+  S = readMem(0x0100 + sp);
   ++sp;
-  pc = Bus.Read_16(0x0100 + sp);
+  pc = readMem_16(0x0100 + sp);
   ++sp;
 }
 
 void Chip::RTS(addressing mode) {
-  pc = Bus.Read_16(0x0100 + sp);
+  pc = readMem_16(0x0100 + sp);
   ++sp;
 }
 
 void Chip::SBC(addressing mode) {
   uint16_t addr = get_addr(mode);
-  uint8_t val = Bus.Read(addr);
+  uint8_t val = readMem(addr);
   val = ~val - 1;
 
   int sum = A + val + (S & 0b000000001);
@@ -1565,19 +1602,19 @@ void Chip::SEI(addressing mode) { setInterruptDisable(true); }
 void Chip::STA(addressing mode) {
   uint16_t addr = get_addr(mode);
 
-  Bus.Write(addr, A);
+  writeMem(addr, A);
 }
 
 void Chip::STX(addressing mode) {
   uint16_t addr = get_addr(mode);
 
-  Bus.Write(addr, X);
+  writeMem(addr, X);
 }
 
 void Chip::STY(addressing mode) {
   uint16_t addr = get_addr(mode);
 
-  Bus.Write(addr, Y);
+  writeMem(addr, Y);
 }
 
 void Chip::TAX(addressing mode) {
@@ -1608,9 +1645,7 @@ void Chip::TXA(addressing mode) {
   setNegative(A & 0b10000000);
 }
 
-void Chip::TXS(addressing mode) {
-  S = X;
-}
+void Chip::TXS(addressing mode) { S = X; }
 
 void Chip::TYA(addressing mode) {
   A = Y;
@@ -1625,34 +1660,33 @@ uint16_t Chip::get_addr(addressing mode) {
     return pc;
     break;
   case Zero:
-    return Bus.Read(pc);
+    return readMem(pc);
     break;
   case Zerox:
-    return (X + Bus.Read(pc)) % (0xFFFF + 1);
+    return (X + readMem(pc)) % (0xFFFF + 1);
     break;
   case Zeroy:
-    return (Y + Bus.Read(pc)) % (0xFFFF + 1);
+    return (Y + readMem(pc)) % (0xFFFF + 1);
     break;
   case Absolute:
-    return Bus.Read_16(pc);
+    return readMem_16(pc);
     break;
   case Absolutex:
-    return (Bus.Read_16(pc) + X) % (0xFFFF + 1);
+    return (readMem_16(pc) + X) % (0xFFFF + 1);
     break;
   case Absolutey:
-    return (Bus.Read_16(pc) + Y) % (0xFFFF + 1);
+    return (readMem_16(pc) + Y) % (0xFFFF + 1);
     break;
   case IdxIndirect: {
-    uint8_t base = Bus.Read(pc);
+    uint8_t base = readMem(pc);
     uint8_t ptr = (base + X) % (0xFF + 1);
-    return (Bus.Read(base + 1) << 8) | Bus.Read(base);
+    return (readMem(base + 1) << 8) | bus.Read(base);
     break;
   }
   case IndirectIdx: {
-    uint8_t base = Bus.Read(pc);
-    return (Y +
-            ((Bus.Read((base + 1) % (0xFF + 1)) << 8) | Bus.Read(base)) %
-                (0xFF + 1));
+    uint8_t base = readMem(pc);
+    return (Y + ((readMem((base + 1) % (0xFF + 1)) << 8) | bus.Read(base)) %
+                    (0xFF + 1));
     break;
   }
   default:

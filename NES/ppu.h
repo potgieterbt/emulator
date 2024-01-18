@@ -1,14 +1,21 @@
 #pragma once
 
+#include "mirroring.h"
 #include "mapper.h"
 #include <cstdint>
 #include <sys/types.h>
 #include <vector>
 
-
 class PPU {
 public:
   PPU(Mapper *mapper);
+
+  struct Sprite {
+    uint8_t Y;
+    uint8_t tilenum;
+    uint8_t attribute;
+    uint8_t X;
+  };
 
   // Methods
 
@@ -16,22 +23,15 @@ public:
   void Write(uint16_t addr, uint8_t val);
 
   void tick();
+  void init();
   void reset();
-  // void genNMI();
+  void genNMI();
 
 
   // Register methods
-  void setCTRL(uint8_t value);
-  void setMask(uint8_t value);
-  void setOAMAddress(uint8_t value);
-  void setOAMData(uint8_t value);
-  void setScroll(uint8_t value);
-  void setDataAddress(uint8_t value);
-  void setData(uint8_t value);
 
-  uint8_t getStatus();
-  uint8_t getOAMData();
-  uint8_t getData();
+  uint8_t registerRead(uint16_t addr);
+  void registerWrite(uint16_t addr, uint8_t val);
 
   // Variables
 
@@ -51,12 +51,6 @@ private:
 
   // Variables
 
-  enum Mirroring {
-    Vertical,
-    Horizontal,
-    oneScreenUpper,
-    oneScreenLower,
-  };
 
   enum State {
     preRender,
@@ -65,9 +59,9 @@ private:
     verticalBlank
   };
 
-  std::vector<uint8_t> chr_rom;
+  const std::vector<uint8_t> chr_rom;
   uint8_t vram[2048];
-  uint8_t oam_data[256];
+  // Sprite oam_data[64];
 
   uint8_t tblName[2][1024];
   uint8_t tblAttribute[4][64];
@@ -81,8 +75,8 @@ private:
   uint8_t x;
   int w;
 
-  //Mirroring
-  Mirroring mirroring;
+  //NameTableMirroring
+  NameTableMirroring mirroring;
 
   // Registers:
   // Controller

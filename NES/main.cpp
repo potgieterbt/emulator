@@ -14,6 +14,6 @@ int main(int argc, char *argv[]) {
   Mapper *mapper = rom.getMapper();
   PPU ppu = PPU(mapper);
   controller Cont;
-  Chip chip = Chip(*mapper, ppu, Cont);
+  CPU chip = CPU(*mapper, ppu, Cont);
   return 0;
 }

@@ -1405,13 +1405,13 @@ void CPU::INX(addressing mode) {
   setNegative(X & 0b10000000);
 }
 
-void Chip::INY(addressing mode) {
+void CPU::INY(addressing mode) {
   Y += 1;
   setZero(Y == 0);
   setNegative(Y & 0b10000000);
 }
 
-void Chip::JMP(addressing mode) {
+void CPU::JMP(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint16_t val;
   if (mode == Indirect) {

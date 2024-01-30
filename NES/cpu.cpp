@@ -37,6 +37,28 @@ void CPU::writeMem(uint16_t addr, uint8_t val) {
   }
 }
 
+uint16_t CPU::readMem_16(uint16_t addr) {
+  switch (addr) {
+  case RAM ... RAM_MIRRORS_END:
+    return bus.Read(addr & 0b0000011111111111);
+  case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END:
+    return 0;
+  default:
+    return 0;
+  }
+}
+
+void CPU::writeMem_16(uint16_t addr, uint16_t val) {
+  switch (addr) {
+  case RAM ... RAM_MIRRORS_END:
+    writeMem(addr & 0b0000011111111111, val);
+  case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END:
+    return;
+  default:
+    return;
+  }
+}
+
 void CPU::NMI() { SEI(addressing::Implicit); }
 
 void CPU::emulateCycle() {
@@ -1212,7 +1234,7 @@ void CPU::ADC(addressing mode) {
   uint16_t sum = A + val + (S & 0b000000001);
   setCarry(sum > 0xFF);
   uint8_t res = sum;
-  setOverflow((val ^ res) & (res ^ A) & 0x80 != 0);
+  setOverflow(((val ^ res) & (res ^ A) & 0x80) != 0);
   A = res;
   setNegative(A & 0x80);
   setZero(A == 0);
@@ -1341,16 +1363,19 @@ void CPU::CLV(addressing mode) { setOverflow(false); }
 void CPU::CMP(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
+  val++;
 }
 
 void CPU::CPX(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
+  val++;
 }
 
 void CPU::CPY(addressing mode) {
   uint16_t addr = get_addr(mode);
   uint8_t val = readMem(addr);
+  val++;
 }
 
 void CPU::DEC(addressing mode) {
@@ -1587,7 +1612,7 @@ void CPU::SBC(addressing mode) {
   int sum = A + val + (S & 0b000000001);
   setCarry(sum > 0xFF);
   uint8_t res = sum;
-  setOverflow((val ^ res) & (res ^ A) & 0x80 != 0);
+  setOverflow(((val ^ res) & (res ^ A) & 0x80) != 0);
   A = res;
   setNegative(A & 0x80);
   setZero(A == 0);
@@ -1680,6 +1705,7 @@ uint16_t CPU::get_addr(addressing mode) {
   case IdxIndirect: {
     uint8_t base = readMem(pc);
     uint8_t ptr = (base + X) % (0xFF + 1);
+    ptr++;
     return (readMem(base + 1) << 8) | bus.Read(base);
     break;
   }

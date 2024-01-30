@@ -24,6 +24,7 @@ void Bus::Write(const uint16_t addr, const uint8_t val) {
 
   case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END: {
     uint16_t mirror_down_addr = addr & 0b0010000000000111;
+    mirror_down_addr += 1;
     return;
   }
   default:

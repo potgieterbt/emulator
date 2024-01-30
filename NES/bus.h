@@ -5,7 +5,6 @@
 class Bus {
 public:
   Bus();
-  ~Bus();
   uint8_t Read(const uint16_t);
   void Write(const uint16_t, const uint8_t);
   uint16_t Read_16(const uint16_t);

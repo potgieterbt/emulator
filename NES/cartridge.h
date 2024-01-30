@@ -6,7 +6,6 @@
 class Cart {
 public:
   Cart();
-  ~Cart();
   bool loadFromFile(std::string path);
   const std::vector<uint8_t> &getROM();
   const std::vector<uint8_t> &getVROM();

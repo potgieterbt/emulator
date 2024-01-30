@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <vector>
 
+Cart::Cart(): mapper(*getMapper()) {}
+
 const std::vector<uint8_t> &Cart::getROM() { return PRG_ROM; }
 
 const std::vector<uint8_t> &Cart::getVROM() { return CHR_ROM; }

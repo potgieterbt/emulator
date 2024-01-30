@@ -6,7 +6,6 @@
 class CPU {
 public:
   CPU(Mapper &mapper);
-  ~CPU();
   Mapper _mapper;
   uint8_t readMem(uint16_t addr);
   void writeMem(uint16_t addr, uint8_t val);

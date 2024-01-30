@@ -1,17 +1,13 @@
 // Stack pointer indexes into 256-byte stack at 0x0100-0x01FF
 #include "bus.h"
-#include "controller.h"
 #include "mapper.h"
-#include "ppu.h"
 #include <cstdint>
 
 class CPU {
 public:
-  CPU(Mapper &mapper, PPU &ppu, controller &cont);
+  CPU(Mapper &mapper);
   ~CPU();
-  PPU _ppu;
   Mapper _mapper;
-  controller _cont;
   uint8_t readMem(uint16_t addr);
   void writeMem(uint16_t addr, uint8_t val);
   uint16_t readMem_16(uint16_t addr);

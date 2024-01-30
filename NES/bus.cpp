@@ -1,5 +1,4 @@
 #include "bus.h"
-#include "ppu.h"
 #include <cstdint>
 #include <cstring>
 
@@ -12,7 +11,7 @@ const uint16_t PPU_REGISTERS_MIRRORS_END = 0x3FFF;
 Bus::Bus() { memset(cpu_ram, 0, sizeof(cpu_ram)); }
 
 uint8_t Bus::Read(const uint16_t addr) {
-    return cpu_ram[mirror_down_addr];
+    return cpu_ram[addr];
 }
 
 void Bus::Write(const uint16_t addr, const uint8_t val) {

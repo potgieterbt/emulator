@@ -8,7 +8,6 @@
 #include <sys/types.h>
 #include <vector>
 
-
 const std::vector<uint8_t> &Cart::getROM() { return PRG_ROM; }
 
 const std::vector<uint8_t> &Cart::getVROM() { return CHR_ROM; }
@@ -56,7 +55,7 @@ bool Cart::loadFromFile(std::string path) {
   std::cout << "8KB CHR-ROM Banks: " << +vbanks << "\n";
 
   if (header[6] & 0x8) {
-    nameTableMirroring = NameTableMirroring::FourScreen;
+    nameTableMirroring = 8;
     std::cout << "Name Table Mirroring: FourScreen\n";
   } else {
     nameTableMirroring = header[6] & 0x1;

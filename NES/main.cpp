@@ -1,7 +1,5 @@
 #include "cartridge.h"
-#include "controller.h"
 #include "cpu.h"
-#include "ppu.h"
 #include <array>
 #include <cstdint>
 #include <string>
@@ -12,8 +10,6 @@ int main(int argc, char *argv[]) {
   Cart rom;
   rom.loadFromFile(file);
   Mapper *mapper = rom.getMapper();
-  PPU ppu = PPU(mapper);
-  controller Cont;
-  CPU chip = CPU(*mapper, ppu, Cont);
+  CPU chip = CPU(*mapper);
   return 0;
 }

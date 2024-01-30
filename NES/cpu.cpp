@@ -13,16 +13,14 @@ const uint16_t APU_IO_REGISTERS_DISABLED_END = 0x401F;
 const uint16_t CARTRIDGE_SPACE = 0x4020;
 const uint16_t CARTRIDGE_SPACE_END = 0xFFFF;
 
-
-CPU::CPU(Mapper &mapper, PPU &ppu, controller &cont)
-    : _ppu(ppu), _mapper(mapper), _cont(cont) {}
+CPU::CPU(Mapper &mapper) : _mapper(mapper) {}
 
 uint8_t CPU::readMem(uint16_t addr) {
   switch (addr) {
   case RAM ... RAM_MIRRORS_END:
     return bus.Read(addr & 0b0000011111111111);
   case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END:
-    return _ppu.Read(addr & 0b0010000000000111);
+    return 0;
   default:
     return 0;
   }
@@ -33,16 +31,13 @@ void CPU::writeMem(uint16_t addr, uint8_t val) {
   case RAM ... RAM_MIRRORS_END:
     writeMem(addr & 0b0000011111111111, val);
   case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END:
-    _ppu.Write(addr & 0b0010000000000111, val);
+    return;
   default:
     return;
   }
 }
 
-void CPU::NMI() {
-  SEI(addressing::Implicit);
-
-}
+void CPU::NMI() { SEI(addressing::Implicit); }
 
 void CPU::emulateCycle() {
   uint8_t opcode = readMem(pc);

@@ -8,11 +8,11 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/user/emulator/NES/bus.cpp" "CMakeFiles/NES.dir/bus.cpp.o" "gcc" "CMakeFiles/NES.dir/bus.cpp.o.d"
-  "/home/user/emulator/NES/cartridge.cpp" "CMakeFiles/NES.dir/cartridge.cpp.o" "gcc" "CMakeFiles/NES.dir/cartridge.cpp.o.d"
-  "/home/user/emulator/NES/cpu.cpp" "CMakeFiles/NES.dir/cpu.cpp.o" "gcc" "CMakeFiles/NES.dir/cpu.cpp.o.d"
-  "/home/user/emulator/NES/main.cpp" "CMakeFiles/NES.dir/main.cpp.o" "gcc" "CMakeFiles/NES.dir/main.cpp.o.d"
-  "/home/user/emulator/NES/mapper.cpp" "CMakeFiles/NES.dir/mapper.cpp.o" "gcc" "CMakeFiles/NES.dir/mapper.cpp.o.d"
+  "/home/user/projects/emulator/NES/bus.cpp" "CMakeFiles/NES.dir/bus.cpp.o" "gcc" "CMakeFiles/NES.dir/bus.cpp.o.d"
+  "/home/user/projects/emulator/NES/cartridge.cpp" "CMakeFiles/NES.dir/cartridge.cpp.o" "gcc" "CMakeFiles/NES.dir/cartridge.cpp.o.d"
+  "/home/user/projects/emulator/NES/cpu.cpp" "CMakeFiles/NES.dir/cpu.cpp.o" "gcc" "CMakeFiles/NES.dir/cpu.cpp.o.d"
+  "/home/user/projects/emulator/NES/main.cpp" "CMakeFiles/NES.dir/main.cpp.o" "gcc" "CMakeFiles/NES.dir/main.cpp.o.d"
+  "/home/user/projects/emulator/NES/mapper.cpp" "CMakeFiles/NES.dir/mapper.cpp.o" "gcc" "CMakeFiles/NES.dir/mapper.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

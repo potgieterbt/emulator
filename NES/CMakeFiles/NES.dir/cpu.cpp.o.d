@@ -1,6 +1,6 @@
-CMakeFiles/NES.dir/cpu.cpp.o: /home/user/emulator/NES/cpu.cpp \
- /usr/include/stdc-predef.h /home/user/emulator/NES/cpu.h \
- /home/user/emulator/NES/bus.h /usr/include/c++/13.2.1/cstdint \
+CMakeFiles/NES.dir/cpu.cpp.o: /home/user/projects/emulator/NES/cpu.cpp \
+ /usr/include/stdc-predef.h /home/user/projects/emulator/NES/cpu.h \
+ /home/user/projects/emulator/NES/bus.h /usr/include/c++/13.2.1/cstdint \
  /usr/include/c++/13.2.1/x86_64-pc-linux-gnu/bits/c++config.h \
  /usr/include/c++/13.2.1/x86_64-pc-linux-gnu/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -13,7 +13,7 @@ CMakeFiles/NES.dir/cpu.cpp.o: /home/user/emulator/NES/cpu.cpp \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/bits/time64.h /usr/include/bits/wchar.h \
  /usr/include/bits/stdint-intn.h /usr/include/bits/stdint-uintn.h \
- /home/user/emulator/NES/mapper.h /usr/include/c++/13.2.1/vector \
+ /home/user/projects/emulator/NES/mapper.h /usr/include/c++/13.2.1/vector \
  /usr/include/c++/13.2.1/bits/requires_hosted.h \
  /usr/include/c++/13.2.1/bits/stl_algobase.h \
  /usr/include/c++/13.2.1/bits/functexcept.h \
@@ -51,8 +51,4 @@ CMakeFiles/NES.dir/cpu.cpp.o: /home/user/emulator/NES/cpu.cpp \
  /usr/include/c++/13.2.1/bits/stl_function.h \
  /usr/include/c++/13.2.1/backward/binders.h \
  /usr/include/c++/13.2.1/bits/range_access.h \
- /usr/include/c++/13.2.1/bits/vector.tcc /usr/include/c++/13.2.1/cstring \
- /usr/include/string.h \
- /usr/lib/gcc/x86_64-pc-linux-gnu/13.2.1/include/stddef.h \
- /usr/include/bits/types/locale_t.h /usr/include/bits/types/__locale_t.h \
- /usr/include/strings.h
+ /usr/include/c++/13.2.1/bits/vector.tcc

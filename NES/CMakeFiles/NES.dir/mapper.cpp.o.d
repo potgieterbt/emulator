@@ -1,5 +1,6 @@
-CMakeFiles/NES.dir/mapper.cpp.o: /home/user/emulator/NES/mapper.cpp \
- /usr/include/stdc-predef.h /home/user/emulator/NES/mapper.h \
+CMakeFiles/NES.dir/mapper.cpp.o: \
+ /home/user/projects/emulator/NES/mapper.cpp /usr/include/stdc-predef.h \
+ /home/user/projects/emulator/NES/mapper.h \
  /usr/include/c++/13.2.1/cstdint \
  /usr/include/c++/13.2.1/x86_64-pc-linux-gnu/bits/c++config.h \
  /usr/include/c++/13.2.1/x86_64-pc-linux-gnu/bits/os_defines.h \

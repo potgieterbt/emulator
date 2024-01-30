@@ -238,8 +238,6 @@ CMakeFiles/NES.dir/cpu.cpp.o: cpu.cpp \
   /usr/include/bits/time64.h \
   /usr/include/bits/timesize.h \
   /usr/include/bits/types.h \
-  /usr/include/bits/types/__locale_t.h \
-  /usr/include/bits/types/locale_t.h \
   /usr/include/bits/typesizes.h \
   /usr/include/bits/wchar.h \
   /usr/include/bits/wordsize.h \
@@ -276,7 +274,6 @@ CMakeFiles/NES.dir/cpu.cpp.o: cpu.cpp \
   /usr/include/c++/13.2.1/bits/utility.h \
   /usr/include/c++/13.2.1/bits/vector.tcc \
   /usr/include/c++/13.2.1/cstdint \
-  /usr/include/c++/13.2.1/cstring \
   /usr/include/c++/13.2.1/debug/assertions.h \
   /usr/include/c++/13.2.1/debug/debug.h \
   /usr/include/c++/13.2.1/ext/alloc_traits.h \
@@ -296,10 +293,7 @@ CMakeFiles/NES.dir/cpu.cpp.o: cpu.cpp \
   /usr/include/gnu/stubs.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
-  /usr/include/string.h \
-  /usr/include/strings.h \
   /usr/include/sys/cdefs.h \
-  /usr/lib/gcc/x86_64-pc-linux-gnu/13.2.1/include/stddef.h \
   /usr/lib/gcc/x86_64-pc-linux-gnu/13.2.1/include/stdint.h
 
 CMakeFiles/NES.dir/main.cpp.o: main.cpp \

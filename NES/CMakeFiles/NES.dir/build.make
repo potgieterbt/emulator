@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/user/emulator/NES
+CMAKE_SOURCE_DIR = /home/user/projects/emulator/NES
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/user/emulator/NES
+CMAKE_BINARY_DIR = /home/user/projects/emulator/NES
 
 # Include any dependencies generated for this target.
 include CMakeFiles/NES.dir/depend.make
@@ -72,72 +72,72 @@ include CMakeFiles/NES.dir/flags.make
 CMakeFiles/NES.dir/bus.cpp.o: CMakeFiles/NES.dir/flags.make
 CMakeFiles/NES.dir/bus.cpp.o: bus.cpp
 CMakeFiles/NES.dir/bus.cpp.o: CMakeFiles/NES.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/NES.dir/bus.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/bus.cpp.o -MF CMakeFiles/NES.dir/bus.cpp.o.d -o CMakeFiles/NES.dir/bus.cpp.o -c /home/user/emulator/NES/bus.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/projects/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/NES.dir/bus.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/bus.cpp.o -MF CMakeFiles/NES.dir/bus.cpp.o.d -o CMakeFiles/NES.dir/bus.cpp.o -c /home/user/projects/emulator/NES/bus.cpp
 
 CMakeFiles/NES.dir/bus.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/NES.dir/bus.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/emulator/NES/bus.cpp > CMakeFiles/NES.dir/bus.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/projects/emulator/NES/bus.cpp > CMakeFiles/NES.dir/bus.cpp.i
 
 CMakeFiles/NES.dir/bus.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NES.dir/bus.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/emulator/NES/bus.cpp -o CMakeFiles/NES.dir/bus.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/projects/emulator/NES/bus.cpp -o CMakeFiles/NES.dir/bus.cpp.s
 
 CMakeFiles/NES.dir/cartridge.cpp.o: CMakeFiles/NES.dir/flags.make
 CMakeFiles/NES.dir/cartridge.cpp.o: cartridge.cpp
 CMakeFiles/NES.dir/cartridge.cpp.o: CMakeFiles/NES.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/NES.dir/cartridge.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/cartridge.cpp.o -MF CMakeFiles/NES.dir/cartridge.cpp.o.d -o CMakeFiles/NES.dir/cartridge.cpp.o -c /home/user/emulator/NES/cartridge.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/projects/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/NES.dir/cartridge.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/cartridge.cpp.o -MF CMakeFiles/NES.dir/cartridge.cpp.o.d -o CMakeFiles/NES.dir/cartridge.cpp.o -c /home/user/projects/emulator/NES/cartridge.cpp
 
 CMakeFiles/NES.dir/cartridge.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/NES.dir/cartridge.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/emulator/NES/cartridge.cpp > CMakeFiles/NES.dir/cartridge.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/projects/emulator/NES/cartridge.cpp > CMakeFiles/NES.dir/cartridge.cpp.i
 
 CMakeFiles/NES.dir/cartridge.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NES.dir/cartridge.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/emulator/NES/cartridge.cpp -o CMakeFiles/NES.dir/cartridge.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/projects/emulator/NES/cartridge.cpp -o CMakeFiles/NES.dir/cartridge.cpp.s
 
 CMakeFiles/NES.dir/cpu.cpp.o: CMakeFiles/NES.dir/flags.make
 CMakeFiles/NES.dir/cpu.cpp.o: cpu.cpp
 CMakeFiles/NES.dir/cpu.cpp.o: CMakeFiles/NES.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/NES.dir/cpu.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/cpu.cpp.o -MF CMakeFiles/NES.dir/cpu.cpp.o.d -o CMakeFiles/NES.dir/cpu.cpp.o -c /home/user/emulator/NES/cpu.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/projects/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/NES.dir/cpu.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/cpu.cpp.o -MF CMakeFiles/NES.dir/cpu.cpp.o.d -o CMakeFiles/NES.dir/cpu.cpp.o -c /home/user/projects/emulator/NES/cpu.cpp
 
 CMakeFiles/NES.dir/cpu.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/NES.dir/cpu.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/emulator/NES/cpu.cpp > CMakeFiles/NES.dir/cpu.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/projects/emulator/NES/cpu.cpp > CMakeFiles/NES.dir/cpu.cpp.i
 
 CMakeFiles/NES.dir/cpu.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NES.dir/cpu.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/emulator/NES/cpu.cpp -o CMakeFiles/NES.dir/cpu.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/projects/emulator/NES/cpu.cpp -o CMakeFiles/NES.dir/cpu.cpp.s
 
 CMakeFiles/NES.dir/main.cpp.o: CMakeFiles/NES.dir/flags.make
 CMakeFiles/NES.dir/main.cpp.o: main.cpp
 CMakeFiles/NES.dir/main.cpp.o: CMakeFiles/NES.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/NES.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/main.cpp.o -MF CMakeFiles/NES.dir/main.cpp.o.d -o CMakeFiles/NES.dir/main.cpp.o -c /home/user/emulator/NES/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/projects/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/NES.dir/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/main.cpp.o -MF CMakeFiles/NES.dir/main.cpp.o.d -o CMakeFiles/NES.dir/main.cpp.o -c /home/user/projects/emulator/NES/main.cpp
 
 CMakeFiles/NES.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/NES.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/emulator/NES/main.cpp > CMakeFiles/NES.dir/main.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/projects/emulator/NES/main.cpp > CMakeFiles/NES.dir/main.cpp.i
 
 CMakeFiles/NES.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NES.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/emulator/NES/main.cpp -o CMakeFiles/NES.dir/main.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/projects/emulator/NES/main.cpp -o CMakeFiles/NES.dir/main.cpp.s
 
 CMakeFiles/NES.dir/mapper.cpp.o: CMakeFiles/NES.dir/flags.make
 CMakeFiles/NES.dir/mapper.cpp.o: mapper.cpp
 CMakeFiles/NES.dir/mapper.cpp.o: CMakeFiles/NES.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/NES.dir/mapper.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/mapper.cpp.o -MF CMakeFiles/NES.dir/mapper.cpp.o.d -o CMakeFiles/NES.dir/mapper.cpp.o -c /home/user/emulator/NES/mapper.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/user/projects/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/NES.dir/mapper.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/NES.dir/mapper.cpp.o -MF CMakeFiles/NES.dir/mapper.cpp.o.d -o CMakeFiles/NES.dir/mapper.cpp.o -c /home/user/projects/emulator/NES/mapper.cpp
 
 CMakeFiles/NES.dir/mapper.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/NES.dir/mapper.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/emulator/NES/mapper.cpp > CMakeFiles/NES.dir/mapper.cpp.i
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/user/projects/emulator/NES/mapper.cpp > CMakeFiles/NES.dir/mapper.cpp.i
 
 CMakeFiles/NES.dir/mapper.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/NES.dir/mapper.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/emulator/NES/mapper.cpp -o CMakeFiles/NES.dir/mapper.cpp.s
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/user/projects/emulator/NES/mapper.cpp -o CMakeFiles/NES.dir/mapper.cpp.s
 
 # Object files for target NES
 NES_OBJECTS = \
@@ -157,7 +157,7 @@ NES: CMakeFiles/NES.dir/main.cpp.o
 NES: CMakeFiles/NES.dir/mapper.cpp.o
 NES: CMakeFiles/NES.dir/build.make
 NES: CMakeFiles/NES.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/user/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable NES"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/user/projects/emulator/NES/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable NES"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/NES.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -169,6 +169,6 @@ CMakeFiles/NES.dir/clean:
 .PHONY : CMakeFiles/NES.dir/clean
 
 CMakeFiles/NES.dir/depend:
-	cd /home/user/emulator/NES && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/user/emulator/NES /home/user/emulator/NES /home/user/emulator/NES /home/user/emulator/NES /home/user/emulator/NES/CMakeFiles/NES.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/user/projects/emulator/NES && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/user/projects/emulator/NES /home/user/projects/emulator/NES /home/user/projects/emulator/NES /home/user/projects/emulator/NES /home/user/projects/emulator/NES/CMakeFiles/NES.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/NES.dir/depend
 

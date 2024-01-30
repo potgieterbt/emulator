@@ -1,6 +1,5 @@
 #include "cpu.h"
 #include <cstdint>
-#include <cstring>
 
 const uint16_t RAM = 0x0000;
 const uint16_t RAM_MIRRORS_END = 0x1FFF;
@@ -15,6 +14,28 @@ const uint16_t CARTRIDGE_SPACE_END = 0xFFFF;
 
 CPU::CPU(Mapper &mapper) : _mapper(mapper) {}
 
+void CPU::setNegative(bool val) {
+  return;
+}
+
+void CPU::setZero(bool val) {
+  return;
+}
+
+void CPU::setInterruptDisable(bool val) {
+  return;
+}
+
+void CPU::setDecimal(bool val) {
+  return;
+}
+
+void CPU::setCarry(bool val) {
+  return;
+}
+void CPU::setOverflow(bool val) {
+  return;
+}
 uint8_t CPU::readMem(uint16_t addr) {
   switch (addr) {
   case RAM ... RAM_MIRRORS_END:

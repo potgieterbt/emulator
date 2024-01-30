@@ -1,6 +1,7 @@
-CMakeFiles/NES.dir/main.cpp.o: /home/user/emulator/NES/main.cpp \
- /usr/include/stdc-predef.h /home/user/emulator/NES/cartridge.h \
- /home/user/emulator/NES/mapper.h /usr/include/c++/13.2.1/cstdint \
+CMakeFiles/NES.dir/main.cpp.o: /home/user/projects/emulator/NES/main.cpp \
+ /usr/include/stdc-predef.h /home/user/projects/emulator/NES/cartridge.h \
+ /home/user/projects/emulator/NES/mapper.h \
+ /usr/include/c++/13.2.1/cstdint \
  /usr/include/c++/13.2.1/x86_64-pc-linux-gnu/bits/c++config.h \
  /usr/include/c++/13.2.1/x86_64-pc-linux-gnu/bits/os_defines.h \
  /usr/include/features.h /usr/include/features-time64.h \
@@ -99,5 +100,6 @@ CMakeFiles/NES.dir/main.cpp.o: /home/user/emulator/NES/main.cpp \
  /usr/include/bits/types/error_t.h \
  /usr/include/c++/13.2.1/bits/charconv.h \
  /usr/include/c++/13.2.1/bits/basic_string.tcc \
- /home/user/emulator/NES/cpu.h /home/user/emulator/NES/bus.h \
- /usr/include/c++/13.2.1/array /usr/include/c++/13.2.1/compare
+ /home/user/projects/emulator/NES/cpu.h \
+ /home/user/projects/emulator/NES/bus.h /usr/include/c++/13.2.1/array \
+ /usr/include/c++/13.2.1/compare

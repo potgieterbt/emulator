@@ -1,3 +1,0 @@
-/home/user/emulator/NES/CMakeFiles/NES.dir
-/home/user/emulator/NES/CMakeFiles/edit_cache.dir
-/home/user/emulator/NES/CMakeFiles/rebuild_cache.dir

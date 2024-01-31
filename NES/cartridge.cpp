@@ -8,13 +8,13 @@
 #include <sys/types.h>
 #include <vector>
 
-Cart::Cart(): mapper(*getMapper()) {}
+Cart::Cart() : mapper(0) {}
 
 const std::vector<uint8_t> &Cart::getROM() { return PRG_ROM; }
 
 const std::vector<uint8_t> &Cart::getVROM() { return CHR_ROM; }
 
-Mapper *Cart::getMapper() { return &mapper; }
+uint8_t Cart::getMapper() { return 0; }
 
 uint8_t Cart::getNameTableMirroring() { return nameTableMirroring; }
 
@@ -66,7 +66,7 @@ bool Cart::loadFromFile(std::string path) {
   }
 
   uint8_t mapperNumber = ((header[6] >> 4) & 0xf) | (header[7] & 0xf0);
-  Mapper mapper = Mapper(mapperNumber, PRG_ROM, CHR_ROM, nameTableMirroring);
+  mapper = Mapper(mapperNumber);
   std::cout << "Mapper #: " << +mapperNumber << "\n";
 
   if (header[6] & 0x4) {

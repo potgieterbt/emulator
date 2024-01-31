@@ -1,15 +1,19 @@
 #include "cartridge.h"
 #include "cpu.h"
-#include <array>
-#include <cstdint>
+#include "mapper.h"
+#include <iostream>
 #include <string>
-#include <vector>
 
 int main(int argc, char *argv[]) {
-  std::string file = argv[3];
+  if (argc < 2) {
+    std::cout << "Usage: ./NES <whole path the ROM>" << "\n";
+  }
+  std::string file = argv[1];
+  std::cout << file << "\n";
   Cart rom;
   rom.loadFromFile(file);
-  Mapper *mapper = rom.getMapper();
-  CPU chip = CPU(*mapper);
+  Mapper mapper = Mapper(rom.getMapper());
+  std::cout << &mapper << "\n";
+  // CPU chip = CPU(*mapper);
   return 0;
 }

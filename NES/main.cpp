@@ -14,6 +14,7 @@ int main(int argc, char *argv[]) {
   rom.loadFromFile(file);
   Mapper mapper = Mapper(rom.getMapper());
   std::cout << &mapper << "\n";
-  // CPU chip = CPU(*mapper);
+  CPU chip = CPU(mapper);
+  chip.emulateCycle();
   return 0;
 }

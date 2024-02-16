@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include <cstdint>
+#include <iostream>
 
 const uint16_t RAM = 0x0000;
 const uint16_t RAM_MIRRORS_END = 0x1FFF;
@@ -12,7 +13,8 @@ const uint16_t APU_IO_REGISTERS_DISABLED_END = 0x401F;
 const uint16_t CARTRIDGE_SPACE = 0x4020;
 const uint16_t CARTRIDGE_SPACE_END = 0xFFFF;
 
-CPU::CPU(Mapper &mapper) : _mapper(mapper) {}
+CPU::CPU(Mapper &mapper) : _mapper(mapper){
+}
 
 void CPU::setNegative(bool val) {
   return;
@@ -39,6 +41,7 @@ void CPU::setOverflow(bool val) {
 uint8_t CPU::readMem(uint16_t addr) {
   switch (addr) {
   case RAM ... RAM_MIRRORS_END:
+      return ram[addr & 0b0000011111111111];
     return bus.Read(addr & 0b0000011111111111);
   case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END:
     return 0;
@@ -50,6 +53,8 @@ uint8_t CPU::readMem(uint16_t addr) {
 void CPU::writeMem(uint16_t addr, uint8_t val) {
   switch (addr) {
   case RAM ... RAM_MIRRORS_END:
+    ram[addr & 0b0000011111111111] = val;
+    return;
     writeMem(addr & 0b0000011111111111, val);
   case PPU_REGISTERS ... PPU_REGISTERS_MIRRORS_END:
     return;
@@ -85,6 +90,7 @@ void CPU::NMI() { SEI(addressing::Implicit); }
 void CPU::emulateCycle() {
   uint8_t opcode = readMem(pc);
   pc += 1;
+  std::cout << opcode << "\n";
 
   switch (opcode) {
   case 0x00:

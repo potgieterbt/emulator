@@ -29,10 +29,11 @@ public:
   };
 
 private:
+  uint8_t ram[2048];
   Bus bus;
   uint16_t opcode, I;
   uint8_t A, X, Y;
-  uint16_t pc;
+  uint16_t pc = 0;
   uint8_t sp = 0xFE;
   uint8_t S;
 

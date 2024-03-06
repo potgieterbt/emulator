@@ -1,13 +1,9 @@
 #include "chip8.h"
 #include <SDL2/SDL.h>
-#include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <iostream>
-#include <thread>
 #include <unistd.h>
-#include <vector>
 
 uint8_t keymap[16] = {
     SDLK_x, SDLK_1, SDLK_2, SDLK_3, SDLK_q, SDLK_w, SDLK_e, SDLK_a,

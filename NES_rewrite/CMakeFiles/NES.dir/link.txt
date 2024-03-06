@@ -1,0 +1,1 @@
+/usr/bin/c++  -Wall -Werror -std=c++14 CMakeFiles/NES.dir/bus.cpp.o CMakeFiles/NES.dir/cartridge.cpp.o CMakeFiles/NES.dir/cpu.cpp.o CMakeFiles/NES.dir/main.cpp.o -o NES 

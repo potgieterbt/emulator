@@ -8,9 +8,6 @@
 #include <ios>
 #include <iostream>
 #include <string>
-#include <string_view>
-#include <tuple>
-#include <vector>
 
 unsigned char chip8_fontset[80] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0

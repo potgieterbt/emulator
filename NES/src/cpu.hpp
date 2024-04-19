@@ -1,5 +1,13 @@
+#include <array>
+#include <cstdint>
+#include <string>
+#include <vector>
 
 class cpu {
 public:
-  int getID() { return 1; }
+  cpu(const std::string path);
+
+  std::array<uint8_t, 0xFFFF> RAM;
+
+  std::vector<uint8_t> loadROM(const std::string path);
 };

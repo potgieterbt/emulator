@@ -1,6 +1,8 @@
 #include "cpu.hpp"
+#include <cstdint>
 #include <iostream>
 #include <string>
+#include <vector>
 
 int main(int argc, char *argv[]) {
 
@@ -11,6 +13,9 @@ int main(int argc, char *argv[]) {
 
   const std::string path = argv[1];
 
-  cpu CPU(path);
-  return 0;
+  cpu CPU;
+  std::vector<uint8_t> test = CPU.loadROM(path);
+  std::cout << std::string{&test[0], &test[4]} << "\n";
+
+    return 0;
 }

@@ -5,9 +5,9 @@
 
 class cpu {
 public:
-  cpu(const std::string path);
-
   std::array<uint8_t, 0xFFFF> RAM;
 
   std::vector<uint8_t> loadROM(const std::string path);
+
+  std::vector<uint8_t> ROM;
 };

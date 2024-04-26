@@ -1,5 +1,7 @@
 #include "cpu.hpp"
 #include <cstdint>
+#include <iomanip>
+#include <ios>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -14,8 +16,18 @@ int main(int argc, char *argv[]) {
   const std::string path = argv[1];
 
   cpu CPU;
-  std::vector<uint8_t> test = CPU.loadROM(path);
-  std::cout << std::string{&test[0], &test[4]} << "\n";
+  bool res = CPU.loadROM(path);
 
-    return 0;
+  std::vector<uint8_t> test = CPU.getPRG();
+  std::cout << test[0];
+  std::cout << "test";
+  for (uint8_t ins : test) {
+    if (test[ins] != 0) {
+      std::cout << "0x" << std::setw(8) << std::setfill('0') << std::hex << ins;
+      std::cout << "\n";
+    }
+  }
+  std::cout << std::dec << "\n";
+
+  return 0;
 }

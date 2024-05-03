@@ -6,18 +6,31 @@
 #include <string>
 #include <vector>
 
+void cpu::reset() { PC = (read(0xFFFD) << 8) | read(0xFFFC); }
+
+uint8_t cpu::read(uint16_t addr) {
+  uint16_t address = (addr - 0x8000) % m_PRG_ROM.size();
+  return m_PRG_ROM[address];
+}
+
+std::vector<uint8_t> cpu::getCHR() { return m_CHR_ROM; }
+std::vector<uint8_t> cpu::getPRG() { return m_PRG_ROM; }
+
 bool cpu::loadROM(const std::string path) {
   std::ifstream romFile(path, std::ios_base::binary | std::ios_base::in);
   if (!romFile) {
     std::cout << "Could not open file at given path\n";
     return false;
   }
+
   std::vector<uint8_t> header;
   header.resize(0x10);
+
   if (!romFile.read(reinterpret_cast<char *>(&header[0]), 0x10)) {
     std::cout << "Failed to read iNES header\n";
     return false;
   }
+
   if (std::string{&header[0], &header[4]} != "NES\x1A") {
     std::cout << "Not a valid iNES image. Magic number: " << std::hex
               << header[0] << " " << header[1] << " " << header[2] << " "
@@ -30,8 +43,7 @@ bool cpu::loadROM(const std::string path) {
   uint8_t banks = header[4];
   std::cout << "16KB PRG-ROM Banks: " << +banks << "\n";
   if (!banks) {
-    std::cout << "ROM has no PRG-ROM banks. Loading ROM failed."
-              << "\n";
+    std::cout << "ROM has no PRG-ROM banks. Loading ROM failed.\n";
     return false;
   }
 
@@ -92,6 +104,3 @@ bool cpu::loadROM(const std::string path) {
               << "\n";
   return true;
 }
-
-std::vector<uint8_t> cpu::getCHR() { return m_CHR_ROM; }
-std::vector<uint8_t> cpu::getPRG() { return m_PRG_ROM; }

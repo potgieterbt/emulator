@@ -20,10 +20,15 @@ uint8_t cpu::read(uint16_t addr) {
     return 0;
   case 0x4018 ... 0x401F:
     return 0;
-  case 0x4020 ... 0xFFFF:
+  case 0x4020 ... 0xFFFF: {
     std::cout << "PRGROM accessed\n";
-      std::cout << m_PRG_ROM << "\n";
-    return m_PRG_ROM[(addr - 0x8000) % m_PRG_ROM.size()];
+    uint16_t address = addr % 0x8000;
+    for (int i = address - 0x10; i < address + 0x10; ++i) {
+        std::cout << std::hex << i << "\n";
+        std::cout << std::hex << m_PRG_ROM[i] << "\n";
+    }
+    return m_PRG_ROM[address];
+  }
   default:
     return 0;
   }
@@ -31,7 +36,6 @@ uint8_t cpu::read(uint16_t addr) {
 
 void cpu::runCycle() {
   uint8_t op = read(PC);
-  std::cout << std::dec << op << "\n";
   std::cout << std::hex << op << std::dec << "\n";
 }
 

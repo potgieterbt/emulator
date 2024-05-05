@@ -21,7 +21,9 @@ int main(int argc, char *argv[]) {
   std::vector<uint8_t> test = CPU.getPRG();
 
   CPU.reset();
+
   std::cout << std::hex << CPU.PC << std::dec << "\n";
+  CPU.runCycle();
 
   return 0;
 }

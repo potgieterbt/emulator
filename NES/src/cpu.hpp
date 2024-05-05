@@ -12,6 +12,7 @@ public:
   uint8_t read(uint16_t addr);
   uint8_t write(uint16_t addr, uint8_t val);
   void reset();
+  void runCycle();
 
   bool loadROM(const std::string path);
   std::vector<uint8_t> getCHR();

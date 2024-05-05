@@ -1,6 +1,7 @@
 #include "cpu.hpp"
 #include <cstdint>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -9,9 +10,32 @@
 void cpu::reset() { PC = (read(0xFFFD) << 8) | read(0xFFFC); }
 
 uint8_t cpu::read(uint16_t addr) {
-  uint16_t address = (addr - 0x8000) % m_PRG_ROM.size();
-  return m_PRG_ROM[address];
+  switch (addr) {
+  case 0x0000 ... 0x0FFF:
+    std::cout << "RAM accessed\n";
+    return RAM[addr % 0x0800];
+  case 0x2000 ... 0x3FFF:
+    return 0;
+  case 0x4000 ... 0x4017:
+    return 0;
+  case 0x4018 ... 0x401F:
+    return 0;
+  case 0x4020 ... 0xFFFF:
+    std::cout << "PRGROM accessed\n";
+      std::cout << m_PRG_ROM << "\n";
+    return m_PRG_ROM[(addr - 0x8000) % m_PRG_ROM.size()];
+  default:
+    return 0;
+  }
 }
+
+void cpu::runCycle() {
+  uint8_t op = read(PC);
+  std::cout << std::dec << op << "\n";
+  std::cout << std::hex << op << std::dec << "\n";
+}
+
+// These mothods will move to the Cartridge class when I implement it
 
 std::vector<uint8_t> cpu::getCHR() { return m_CHR_ROM; }
 std::vector<uint8_t> cpu::getPRG() { return m_PRG_ROM; }

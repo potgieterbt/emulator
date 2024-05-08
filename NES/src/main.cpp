@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   CPU.reset();
   std::cout << std::hex << CPU.PC << std::dec << "\n";
 
-  CPU.runCycle();
+  // CPU.runCycle();
 
   return 0;
 }

@@ -1,5 +1,6 @@
 #include "cpu.hpp"
 #include <cstdint>
+#include <cstdio>
 #include <fstream>
 #include <ios>
 #include <iostream>
@@ -21,12 +22,7 @@ uint8_t cpu::read(uint16_t addr) {
   case 0x4018 ... 0x401F:
     return 0;
   case 0x4020 ... 0xFFFF: {
-    std::cout << "PRGROM accessed\n";
     uint16_t address = addr % 0x8000;
-    for (int i = address - 0x10; i < address + 0x10; ++i) {
-        std::cout << std::hex << i << "\n";
-        std::cout << std::hex << m_PRG_ROM[i] << "\n";
-    }
     return m_PRG_ROM[address];
   }
   default:
@@ -36,7 +32,15 @@ uint8_t cpu::read(uint16_t addr) {
 
 void cpu::runCycle() {
   uint8_t op = read(PC);
-  std::cout << std::hex << op << std::dec << "\n";
+  printf("%x\n", op);
+  PC++;
+  executeOpcode(op);
+}
+
+void executeOpcode(uint8_t op) {
+  switch (op) {
+    case 0x00:
+  }
 }
 
 // These mothods will move to the Cartridge class when I implement it

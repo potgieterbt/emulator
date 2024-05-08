@@ -13,6 +13,7 @@ public:
   uint8_t write(uint16_t addr, uint8_t val);
   void reset();
   void runCycle();
+  void executeOpcode(uint8_t op);
 
   bool loadROM(const std::string path);
   std::vector<uint8_t> getCHR();

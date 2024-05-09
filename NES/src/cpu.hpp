@@ -29,4 +29,12 @@ public:
   uint8_t X;
   uint8_t Y;
   uint8_t P;
+
+  enum addressing {
+    immediate,
+
+  };
+
+  // Instructions
+  void LDA(addressing mode);
 };

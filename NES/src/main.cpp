@@ -1,7 +1,5 @@
 #include "cpu.hpp"
 #include <cstdint>
-#include <iomanip>
-#include <ios>
 #include <iostream>
 #include <string>
 #include <vector>

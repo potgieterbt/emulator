@@ -37,9 +37,26 @@ void cpu::runCycle() {
   executeOpcode(op);
 }
 
-void executeOpcode(uint8_t op) {
+void cpu::executeOpcode(uint8_t op) {
   switch (op) {
-    case 0x00:
+  case 0x00:
+    return;
+  case 0xa9:
+    LDA(addressing::immediate);
+    break;
+  }
+}
+
+// Instructions
+void cpu::LDA(addressing mode) {
+  switch (mode) {
+  case addressing::immediate: {
+    uint8_t val = read(PC);
+    A = val;
+    if (A == 0) {
+      P &= 0b00000010;
+    }
+  }
   }
 }
 

@@ -8,9 +8,19 @@
 #include <string>
 #include <vector>
 
-void cpu::reset() { PC = (read(0xFFFD) << 8) | read(0xFFFC); }
+void cpu::reset() {
+  PC = (read(0xFFFD) << 8) | read(0xFFFC);
+  A = 0;
+  S = 0;
+  A = 0;
+  X = 0;
+  Y = 0;
+  P = 0;
+}
 
 uint8_t cpu::read(uint16_t addr) {
+  PC++;
+
   switch (addr) {
   case 0x0000 ... 0x0FFF:
     std::cout << "RAM accessed\n";
@@ -30,10 +40,11 @@ uint8_t cpu::read(uint16_t addr) {
   }
 }
 
+void cpu::write(uint16_t addr, uint8_t val) { RAM[(addr % 0x2000)] = val; }
+
 void cpu::runCycle() {
   uint8_t op = read(PC);
   printf("%x\n", op);
-  PC++;
   executeOpcode(op);
 }
 
@@ -42,8 +53,12 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x00:
     return;
   case 0xa9:
+    printf("%X\n", A);
     LDA(addressing::immediate);
+    printf("%X\n", A);
     break;
+  case 0x8d:
+    STA(addressing::absolute);
   }
 }
 
@@ -56,9 +71,28 @@ void cpu::LDA(addressing mode) {
     if (A == 0) {
       P &= 0b00000010;
     }
+    P &= (A & 0b10000000);
   }
+  default:
+    break;
   }
 }
+
+void cpu::STA(addressing mode) {
+  switch (mode) {
+  case addressing::absolute: {
+    uint8_t addr_high = read(PC);
+    uint8_t addr_low = read(PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    write(addr, A);
+    break;
+  }
+  default:
+    break;
+  }
+}
+
+void cpu::PHA() {}
 
 // These mothods will move to the Cartridge class when I implement it
 

@@ -10,7 +10,7 @@ public:
   std::vector<uint8_t> m_PRG_ROM;
 
   uint8_t read(uint16_t addr);
-  uint8_t write(uint16_t addr, uint8_t val);
+  void write(uint16_t addr, uint8_t val);
   void reset();
   void runCycle();
   void executeOpcode(uint8_t op);
@@ -32,9 +32,11 @@ public:
 
   enum addressing {
     immediate,
+    absolute,
 
   };
 
   // Instructions
   void LDA(addressing mode);
+  void STA(addressing mode);
 };

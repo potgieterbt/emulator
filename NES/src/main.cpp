@@ -21,7 +21,10 @@ int main(int argc, char *argv[]) {
   CPU.reset();
   printf("%x\n", CPU.PC);
 
-  CPU.runCycle();
+  while (true) {
+    CPU.runCycle();
+        std::cin.get();
+  }
 
   return 0;
 }

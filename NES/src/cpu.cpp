@@ -9,7 +9,7 @@
 #include <vector>
 
 void cpu::reset() {
-  PC = ((read(0xFFFD) << 8) | read(0xFFFC)) - 1;
+  PC = ((read(0xFFFD) << 8) | read(0xFFFC));
   A = 0;
   S = 0xFF;
   A = 0;
@@ -44,10 +44,13 @@ void cpu::write(uint16_t addr, uint8_t val) {
   return;
 }
 
+uint8_t cpu::fetchInstruction() { return read(PC); }
+
 void cpu::runCycle() {
-  uint8_t op = read(++PC);
+  uint8_t op = fetchInstruction();
   printf("%x\n", op);
   executeOpcode(op);
+  ++PC;
 }
 
 void cpu::executeOpcode(uint8_t op) {
@@ -55,7 +58,10 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x00:
     break;
   case 0x48:
-    PHA();
+    PHA(addressing::implied);
+    break;
+  case 0x6D:
+    ADC(addressing::absolute);
     break;
   case 0x8d:
     STA(addressing::absolute);
@@ -72,10 +78,62 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xBD:
     LDA(addressing::absoluteX);
     break;
+  case 0xE8:
+    INX(addressing::implied);
+    break;
+  case 0xD0:
+    BNE(addressing::relative);
+    break;
+  default:
+    printf("%X", op);
   }
 }
 
 // Instructions
+
+void cpu::ADC(addressing mode) {
+  switch (mode) {
+  case addressing::absolute:
+    break;
+  default:
+    break;
+  }
+}
+
+void cpu::BNE(addressing mode) {
+  switch (mode) {
+  case addressing::relative: {
+    printf("%X\n", PC);
+    uint8_t zero = (P >> 1) & 1;
+    if (!zero) {
+      PC += read(++PC);
+    }
+    printf("%X\n", PC);
+    break;
+  }
+  default:
+    printf("Instruction should not take anything other than a relative "
+           "addressing");
+    abort();
+  }
+}
+
+void cpu::INX(addressing mode) {
+  switch (mode) {
+  case addressing::implied:
+    ++X;
+    if (X == 0) {
+      P &= 0b00000010;
+    }
+    P &= (X & 0b10000000);
+    break;
+  default:
+    printf("Instruction should not take anything other than a implied "
+           "addressing");
+    abort();
+  }
+}
+
 void cpu::LDA(addressing mode) {
   switch (mode) {
   case addressing::immediate: {
@@ -106,7 +164,6 @@ void cpu::LDA(addressing mode) {
 }
 
 void cpu::LDX(addressing mode) {
-  printf("%X", X);
   switch (mode) {
   case addressing::immediate: {
     uint8_t val = read(++PC);
@@ -130,14 +187,29 @@ void cpu::STA(addressing mode) {
     write(addr, A);
     break;
   }
+  case addressing::absoluteX: {
+    uint8_t addr_high = read(++PC);
+    uint8_t addr_low = read(++PC);
+    uint16_t addr = ((addr_high << 8) | addr_low) + X;
+    write(addr, A);
+    break;
+  }
   default:
     break;
   }
 }
 
-void cpu::PHA() {
-  Stack[(0x100 & S) % 0x1FF] = A;
-  S--;
+void cpu::PHA(addressing mode) {
+  switch (mode) {
+  case addressing::implied:
+    Stack[(0x100 & S) % 0x1FF] = A;
+    S--;
+    break;
+  default:
+    printf("Instruction should not take anything other than a implied "
+           "addressing");
+    abort();
+  }
 }
 
 // These mothods will move to the Cartridge class when I implement it

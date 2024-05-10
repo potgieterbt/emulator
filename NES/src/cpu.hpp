@@ -11,6 +11,7 @@ public:
 
   uint8_t read(uint16_t addr);
   void write(uint16_t addr, uint8_t val);
+  uint8_t fetchInstruction();
   void reset();
   void runCycle();
   void executeOpcode(uint8_t op);
@@ -35,12 +36,17 @@ public:
     immediate,
     absolute,
     absoluteX,
+    relative,
+    implied,
 
   };
 
   // Instructions
+  void ADC(addressing mode);
+  void BNE(addressing mode);
+  void INX(addressing mode);
   void LDA(addressing mode);
   void LDX(addressing mode);
+  void PHA(addressing mode);
   void STA(addressing mode);
-  void PHA();
 };

@@ -22,6 +22,7 @@ public:
   uint8_t m_mapperNumber;
   bool m_extendedRAM;
   bool m_chrRAM;
+  uint8_t Stack[0xFF];
 
   uint8_t S;
   uint16_t PC;
@@ -33,10 +34,13 @@ public:
   enum addressing {
     immediate,
     absolute,
+    absoluteX,
 
   };
 
   // Instructions
   void LDA(addressing mode);
+  void LDX(addressing mode);
   void STA(addressing mode);
+  void PHA();
 };

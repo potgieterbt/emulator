@@ -11,7 +11,7 @@
 void cpu::reset() {
   PC = (read(0xFFFD) << 8) | read(0xFFFC);
   A = 0;
-  S = 0;
+  S = 0xFF;
   A = 0;
   X = 0;
   Y = 0;
@@ -19,8 +19,6 @@ void cpu::reset() {
 }
 
 uint8_t cpu::read(uint16_t addr) {
-  PC++;
-
   switch (addr) {
   case 0x0000 ... 0x0FFF:
     std::cout << "RAM accessed\n";
@@ -33,6 +31,7 @@ uint8_t cpu::read(uint16_t addr) {
     return 0;
   case 0x4020 ... 0xFFFF: {
     uint16_t address = addr % 0x8000;
+    // printf("%X\n", address);
     return m_PRG_ROM[address];
   }
   default:
@@ -40,7 +39,10 @@ uint8_t cpu::read(uint16_t addr) {
   }
 }
 
-void cpu::write(uint16_t addr, uint8_t val) { RAM[(addr % 0x2000)] = val; }
+void cpu::write(uint16_t addr, uint8_t val) {
+  RAM[(addr % 0x2000)] = val;
+  return;
+}
 
 void cpu::runCycle() {
   uint8_t op = read(PC);
@@ -51,14 +53,22 @@ void cpu::runCycle() {
 void cpu::executeOpcode(uint8_t op) {
   switch (op) {
   case 0x00:
-    return;
-  case 0xa9:
-    printf("%X\n", A);
-    LDA(addressing::immediate);
-    printf("%X\n", A);
+    break;
+  case 0x48:
+    PHA();
     break;
   case 0x8d:
     STA(addressing::absolute);
+    break;
+  case 0xA2:
+    LDX(addressing::immediate);
+    break;
+  case 0xa9:
+    LDA(addressing::immediate);
+    break;
+  case 0xBD:
+    LDA(addressing::absoluteX);
+    break;
   }
 }
 
@@ -72,6 +82,36 @@ void cpu::LDA(addressing mode) {
       P &= 0b00000010;
     }
     P &= (A & 0b10000000);
+    break;
+  }
+  case addressing::absoluteX: {
+    uint8_t addr_high = read(PC);
+    uint8_t addr_low = read(PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    addr += X;
+    uint8_t val = read(addr);
+    A = val;
+    if (A == 0) {
+      P &= 0b00000010;
+    }
+    P &= (A & 0b10000000);
+    break;
+  }
+  default:
+    break;
+  }
+}
+
+void cpu::LDX(addressing mode) {
+  printf("%X", X);
+  switch (mode) {
+  case addressing::immediate: {
+    uint8_t val = read(PC);
+    X = val;
+    if (X == 0) {
+      P &= 0b00000010;
+    }
+    P &= (X & 0b10000000);
   }
   default:
     break;
@@ -92,7 +132,10 @@ void cpu::STA(addressing mode) {
   }
 }
 
-void cpu::PHA() {}
+void cpu::PHA() {
+  Stack[(0x100 & S) % 0x1FF] = A;
+  S--;
+}
 
 // These mothods will move to the Cartridge class when I implement it
 

@@ -9,7 +9,7 @@
 #include <vector>
 
 void cpu::reset() {
-  PC = (read(0xFFFD) << 8) | read(0xFFFC);
+  PC = ((read(0xFFFD) << 8) | read(0xFFFC)) - 1;
   A = 0;
   S = 0xFF;
   A = 0;
@@ -59,6 +59,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0x8d:
     STA(addressing::absolute);
+    break;
+  case 0x9D:
+    STA(addressing::absoluteX);
     break;
   case 0xA2:
     LDX(addressing::immediate);

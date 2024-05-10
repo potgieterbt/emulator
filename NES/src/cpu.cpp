@@ -45,7 +45,7 @@ void cpu::write(uint16_t addr, uint8_t val) {
 }
 
 void cpu::runCycle() {
-  uint8_t op = read(PC);
+  uint8_t op = read(++PC);
   printf("%x\n", op);
   executeOpcode(op);
 }
@@ -76,7 +76,7 @@ void cpu::executeOpcode(uint8_t op) {
 void cpu::LDA(addressing mode) {
   switch (mode) {
   case addressing::immediate: {
-    uint8_t val = read(PC);
+    uint8_t val = read(++PC);
     A = val;
     if (A == 0) {
       P &= 0b00000010;
@@ -85,8 +85,8 @@ void cpu::LDA(addressing mode) {
     break;
   }
   case addressing::absoluteX: {
-    uint8_t addr_high = read(PC);
-    uint8_t addr_low = read(PC);
+    uint8_t addr_high = read(++PC);
+    uint8_t addr_low = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     addr += X;
     uint8_t val = read(addr);
@@ -106,7 +106,7 @@ void cpu::LDX(addressing mode) {
   printf("%X", X);
   switch (mode) {
   case addressing::immediate: {
-    uint8_t val = read(PC);
+    uint8_t val = read(++PC);
     X = val;
     if (X == 0) {
       P &= 0b00000010;
@@ -121,8 +121,8 @@ void cpu::LDX(addressing mode) {
 void cpu::STA(addressing mode) {
   switch (mode) {
   case addressing::absolute: {
-    uint8_t addr_high = read(PC);
-    uint8_t addr_low = read(PC);
+    uint8_t addr_high = read(++PC);
+    uint8_t addr_low = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     write(addr, A);
     break;

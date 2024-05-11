@@ -93,8 +93,29 @@ void cpu::executeOpcode(uint8_t op) {
 
 void cpu::ADC(addressing mode) {
   switch (mode) {
-  case addressing::absolute:
+  case addressing::absolute: {
+
+    uint8_t addr_high = read(++PC);
+    uint8_t addr_low = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    uint8_t val = read(addr);
+    uint16_t sum = A + (val + (P & 1));
+    A += sum;
+    // checks
+
+    if (sum & 0x100) {
+      P ^= 1;
+    }
+    // Will need to confirm that this is correct
+    if ((A ^ sum) & (val ^ sum) & 0x80) {
+      P ^= 0b01000000;
+      }
+    if (A == 0) {
+      P &= 0b00000010;
+    }
+    P &= (A & 0b10000000);
     break;
+  }
   default:
     break;
   }
@@ -103,12 +124,10 @@ void cpu::ADC(addressing mode) {
 void cpu::BNE(addressing mode) {
   switch (mode) {
   case addressing::relative: {
-    printf("%X\n", PC);
     uint8_t zero = (P >> 1) & 1;
     if (!zero) {
       PC += read(++PC);
     }
-    printf("%X\n", PC);
     break;
   }
   default:

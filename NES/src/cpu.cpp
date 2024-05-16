@@ -60,6 +60,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x48:
     PHA(addressing::implied);
     break;
+  case 0x69:
+    ADC(addressing::immediate);
+    break;
   case 0x6D:
     ADC(addressing::absolute);
     break;
@@ -94,13 +97,12 @@ void cpu::executeOpcode(uint8_t op) {
 void cpu::ADC(addressing mode) {
   switch (mode) {
   case addressing::absolute: {
-
     uint8_t addr_high = read(++PC);
     uint8_t addr_low = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     uint8_t val = read(addr);
     uint16_t sum = A + (val + (P & 1));
-    A += sum;
+    A = sum;
     // checks
 
     if (sum & 0x100) {
@@ -109,7 +111,26 @@ void cpu::ADC(addressing mode) {
     // Will need to confirm that this is correct
     if ((A ^ sum) & (val ^ sum) & 0x80) {
       P ^= 0b01000000;
-      }
+    }
+    if (A == 0) {
+      P &= 0b00000010;
+    }
+    P &= (A & 0b10000000);
+    break;
+  }
+  case addressing::immediate: {
+    uint8_t val = read(++PC);
+    uint16_t sum = A + (val + (P & 1));
+    A = sum;
+    // checks
+
+    if (sum & 0x100) {
+      P ^= 1;
+    }
+    // Will need to confirm that this is correct
+    if ((A ^ sum) & (val ^ sum) & 0x80) {
+      P ^= 0b01000000;
+    }
     if (A == 0) {
       P &= 0b00000010;
     }

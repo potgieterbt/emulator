@@ -31,7 +31,8 @@ uint8_t cpu::read(uint16_t addr) {
     return 0;
   case 0x4020 ... 0xFFFF: {
     uint16_t address = addr % 0x8000;
-    // printf("%X\n", address);
+    printf("%X\n", address);
+    printf("%X\n", m_PRG_ROM[address]);
     return m_PRG_ROM[address];
   }
   default:
@@ -120,6 +121,7 @@ void cpu::ADC(addressing mode) {
   }
   case addressing::immediate: {
     uint8_t val = read(++PC);
+    printf("%X", val);
     uint16_t sum = A + (val + (P & 1));
     A = sum;
     // checks

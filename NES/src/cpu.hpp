@@ -38,12 +38,13 @@ public:
     absoluteX,
     relative,
     implied,
-
+    zero,
   };
 
   // Instructions
   void ADC(addressing mode);
   void BNE(addressing mode);
+  void BVS(addressing mode);
   void INX(addressing mode);
   void LDA(addressing mode);
   void LDX(addressing mode);

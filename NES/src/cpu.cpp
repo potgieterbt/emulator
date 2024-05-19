@@ -61,11 +61,17 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x48:
     PHA(addressing::implied);
     break;
+  case 0x65:
+    ADC(addressing::immediate);
+    break;
   case 0x69:
     ADC(addressing::immediate);
     break;
   case 0x6D:
     ADC(addressing::absolute);
+    break;
+  case 0x70:
+    BVS(addressing::relative);
     break;
   case 0x8d:
     STA(addressing::absolute);
@@ -123,6 +129,29 @@ void cpu::ADC(addressing mode) {
     uint8_t val = read(++PC);
     printf("%X", val);
     uint16_t sum = A + (val + (P & 1));
+    printf("%X", sum);
+    A = sum;
+    // checks
+
+    if (sum & 0x100) {
+      P ^= 1;
+    }
+    // Will need to confirm that this is correct
+    if ((A ^ sum) & (val ^ sum) & 0x80) {
+      P ^= 0b01000000;
+    }
+    if (A == 0) {
+      P &= 0b00000010;
+    }
+    P &= (A & 0b10000000);
+    break;
+  }
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    printf("%X", zaddr);
+    uint8_t val = read(0x0000 | zaddr);
+    printf("%X", val);
+    uint16_t sum = A + (val + (P & 1));
     A = sum;
     // checks
 
@@ -148,8 +177,32 @@ void cpu::BNE(addressing mode) {
   switch (mode) {
   case addressing::relative: {
     uint8_t zero = (P >> 1) & 1;
+    // Read before the if statement to ensure that the program counter
+    // increments correctly
+    uint8_t jmp_val = read(++PC);
     if (!zero) {
-      PC += read(++PC);
+      // added - 1 due to the way that I increment PC after the Instruction in
+      // executed
+      PC += jmp_val - 1;
+    }
+    break;
+  }
+  default:
+    printf("Instruction should not take anything other than a relative "
+           "addressing");
+    abort();
+  }
+}
+
+void cpu::BVS(addressing mode) {
+  switch (mode) {
+  case addressing::relative: {
+    uint8_t overflow = (P >> 6) & 1;
+    uint8_t jmp_val = read(++PC);
+    if (overflow) {
+      // added - 1 due to the way that I increment PC after the Instruction in
+      // executed
+      PC += jmp_val - 1;
     }
     break;
   }

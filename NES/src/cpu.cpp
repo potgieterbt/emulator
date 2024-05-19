@@ -102,56 +102,35 @@ void cpu::executeOpcode(uint8_t op) {
 // Instructions
 
 void cpu::ADC(addressing mode) {
+  uint16_t sum;
+  uint8_t val;
   switch (mode) {
   case addressing::absolute: {
     uint8_t addr_high = read(++PC);
     uint8_t addr_low = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
-    uint8_t val = read(addr);
-    uint16_t sum = A + (val + (P & 1));
-    A = sum;
-    // checks
-
-    if (sum & 0x100) {
-      P ^= 1;
-    }
-    // Will need to confirm that this is correct
-    if ((A ^ sum) & (val ^ sum) & 0x80) {
-      P ^= 0b01000000;
-    }
-    if (A == 0) {
-      P &= 0b00000010;
-    }
-    P &= (A & 0b10000000);
+    val = read(addr);
+    sum = A + (val + (P & 1));
     break;
   }
   case addressing::immediate: {
-    uint8_t val = read(++PC);
+    val = read(++PC);
     printf("%X", val);
-    uint16_t sum = A + (val + (P & 1));
+    sum = A + (val + (P & 1));
     printf("%X", sum);
-    A = sum;
-    // checks
-
-    if (sum & 0x100) {
-      P ^= 1;
-    }
-    // Will need to confirm that this is correct
-    if ((A ^ sum) & (val ^ sum) & 0x80) {
-      P ^= 0b01000000;
-    }
-    if (A == 0) {
-      P &= 0b00000010;
-    }
-    P &= (A & 0b10000000);
     break;
   }
   case addressing::zero: {
     uint8_t zaddr = read(++PC);
     printf("%X", zaddr);
-    uint8_t val = read(0x0000 | zaddr);
+    val = read(0x00FF & zaddr);
     printf("%X", val);
-    uint16_t sum = A + (val + (P & 1));
+    sum = A + (val + (P & 1));
+    break;
+  }
+  default:
+    break;
+  }
     A = sum;
     // checks
 
@@ -166,11 +145,6 @@ void cpu::ADC(addressing mode) {
       P &= 0b00000010;
     }
     P &= (A & 0b10000000);
-    break;
-  }
-  default:
-    break;
-  }
 }
 
 void cpu::BNE(addressing mode) {

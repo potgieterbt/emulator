@@ -131,20 +131,26 @@ void cpu::ADC(addressing mode) {
   default:
     break;
   }
-    A = sum;
-    // checks
+  A = sum;
+  // checks
 
-    if (sum & 0x100) {
-      P ^= 1;
-    }
-    // Will need to confirm that this is correct
-    if ((A ^ sum) & (val ^ sum) & 0x80) {
-      P ^= 0b01000000;
-    }
-    if (A == 0) {
-      P &= 0b00000010;
-    }
-    P &= (A & 0b10000000);
+  // Carry bit
+  if (sum & 0x100) {
+    P ^= 1;
+  }
+  // Will need to confirm that this is correct
+  // Overflow bit
+  if ((A ^ sum) & (val ^ sum) & 0x80) {
+    P ^= 0b01000000;
+  }
+
+  // Zero bit
+  if (A == 0) {
+    P &= 0b00000010;
+  }
+
+  // Negative bit
+  P &= (A & 0b10000000);
 }
 
 void cpu::BNE(addressing mode) {

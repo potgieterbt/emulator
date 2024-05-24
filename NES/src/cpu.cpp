@@ -9,13 +9,16 @@
 #include <vector>
 
 void cpu::reset() {
-  PC = ((read(0xFFFD) << 8) | read(0xFFFC));
-  A = 0;
-  S = 0xFF;
-  A = 0;
-  X = 0;
-  Y = 0;
-  P = 0;
+  for (int i = 0xFFF0; i <= 0xFFFF; ++i) {
+    read(i);
+  }
+  // PC = ((read(0xFFFD) << 8) | read(0xFFFC));
+  // A = 0;
+  // S = 0xFF;
+  // A = 0;
+  // X = 0;
+  // Y = 0;
+  // P = 0;
 }
 
 uint8_t cpu::read(uint16_t addr) {

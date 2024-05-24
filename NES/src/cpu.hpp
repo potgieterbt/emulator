@@ -46,6 +46,7 @@ public:
   void BNE(addressing mode);
   void BVS(addressing mode);
   void INX(addressing mode);
+  void JMP(addressing mode);
   void LDA(addressing mode);
   void LDX(addressing mode);
   void PHA(addressing mode);

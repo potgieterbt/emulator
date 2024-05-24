@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 
   while (true) {
     CPU.runCycle();
-        std::cin.get();
+    // std::cin.get();
   }
 
   return 0;

@@ -9,16 +9,16 @@
 #include <vector>
 
 void cpu::reset() {
-  for (int i = 0xFFF0; i <= 0xFFFF; ++i) {
+  /* for (int i = 0xFFF0; i <= 0xFFFF; ++i) {
     read(i);
-  }
-  // PC = ((read(0xFFFD) << 8) | read(0xFFFC));
-  // A = 0;
-  // S = 0xFF;
-  // A = 0;
-  // X = 0;
-  // Y = 0;
-  // P = 0;
+  } */
+  PC = ((read(0xFFFD) << 8) | read(0xFFFC));
+  A = 0;
+  S = 0xFF;
+  A = 0;
+  X = 0;
+  Y = 0;
+  P = 0;
 }
 
 uint8_t cpu::read(uint16_t addr) {
@@ -59,10 +59,11 @@ void cpu::runCycle() {
 
 void cpu::executeOpcode(uint8_t op) {
   switch (op) {
-  case 0x00:
-    break;
   case 0x48:
     PHA(addressing::implied);
+    break;
+  case 0x4C:
+    JMP(addressing::absolute);
     break;
   case 0x65:
     ADC(addressing::immediate);
@@ -85,7 +86,7 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xA2:
     LDX(addressing::immediate);
     break;
-  case 0xa9:
+  case 0xA9:
     LDA(addressing::immediate);
     break;
   case 0xBD:
@@ -93,12 +94,14 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0xE8:
     INX(addressing::implied);
+    printf("%b\n", P);
     break;
   case 0xD0:
     BNE(addressing::relative);
     break;
   default:
     printf("%X", op);
+    std::cin.get();
   }
 }
 
@@ -159,14 +162,14 @@ void cpu::ADC(addressing mode) {
 void cpu::BNE(addressing mode) {
   switch (mode) {
   case addressing::relative: {
-    uint8_t zero = (P >> 1) & 1;
+    uint8_t zero = (P & 0b00000010) >> 1;
     // Read before the if statement to ensure that the program counter
     // increments correctly
-    uint8_t jmp_val = read(++PC);
+    int8_t jmp_val = (int8_t)read(++PC);
     if (!zero) {
       // added - 1 due to the way that I increment PC after the Instruction in
       // executed
-      PC += jmp_val - 1;
+      PC += jmp_val;
     }
     break;
   }
@@ -196,14 +199,29 @@ void cpu::BVS(addressing mode) {
   }
 }
 
+void cpu::JMP(addressing mode) {
+  switch (mode) {
+  case absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %s\n",
+           "JMP", "absolute");
+    abort();
+  }
+}
+
 void cpu::INX(addressing mode) {
   switch (mode) {
   case addressing::implied:
     ++X;
     if (X == 0) {
-      P &= 0b00000010;
+      P |= 0b00000010;
     }
-    P &= (X & 0b10000000);
+    P |= (X & 0b01000000);
     break;
   default:
     printf("Instruction should not take anything other than a implied "
@@ -224,8 +242,8 @@ void cpu::LDA(addressing mode) {
     break;
   }
   case addressing::absoluteX: {
-    uint8_t addr_high = read(++PC);
     uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     addr += X;
     uint8_t val = read(addr);
@@ -259,15 +277,15 @@ void cpu::LDX(addressing mode) {
 void cpu::STA(addressing mode) {
   switch (mode) {
   case addressing::absolute: {
-    uint8_t addr_high = read(++PC);
     uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     write(addr, A);
     break;
   }
   case addressing::absoluteX: {
-    uint8_t addr_high = read(++PC);
     uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
     uint16_t addr = ((addr_high << 8) | addr_low) + X;
     write(addr, A);
     break;

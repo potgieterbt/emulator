@@ -9,9 +9,6 @@
 #include <vector>
 
 void cpu::reset() {
-  /* for (int i = 0xFFF0; i <= 0xFFFF; ++i) {
-    read(i);
-  } */
   PC = ((read(0xFFFD) << 8) | read(0xFFFC));
   A = 0;
   S = 0xFF;
@@ -24,7 +21,8 @@ void cpu::reset() {
 uint8_t cpu::read(uint16_t addr) {
   switch (addr) {
   case 0x0000 ... 0x0FFF:
-    std::cout << "RAM accessed\n";
+    printf("%X\n", addr);
+    printf("%X\n", RAM[addr]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
     return 0;
@@ -205,6 +203,7 @@ void cpu::JMP(addressing mode) {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
+    PC = addr - 1;
     break;
   }
   default:

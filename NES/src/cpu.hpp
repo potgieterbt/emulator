@@ -46,10 +46,12 @@ public:
   // Instructions
   void ADC(addressing mode);
   void BNE(addressing mode);
+  void BEQ(addressing mode);
   void BVS(addressing mode);
   void CMP(addressing mode);
   void INX(addressing mode);
   void JMP(addressing mode);
+  void JSR(addressing mode);
   void LDA(addressing mode);
   void LDX(addressing mode);
   void LSR(addressing mode);

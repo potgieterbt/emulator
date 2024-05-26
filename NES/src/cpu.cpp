@@ -63,6 +63,9 @@ void cpu::runCycle() {
 
 void cpu::executeOpcode(uint8_t op) {
   switch (op) {
+  case 0x20:
+    JSR(addressing::absolute);
+    break;
   case 0x48:
     PHA(addressing::implied);
     break;
@@ -82,7 +85,7 @@ void cpu::executeOpcode(uint8_t op) {
     ADC(addressing::immediate);
     break;
   case 0x6C:
-    JMP(addressing::implied);
+    JMP(addressing::indirect);
     break;
   case 0x6D:
     ADC(addressing::absolute);
@@ -113,6 +116,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0xD0:
     BNE(addressing::relative);
+    break;
+  case 0xF0:
+    BEQ(addressing::relative);
     break;
   default:
     printf("%X", op);
@@ -191,6 +197,27 @@ void cpu::BNE(addressing mode) {
   }
 }
 
+void cpu::BEQ(addressing mode) {
+  switch (mode) {
+  case addressing::relative: {
+    uint8_t zero = (P & 0b00000010) >> 1;
+    // Read before the if statement to ensure that the program counter
+    // increments correctly
+    int8_t jmp_val = (int8_t)read(++PC);
+    if (zero) {
+      // added - 1 due to the way that I increment PC after the Instruction in
+      // executed
+      PC += jmp_val;
+    }
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "BEQ", mode);
+    abort();
+  }
+}
+
 void cpu::BVS(addressing mode) {
   switch (mode) {
   case addressing::relative: {
@@ -230,22 +257,6 @@ void cpu::CMP(addressing mode) {
   }
 }
 
-void cpu::JMP(addressing mode) {
-  switch (mode) {
-  case absolute: {
-    uint8_t addr_low = read(++PC);
-    uint8_t addr_high = read(++PC);
-    uint16_t addr = (addr_high << 8) | addr_low;
-    PC = addr - 1;
-    break;
-  }
-  default:
-    printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           "JMP", mode);
-    abort();
-  }
-}
-
 void cpu::INX(addressing mode) {
   switch (mode) {
   case addressing::implied:
@@ -258,6 +269,54 @@ void cpu::INX(addressing mode) {
   default:
     printf("Instruction should not take anything other than a implied "
            "addressing");
+    abort();
+  }
+}
+
+void cpu::JMP(addressing mode) {
+  switch (mode) {
+  case absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    PC = addr - 1;
+    break;
+  }
+  case indirect: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    uint8_t jaddr_low = read(addr);
+    uint8_t jaddr_high = read(++addr);
+    uint16_t jmp_addr = (jaddr_high << 8) | jaddr_low;
+    PC = jmp_addr - 1;
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "JMP", mode);
+    abort();
+  }
+}
+
+void cpu::JSR(addressing mode) {
+  switch (mode) {
+  case absolute: {
+    // I don't think this is working properly will have to test
+    printf("%X", PC);
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    Stack[S] = (PC >> 8);
+    --S;
+    Stack[S] = (PC & 0xFF);
+    --S;
+    PC = addr;
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "JMP", mode);
     abort();
   }
 }

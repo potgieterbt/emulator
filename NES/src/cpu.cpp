@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <sys/types.h>
 #include <vector>
 
 void cpu::reset() {
@@ -50,7 +51,7 @@ uint8_t cpu::fetchInstruction() { return read(PC); }
 
 void cpu::runCycle() {
   uint8_t op = fetchInstruction();
-  printf("%x\n", op);
+  printf("Instr: %x\n", op);
   executeOpcode(op);
   ++PC;
 }
@@ -59,6 +60,9 @@ void cpu::executeOpcode(uint8_t op) {
   switch (op) {
   case 0x48:
     PHA(addressing::implied);
+    break;
+  case 0x4A:
+    LSR(addressing::accumulator);
     break;
   case 0x4C:
     JMP(addressing::absolute);
@@ -90,9 +94,11 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xBD:
     LDA(addressing::absoluteX);
     break;
+  case 0xC9:
+    CMP(addressing::immediate);
+    break;
   case 0xE8:
     INX(addressing::implied);
-    printf("%b\n", P);
     break;
   case 0xD0:
     BNE(addressing::relative);
@@ -197,6 +203,26 @@ void cpu::BVS(addressing mode) {
   }
 }
 
+void cpu::CMP(addressing mode) {
+  switch (mode) {
+  case immediate: {
+    uint8_t val = read(++PC);
+    if (A >= val) {
+      P |= 1;
+    }
+    if (A == val) {
+      P &= 0b00000010;
+    }
+    P &= ((A - val) & 0b10000000);
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "JMP", mode);
+    abort();
+  }
+}
+
 void cpu::JMP(addressing mode) {
   switch (mode) {
   case absolute: {
@@ -207,8 +233,8 @@ void cpu::JMP(addressing mode) {
     break;
   }
   default:
-    printf("Instruction called with an invalid addressing mode: %s, %s\n",
-           "JMP", "absolute");
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "JMP", mode);
     abort();
   }
 }
@@ -270,6 +296,22 @@ void cpu::LDX(addressing mode) {
   }
   default:
     break;
+  }
+}
+
+void cpu::LSR(addressing mode) {
+  switch (mode) {
+  case accumulator:
+    P |= (A & 1);
+    A >>= 1;
+    if (A == 0) {
+      P &= 0b00000010;
+    }
+    P &= (A & 0b10000000);
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "LSR", mode);
   }
 }
 

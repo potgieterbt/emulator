@@ -1,3 +1,8 @@
+// TODO:
+// - implement a step variable that can be set to true at anytime to to start
+// stepping if needed in a situation for debugging
+// - Implement a save state to be able to save the state at a certain time and
+// load that same state to better implement debug Instruction
 #include "cpu.hpp"
 #include <cstdint>
 #include <cstdio>
@@ -210,9 +215,12 @@ void cpu::CMP(addressing mode) {
     if (A >= val) {
       P |= 1;
     }
+    printf("%b", P);
     if (A == val) {
-      P &= 0b00000010;
+      P |= 0b00000010;
     }
+    printf("%b", P);
+    std::cin.get();
     P &= ((A - val) & 0b10000000);
     break;
   }
@@ -303,9 +311,12 @@ void cpu::LSR(addressing mode) {
   switch (mode) {
   case accumulator:
     P |= (A & 1);
+    printf("%X", A);
     A >>= 1;
+    printf("%X", A);
+    std::cin.get();
     if (A == 0) {
-      P &= 0b00000010;
+      P |= 0b00000010;
     }
     P &= (A & 0b10000000);
     break;

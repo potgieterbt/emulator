@@ -75,8 +75,14 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x65:
     ADC(addressing::immediate);
     break;
+  case 0x68:
+    PLA(addressing::implied);
+    break;
   case 0x69:
     ADC(addressing::immediate);
+    break;
+  case 0x6C:
+    JMP(addressing::implied);
     break;
   case 0x6D:
     ADC(addressing::absolute);
@@ -130,16 +136,12 @@ void cpu::ADC(addressing mode) {
   }
   case addressing::immediate: {
     val = read(++PC);
-    printf("%X", val);
     sum = A + (val + (P & 1));
-    printf("%X", sum);
     break;
   }
   case addressing::zero: {
     uint8_t zaddr = read(++PC);
-    printf("%X", zaddr);
     val = read(0x00FF & zaddr);
-    printf("%X", val);
     sum = A + (val + (P & 1));
     break;
   }
@@ -215,13 +217,10 @@ void cpu::CMP(addressing mode) {
     if (A >= val) {
       P |= 1;
     }
-    printf("%b", P);
     if (A == val) {
       P |= 0b00000010;
     }
-    printf("%b", P);
-    std::cin.get();
-    P &= ((A - val) & 0b10000000);
+    P |= ((A - val) & 0b10000000);
     break;
   }
   default:
@@ -311,18 +310,31 @@ void cpu::LSR(addressing mode) {
   switch (mode) {
   case accumulator:
     P |= (A & 1);
-    printf("%X", A);
     A >>= 1;
-    printf("%X", A);
-    std::cin.get();
     if (A == 0) {
       P |= 0b00000010;
     }
-    P &= (A & 0b10000000);
+    P |= (A & 0b10000000);
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            "LSR", mode);
+  }
+}
+
+void cpu::PLA(addressing mode) {
+  switch (mode) {
+  case implied:
+    A = Stack[S];
+    if (A == 0) {
+      P |= 0b00000010;
+    }
+    P |= (A & 0b10000000);
+
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "PLA", mode);
   }
 }
 

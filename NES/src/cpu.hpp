@@ -40,6 +40,7 @@ public:
     implied,
     zero,
     accumulator,
+    indirect,
   };
 
   // Instructions
@@ -53,5 +54,6 @@ public:
   void LDX(addressing mode);
   void LSR(addressing mode);
   void PHA(addressing mode);
+  void PLA(addressing mode);
   void STA(addressing mode);
 };

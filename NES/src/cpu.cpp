@@ -22,6 +22,8 @@ void cpu::reset() {
   X = 0;
   Y = 0;
   P = 0;
+  printf("%X", read(0x6C62));
+  std::cin.get();
 }
 
 uint8_t cpu::read(uint16_t addr) {
@@ -252,7 +254,7 @@ void cpu::CMP(addressing mode) {
   }
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           "JMP", mode);
+           "CMP", mode);
     abort();
   }
 }
@@ -286,9 +288,11 @@ void cpu::JMP(addressing mode) {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
+    printf("%X\n", addr);
     uint8_t jaddr_low = read(addr);
     uint8_t jaddr_high = read(++addr);
     uint16_t jmp_addr = (jaddr_high << 8) | jaddr_low;
+    printf("%X\n", jmp_addr);
     PC = jmp_addr - 1;
     break;
   }
@@ -297,26 +301,37 @@ void cpu::JMP(addressing mode) {
            "JMP", mode);
     abort();
   }
+  std::cin.get();
 }
 
 void cpu::JSR(addressing mode) {
   switch (mode) {
   case absolute: {
     // I don't think this is working properly will have to test
-    printf("%X", PC);
+    // I think I am supposed to jump to 0xE6A2 but am jumping to E7A2
+    // I think this is because of the previous jump
+
+    for (int i = 0; i < 4; ++i) {
+      uint16_t address = (PC + i) % 0x8000;
+      printf("%X\n", address);
+      printf("%X\n", m_PRG_ROM[address]);
+    }
+    printf("PC: %X\n", PC);
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
+    printf("Jump Addr: %X\n", addr);
     Stack[S] = (PC >> 8);
     --S;
     Stack[S] = (PC & 0xFF);
     --S;
     PC = addr;
+    std::cin.get();
     break;
   }
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           "JMP", mode);
+           "JSR", mode);
     abort();
   }
 }

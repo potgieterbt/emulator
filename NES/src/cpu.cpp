@@ -9,7 +9,6 @@
 #include <fstream>
 #include <ios>
 #include <iostream>
-#include <iterator>
 #include <string>
 #include <sys/types.h>
 #include <vector>
@@ -105,6 +104,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x91:
     STA(addressing::indirectY);
     break;
+  case 0x95:
+    STA(addressing::zeroX);
+    break;
   case 0x9D:
     STA(addressing::absoluteX);
     break;
@@ -117,11 +119,20 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xA9:
     LDA(addressing::immediate);
     break;
+  case 0xAA:
+    TAX(addressing::implied);
+    break;
   case 0xBD:
     LDA(addressing::absoluteX);
     break;
+  case 0xC8:
+    INY(addressing::implied);
+    break;
   case 0xC9:
     CMP(addressing::immediate);
+    break;
+  case 0xE6:
+    INC(addressing::zero);
     break;
   case 0xE8:
     INX(addressing::implied);
@@ -269,6 +280,26 @@ void cpu::CMP(addressing mode) {
   }
 }
 
+void cpu::INC(addressing mode) {
+  switch (mode) {
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t val = read(0x00FF & zaddr);
+    val++;
+    write(0x00FF & zaddr, val);
+    if (val == 0) {
+      P |= 0b00000010;
+    }
+    P |= (val & 0b01000000);
+    break;
+  }
+  default:
+    printf("Instruction should not take anything other than a implied "
+           "addressing");
+    abort();
+  }
+}
+
 void cpu::INX(addressing mode) {
   switch (mode) {
   case addressing::implied:
@@ -277,6 +308,22 @@ void cpu::INX(addressing mode) {
       P |= 0b00000010;
     }
     P |= (X & 0b01000000);
+    break;
+  default:
+    printf("Instruction should not take anything other than a implied "
+           "addressing");
+    abort();
+  }
+}
+
+void cpu::INY(addressing mode) {
+  switch (mode) {
+  case addressing::implied:
+    ++Y;
+    if (Y == 0) {
+      P |= 0b00000010;
+    }
+    P |= (Y & 0b01000000);
     break;
   default:
     printf("Instruction should not take anything other than a implied "
@@ -412,6 +459,19 @@ void cpu::LSR(addressing mode) {
   }
 }
 
+void cpu::PHA(addressing mode) {
+  switch (mode) {
+  case addressing::implied:
+    Stack[(0x100 & S) % 0x1FF] = A;
+    S--;
+    break;
+  default:
+    printf("Instruction should not take anything other than a implied "
+           "addressing");
+    abort();
+  }
+}
+
 void cpu::PLA(addressing mode) {
   switch (mode) {
   case implied:
@@ -445,17 +505,16 @@ void cpu::STA(addressing mode) {
     break;
   }
   case addressing::indirectY: {
-    uint16_t zaddr = read(++PC);
-    printf("zaddr: %X\n", zaddr);
+    uint8_t zaddr = read(++PC);
     uint16_t addr = read(0x00FF & zaddr);
-    printf("addr: %X\n", addr);
     addr += Y;
-    printf("Y: %X\n", Y);
-    printf("addr + Y: %X\n", addr);
-    addr %= 0xFF;
-    printf("addr + Y %% 256: %X\n", addr);
-    std::cin.get();
     write(addr, A);
+    break;
+  }
+  case addressing::zeroX: {
+    uint8_t zaddr = read(++PC);
+    uint16_t addr = read(0x00FF & (zaddr + X));
+    write((addr % 0xFF), A);
     break;
   }
   default:
@@ -487,18 +546,22 @@ void cpu::STX(addressing mode) {
   }
 }
 
-void cpu::PHA(addressing mode) {
+void cpu::TAX(addressing mode) {
   switch (mode) {
-  case addressing::implied:
-    Stack[(0x100 & S) % 0x1FF] = A;
-    S--;
+  case implied:
+    X = A;
+    if (X == 0) {
+      P |= 0b00000010;
+    }
+    P |= (X & 0b10000000);
+
     break;
   default:
-    printf("Instruction should not take anything other than a implied "
-           "addressing");
-    abort();
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "PLA", mode);
   }
 }
+
 
 // These mothods will move to the Cartridge class when I implement it
 

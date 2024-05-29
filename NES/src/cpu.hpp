@@ -33,15 +33,16 @@ public:
   uint8_t P;
 
   enum addressing {
-    immediate,
     absolute,
     absoluteX,
-    relative,
-    implied,
-    zero,
     accumulator,
+    immediate,
+    implied,
     indirect,
     indirectY,
+    relative,
+    zero,
+    zeroX,
   };
 
   // Instructions
@@ -50,7 +51,9 @@ public:
   void BEQ(addressing mode);
   void BVS(addressing mode);
   void CMP(addressing mode);
+  void INC(addressing mode);
   void INX(addressing mode);
+  void INY(addressing mode);
   void JMP(addressing mode);
   void JSR(addressing mode);
   void LDA(addressing mode);
@@ -62,4 +65,5 @@ public:
   void STA(addressing mode);
   void STX(addressing mode);
   void STY(addressing mode);
+  void TAX(addressing mode);
 };

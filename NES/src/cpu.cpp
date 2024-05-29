@@ -445,9 +445,16 @@ void cpu::STA(addressing mode) {
     break;
   }
   case addressing::indirectY: {
-    uint8_t addr_low = read(++PC);
-    uint8_t addr_high = read(++PC);
-    uint16_t addr = ((addr_high << 8) | addr_low) + X;
+    uint16_t zaddr = read(++PC);
+    printf("zaddr: %X\n", zaddr);
+    uint16_t addr = read(0x00FF & zaddr);
+    printf("addr: %X\n", addr);
+    addr += Y;
+    printf("Y: %X\n", Y);
+    printf("addr + Y: %X\n", addr);
+    addr %= 0xFF;
+    printf("addr + Y %% 256: %X\n", addr);
+    std::cin.get();
     write(addr, A);
     break;
   }

@@ -562,7 +562,6 @@ void cpu::TAX(addressing mode) {
   }
 }
 
-
 // These mothods will move to the Cartridge class when I implement it
 
 std::vector<uint8_t> cpu::getCHR() { return m_CHR_ROM; }

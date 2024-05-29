@@ -22,8 +22,6 @@ void cpu::reset() {
   X = 0;
   Y = 0;
   P = 0;
-  printf("%X", read(0x6C62));
-  std::cin.get();
 }
 
 uint8_t cpu::read(uint16_t addr) {
@@ -95,11 +93,23 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x70:
     BVS(addressing::relative);
     break;
+  case 0x84:
+    STY(addressing::zero);
+    break;
+  case 0x86:
+    STX(addressing::zero);
+    break;
   case 0x8d:
     STA(addressing::absolute);
     break;
+  case 0x91:
+    STA(addressing::indirectY);
+    break;
   case 0x9D:
     STA(addressing::absoluteX);
+    break;
+  case 0xA0:
+    LDY(addressing::immediate);
     break;
   case 0xA2:
     LDX(addressing::immediate);
@@ -301,7 +311,6 @@ void cpu::JMP(addressing mode) {
            "JMP", mode);
     abort();
   }
-  std::cin.get();
 }
 
 void cpu::JSR(addressing mode) {
@@ -311,22 +320,14 @@ void cpu::JSR(addressing mode) {
     // I think I am supposed to jump to 0xE6A2 but am jumping to E7A2
     // I think this is because of the previous jump
 
-    for (int i = 0; i < 4; ++i) {
-      uint16_t address = (PC + i) % 0x8000;
-      printf("%X\n", address);
-      printf("%X\n", m_PRG_ROM[address]);
-    }
-    printf("PC: %X\n", PC);
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
-    printf("Jump Addr: %X\n", addr);
     Stack[S] = (PC >> 8);
     --S;
     Stack[S] = (PC & 0xFF);
     --S;
-    PC = addr;
-    std::cin.get();
+    PC = addr - 1;
     break;
   }
   default:
@@ -380,6 +381,21 @@ void cpu::LDX(addressing mode) {
   }
 }
 
+void cpu::LDY(addressing mode) {
+  switch (mode) {
+  case addressing::immediate: {
+    uint8_t val = read(++PC);
+    Y = val;
+    if (Y == 0) {
+      P &= 0b00000010;
+    }
+    P &= (Y & 0b10000000);
+  }
+  default:
+    break;
+  }
+}
+
 void cpu::LSR(addressing mode) {
   switch (mode) {
   case accumulator:
@@ -426,6 +442,37 @@ void cpu::STA(addressing mode) {
     uint8_t addr_high = read(++PC);
     uint16_t addr = ((addr_high << 8) | addr_low) + X;
     write(addr, A);
+    break;
+  }
+  case addressing::indirectY: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = ((addr_high << 8) | addr_low) + X;
+    write(addr, A);
+    break;
+  }
+  default:
+    break;
+  }
+}
+
+void cpu::STY(addressing mode) {
+  switch (mode) {
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    write(0x00FF & zaddr, Y);
+    break;
+  }
+  default:
+    break;
+  }
+}
+
+void cpu::STX(addressing mode) {
+  switch (mode) {
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    write(0x00FF & zaddr, X);
     break;
   }
   default:

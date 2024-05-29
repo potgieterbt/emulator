@@ -41,6 +41,7 @@ public:
     zero,
     accumulator,
     indirect,
+    indirectY,
   };
 
   // Instructions
@@ -54,8 +55,11 @@ public:
   void JSR(addressing mode);
   void LDA(addressing mode);
   void LDX(addressing mode);
+  void LDY(addressing mode);
   void LSR(addressing mode);
   void PHA(addressing mode);
   void PLA(addressing mode);
   void STA(addressing mode);
+  void STX(addressing mode);
+  void STY(addressing mode);
 };

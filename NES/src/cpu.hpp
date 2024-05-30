@@ -51,6 +51,7 @@ public:
   void BEQ(addressing mode);
   void BVS(addressing mode);
   void CMP(addressing mode);
+  void DEX(addressing mode);
   void INC(addressing mode);
   void INX(addressing mode);
   void INY(addressing mode);
@@ -62,8 +63,10 @@ public:
   void LSR(addressing mode);
   void PHA(addressing mode);
   void PLA(addressing mode);
+  void RTS(addressing mode);
   void STA(addressing mode);
   void STX(addressing mode);
   void STY(addressing mode);
   void TAX(addressing mode);
+  void TSX(addressing mode);
 };

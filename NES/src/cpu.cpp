@@ -74,6 +74,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x4C:
     JMP(addressing::absolute);
     break;
+  case 0x60:
+    RTS(addressing::implied);
+    break;
   case 0x65:
     ADC(addressing::immediate);
     break;
@@ -122,6 +125,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xAA:
     TAX(addressing::implied);
     break;
+  case 0xBA:
+    TSX(addressing::implied);
+    break;
   case 0xBD:
     LDA(addressing::absoluteX);
     break;
@@ -130,6 +136,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0xC9:
     CMP(addressing::immediate);
+    break;
+  case 0xCA:
+    DEX(addressing::implied);
     break;
   case 0xE6:
     INC(addressing::zero);
@@ -280,6 +289,22 @@ void cpu::CMP(addressing mode) {
   }
 }
 
+void cpu::DEX(addressing mode) {
+  switch (mode) {
+  case addressing::implied:
+    --X;
+    if (X == 0) {
+      P |= 0b00000010;
+    }
+    P |= (X & 0b01000000);
+    break;
+  default:
+    printf("Instruction should not take anything other than a implied "
+           "addressing");
+    abort();
+  }
+}
+
 void cpu::INC(addressing mode) {
   switch (mode) {
   case addressing::zero: {
@@ -366,14 +391,22 @@ void cpu::JSR(addressing mode) {
     // I don't think this is working properly will have to test
     // I think I am supposed to jump to 0xE6A2 but am jumping to E7A2
     // I think this is because of the previous jump
-
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
-    Stack[S] = (PC >> 8);
+    uint8_t LSB = (PC & 0xFF);
+    uint8_t MSB = (PC >> 8);
+    printf("%X\n", PC);
+    printf("%X\n", MSB);
+    printf("%X\n", LSB);
+    std::cin.get();
+    Stack[S] = LSB;
     --S;
-    Stack[S] = (PC & 0xFF);
+    Stack[S] = MSB;
     --S;
+    printf("%X\n", Stack[S + 1]);
+    printf("%X\n", Stack[S + 2]);
+    std::cin.get();
     PC = addr - 1;
     break;
   }
@@ -488,6 +521,25 @@ void cpu::PLA(addressing mode) {
   }
 }
 
+void cpu::RTS(addressing mode) {
+  switch (mode) {
+  case implied: {
+    ++S;
+    uint8_t LSB = Stack[S];
+    ++S;
+    uint8_t MSB = Stack[S];
+    printf("%X\n", LSB);
+    printf("%X\n", MSB);
+    PC = ((MSB << 8) | LSB) - 1;
+    printf("%X\n", PC);
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "PLA", mode);
+  }
+}
+
 void cpu::STA(addressing mode) {
   switch (mode) {
   case addressing::absolute: {
@@ -550,6 +602,22 @@ void cpu::TAX(addressing mode) {
   switch (mode) {
   case implied:
     X = A;
+    if (X == 0) {
+      P |= 0b00000010;
+    }
+    P |= (X & 0b10000000);
+
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "PLA", mode);
+  }
+}
+
+void cpu::TSX(addressing mode) {
+  switch (mode) {
+  case implied:
+    X = S;
     if (X == 0) {
       P |= 0b00000010;
     }

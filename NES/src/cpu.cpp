@@ -223,8 +223,8 @@ void cpu::BNE(addressing mode) {
     break;
   }
   default:
-    printf("Instruction should not take anything other than a relative "
-           "addressing");
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "BNE", mode);
     abort();
   }
 }
@@ -263,8 +263,8 @@ void cpu::BVS(addressing mode) {
     break;
   }
   default:
-    printf("Instruction should not take anything other than a relative "
-           "addressing");
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "BVS", mode);
     abort();
   }
 }
@@ -299,8 +299,8 @@ void cpu::DEX(addressing mode) {
     P |= (X & 0b01000000);
     break;
   default:
-    printf("Instruction should not take anything other than a implied "
-           "addressing");
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "DEX", mode);
     abort();
   }
 }
@@ -319,8 +319,8 @@ void cpu::INC(addressing mode) {
     break;
   }
   default:
-    printf("Instruction should not take anything other than a implied "
-           "addressing");
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "INC", mode);
     abort();
   }
 }
@@ -335,8 +335,8 @@ void cpu::INX(addressing mode) {
     P |= (X & 0b01000000);
     break;
   default:
-    printf("Instruction should not take anything other than a implied "
-           "addressing");
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "INX", mode);
     abort();
   }
 }
@@ -351,8 +351,8 @@ void cpu::INY(addressing mode) {
     P |= (Y & 0b01000000);
     break;
   default:
-    printf("Instruction should not take anything other than a implied "
-           "addressing");
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "INY", mode);
     abort();
   }
 }
@@ -370,11 +370,9 @@ void cpu::JMP(addressing mode) {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
-    printf("%X\n", addr);
     uint8_t jaddr_low = read(addr);
     uint8_t jaddr_high = read(++addr);
     uint16_t jmp_addr = (jaddr_high << 8) | jaddr_low;
-    printf("%X\n", jmp_addr);
     PC = jmp_addr - 1;
     break;
   }
@@ -388,28 +386,19 @@ void cpu::JMP(addressing mode) {
 void cpu::JSR(addressing mode) {
   switch (mode) {
   case absolute: {
-    // I don't think this is working properly will have to test
-    // I think I am supposed to jump to 0xE6A2 but am jumping to E7A2
-    // I think this is because of the previous jump
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     uint8_t LSB = (PC & 0xFF);
     uint8_t MSB = (PC >> 8);
-    printf("%X\n", PC);
-    printf("%X\n", MSB);
-    printf("%X\n", LSB);
-    std::cin.get();
     Stack[S] = LSB;
     --S;
     Stack[S] = MSB;
     --S;
-    printf("%X\n", Stack[S + 1]);
-    printf("%X\n", Stack[S + 2]);
-    std::cin.get();
     PC = addr - 1;
     break;
   }
+
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            "JSR", mode);
@@ -442,6 +431,8 @@ void cpu::LDA(addressing mode) {
     break;
   }
   default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "LDA", mode);
     break;
   }
 }
@@ -457,6 +448,8 @@ void cpu::LDX(addressing mode) {
     P &= (X & 0b10000000);
   }
   default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "LDX", mode);
     break;
   }
 }
@@ -472,6 +465,8 @@ void cpu::LDY(addressing mode) {
     P &= (Y & 0b10000000);
   }
   default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "LDY", mode);
     break;
   }
 }
@@ -499,8 +494,8 @@ void cpu::PHA(addressing mode) {
     S--;
     break;
   default:
-    printf("Instruction should not take anything other than a implied "
-           "addressing");
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "PHA", mode);
     abort();
   }
 }
@@ -525,18 +520,15 @@ void cpu::RTS(addressing mode) {
   switch (mode) {
   case implied: {
     ++S;
-    uint8_t LSB = Stack[S];
-    ++S;
     uint8_t MSB = Stack[S];
-    printf("%X\n", LSB);
-    printf("%X\n", MSB);
-    PC = ((MSB << 8) | LSB) - 1;
-    printf("%X\n", PC);
+    ++S;
+    uint8_t LSB = Stack[S];
+    PC = ((MSB << 8) | LSB);
     break;
   }
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           "PLA", mode);
+           "RTS", mode);
   }
 }
 
@@ -570,6 +562,8 @@ void cpu::STA(addressing mode) {
     break;
   }
   default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "STA", mode);
     break;
   }
 }
@@ -582,6 +576,8 @@ void cpu::STY(addressing mode) {
     break;
   }
   default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "STY", mode);
     break;
   }
 }
@@ -594,6 +590,8 @@ void cpu::STX(addressing mode) {
     break;
   }
   default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           "STX", mode);
     break;
   }
 }
@@ -610,7 +608,7 @@ void cpu::TAX(addressing mode) {
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           "PLA", mode);
+           "TAX", mode);
   }
 }
 
@@ -626,7 +624,7 @@ void cpu::TSX(addressing mode) {
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           "PLA", mode);
+           "TSX", mode);
   }
 }
 

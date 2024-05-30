@@ -25,6 +25,8 @@ public:
   bool m_chrRAM;
   uint8_t Stack[0xFF];
 
+  uint16_t last_jump;
+
   uint8_t S;
   uint16_t PC;
   uint8_t A;

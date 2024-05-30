@@ -13,6 +13,7 @@ public:
   void write(uint16_t addr, uint8_t val);
   uint8_t fetchInstruction();
   void reset();
+  void setFlag(uint8_t flag, bool val);
   void runCycle();
   void executeOpcode(uint8_t op);
 
@@ -49,8 +50,9 @@ public:
 
   // Instructions
   void ADC(addressing mode);
-  void BNE(addressing mode);
   void BEQ(addressing mode);
+  void BIT(addressing mode);
+  void BNE(addressing mode);
   void BVS(addressing mode);
   void CMP(addressing mode);
   void DEX(addressing mode);

@@ -26,6 +26,7 @@ public:
   bool m_chrRAM;
   uint8_t Stack[0xFF];
 
+  bool Step = false;
   uint16_t last_jump;
 
   uint8_t S;
@@ -53,9 +54,12 @@ public:
   void BEQ(addressing mode);
   void BIT(addressing mode);
   void BNE(addressing mode);
+  void BMI(addressing mode);
+  void BPL(addressing mode);
   void BVS(addressing mode);
   void CMP(addressing mode);
   void DEX(addressing mode);
+  void DEY(addressing mode);
   void INC(addressing mode);
   void INX(addressing mode);
   void INY(addressing mode);
@@ -65,6 +69,7 @@ public:
   void LDX(addressing mode);
   void LDY(addressing mode);
   void LSR(addressing mode);
+  void ORA(addressing mode);
   void PHA(addressing mode);
   void PLA(addressing mode);
   void RTS(addressing mode);
@@ -73,4 +78,5 @@ public:
   void STY(addressing mode);
   void TAX(addressing mode);
   void TSX(addressing mode);
+  void TYA(addressing mode);
 };

@@ -51,13 +51,17 @@ public:
 
   // Instructions
   void ADC(addressing mode);
+  void BCS(addressing mode);
   void BEQ(addressing mode);
   void BIT(addressing mode);
   void BNE(addressing mode);
   void BMI(addressing mode);
   void BPL(addressing mode);
   void BVS(addressing mode);
+  void CLD(addressing mode);
+  void CLI(addressing mode);
   void CMP(addressing mode);
+  void CPX(addressing mode);
   void DEX(addressing mode);
   void DEY(addressing mode);
   void INC(addressing mode);
@@ -71,12 +75,19 @@ public:
   void LSR(addressing mode);
   void ORA(addressing mode);
   void PHA(addressing mode);
+  void PHP(addressing mode);
   void PLA(addressing mode);
+  void PLP(addressing mode);
   void RTS(addressing mode);
+  void SBC(addressing mode);
+  void SED(addressing mode);
+  void SEI(addressing mode);
   void STA(addressing mode);
   void STX(addressing mode);
   void STY(addressing mode);
   void TAX(addressing mode);
+  void TAY(addressing mode);
   void TSX(addressing mode);
+  void TXS(addressing mode);
   void TYA(addressing mode);
 };

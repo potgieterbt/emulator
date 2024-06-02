@@ -70,6 +70,9 @@ void cpu::runCycle() {
 
 void cpu::executeOpcode(uint8_t op) {
   switch (op) {
+  case 0x08:
+    PHP(addressing::implied);
+    break;
   case 0x0D:
     ORA(addressing::absolute);
     break;
@@ -78,6 +81,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0x20:
     JSR(addressing::absolute);
+    break;
+  case 0x28:
+    PLP(addressing::implied);
     break;
   case 0x2C:
     BIT(addressing::absolute);
@@ -93,6 +99,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0x4C:
     JMP(addressing::absolute);
+    break;
+  case 0x58:
+    CLI(addressing::implied);
     break;
   case 0x60:
     RTS(addressing::implied);
@@ -115,6 +124,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x70:
     BVS(addressing::relative);
     break;
+  case 0x78:
+    SEI(addressing::implied);
+    break;
   case 0x84:
     STY(addressing::zero);
     break;
@@ -127,8 +139,11 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x88:
     DEY(addressing::implied);
     break;
-  case 0x8d:
+  case 0x8D:
     STA(addressing::absolute);
+    break;
+  case 0x8E:
+    STX(addressing::absolute);
     break;
   case 0x91:
     STA(addressing::indirectY);
@@ -139,6 +154,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x98:
     TYA(addressing::implied);
     break;
+  case 0x9A:
+    TXS(addressing::implied);
+    break;
   case 0x9D:
     STA(addressing::absoluteX);
     break;
@@ -148,11 +166,23 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xA2:
     LDX(addressing::immediate);
     break;
+  case 0xA5:
+    LDA(addressing::zero);
+    break;
+  case 0xA8:
+    TAY(addressing::implied);
+    break;
   case 0xA9:
     LDA(addressing::immediate);
     break;
   case 0xAA:
     TAX(addressing::implied);
+    break;
+  case 0xAD:
+    LDA(addressing::absolute);
+    break;
+  case 0xB0:
+    BCS(addressing::relative);
     break;
   case 0xB1:
     LDA(addressing::indirectY);
@@ -172,17 +202,32 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xCA:
     DEX(addressing::implied);
     break;
+  case 0xE0:
+    CPX(addressing::immediate);
+    break;
   case 0xE6:
     INC(addressing::zero);
     break;
   case 0xE8:
     INX(addressing::implied);
     break;
+  case 0xE9:
+    SBC(addressing::immediate);
+    break;
+  case 0xEE:
+    INC(addressing::absolute);
+    break;
   case 0xD0:
     BNE(addressing::relative);
     break;
+  case 0xD8:
+    CLD(addressing::implied);
+    break;
   case 0xF0:
     BEQ(addressing::relative);
+    break;
+  case 0xF8:
+    SED(addressing::implied);
     break;
   default:
     printf("%X", op);
@@ -235,6 +280,27 @@ void cpu::ADC(addressing mode) {
 
   // Negative bit
   setFlag(7, A & 0b10000000);
+}
+
+void cpu::BCS(addressing mode) {
+  switch (mode) {
+  case addressing::relative: {
+    uint8_t carry = (P & 0b00000001);
+    // Read before the if statement to ensure that the program counter
+    // increments correctly
+    int8_t jmp_val = (int8_t)read(++PC);
+    if (carry) {
+      // added - 1 due to the way that I increment PC after the Instruction in
+      // executed
+      PC += jmp_val;
+    }
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
 }
 
 void cpu::BEQ(addressing mode) {
@@ -310,6 +376,9 @@ void cpu::BPL(addressing mode) {
     if (PC == 0xE96C) {
       return;
     }
+    if (PC == 0xE86C) {
+      return;
+    }
     if (!neg) {
       PC += jmp_val;
     }
@@ -351,6 +420,53 @@ void cpu::BVS(addressing mode) {
       // executed
       PC += jmp_val - 1;
     }
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::CPX(addressing mode) {
+  switch (mode) {
+  case immediate: {
+    uint8_t val = read(++PC);
+    // Carry
+    setFlag(0, X >= val);
+
+    // Zero bit
+    setFlag(1, X == val);
+
+    // Negative bit
+    setFlag(7, (X - val) & 0b10000000);
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::CLD(addressing mode) {
+  switch (mode) {
+  case implied: {
+    setFlag(3, 0);
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::CLI(addressing mode) {
+  switch (mode) {
+  case implied: {
+    setFlag(2, 0);
     break;
   }
   default:
@@ -429,6 +545,20 @@ void cpu::INC(addressing mode) {
     setFlag(7, val & 0b10000000);
     break;
   }
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    uint8_t val = read(addr);
+    val++;
+    write(addr, val);
+    // Zero bit
+    setFlag(1, val == 0);
+
+    // Negative bit
+    setFlag(7, val & 0b10000000);
+    break;
+  }
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
@@ -483,10 +613,13 @@ void cpu::JMP(addressing mode) {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
+    printf("%X", addr);
     uint8_t jaddr_low = read(addr);
     uint8_t jaddr_high = read(++addr);
     uint16_t jmp_addr = (jaddr_high << 8) | jaddr_low;
+    printf("%X", jmp_addr);
     PC = jmp_addr - 1;
+    printf("%X", PC);
     break;
   }
   default:
@@ -544,6 +677,19 @@ void cpu::LDA(addressing mode) {
     setFlag(7, A & 0b10000000);
     break;
   }
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    uint8_t val = read(addr);
+    A = val;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    break;
+  }
   case addressing::absoluteX: {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
@@ -558,6 +704,18 @@ void cpu::LDA(addressing mode) {
     setFlag(7, A & 0b10000000);
     break;
   }
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t val = read(0x00FF & zaddr);
+    A = val;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    break;
+  }
+
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
@@ -652,7 +810,20 @@ void cpu::ORA(addressing mode) {
 void cpu::PHA(addressing mode) {
   switch (mode) {
   case addressing::implied:
-    Stack[(0x100 & S) % 0x1FF] = A;
+    Stack[S] = A;
+    S--;
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::PHP(addressing mode) {
+  switch (mode) {
+  case addressing::implied:
+    Stack[S] = P;
     S--;
     break;
   default:
@@ -680,6 +851,19 @@ void cpu::PLA(addressing mode) {
   }
 }
 
+void cpu::PLP(addressing mode) {
+  switch (mode) {
+  case implied:
+    ++S;
+    P = Stack[S];
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
 void cpu::RTS(addressing mode) {
   switch (mode) {
   case implied: {
@@ -694,6 +878,49 @@ void cpu::RTS(addressing mode) {
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
     abort();
+  }
+}
+
+void cpu::SBC(addressing mode) {
+  switch (mode) {
+  case addressing::immediate: {
+    uint8_t val = read(++PC);
+
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+    break;
+  }
+}
+
+void cpu::SED(addressing mode) {
+  switch (mode) {
+  case addressing::implied: {
+    setFlag(3, 1);
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+    break;
+  }
+}
+
+void cpu::SEI(addressing mode) {
+  switch (mode) {
+  case addressing::implied: {
+    setFlag(2, 1);
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+    break;
   }
 }
 
@@ -757,6 +984,13 @@ void cpu::STY(addressing mode) {
 
 void cpu::STX(addressing mode) {
   switch (mode) {
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    write(addr, X);
+    break;
+  }
   case addressing::zero: {
     uint8_t zaddr = read(++PC);
     write(0x00FF & zaddr, X);
@@ -787,6 +1021,23 @@ void cpu::TAX(addressing mode) {
   }
 }
 
+void cpu::TAY(addressing mode) {
+  switch (mode) {
+  case implied:
+    Y = A;
+    // Zero bit
+    setFlag(1, Y == 0);
+
+    // Negative bit
+    setFlag(7, Y & 0b10000000);
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
 void cpu::TSX(addressing mode) {
   switch (mode) {
   case implied:
@@ -796,6 +1047,23 @@ void cpu::TSX(addressing mode) {
 
     // Negative bit
     setFlag(7, X & 0b10000000);
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::TXS(addressing mode) {
+  switch (mode) {
+  case implied:
+    S = X;
+    // Zero bit
+    setFlag(1, S == 0);
+
+    // Negative bit
+    setFlag(7, S & 0b10000000);
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",

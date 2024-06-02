@@ -51,6 +51,9 @@ public:
 
   // Instructions
   void ADC(addressing mode);
+  void AND(addressing mode);
+  void ASL(addressing mode);
+  void BCC(addressing mode);
   void BCS(addressing mode);
   void BEQ(addressing mode);
   void BIT(addressing mode);
@@ -59,6 +62,7 @@ public:
   void BPL(addressing mode);
   void BVS(addressing mode);
   void CLD(addressing mode);
+  void CLC(addressing mode);
   void CLI(addressing mode);
   void CMP(addressing mode);
   void CPX(addressing mode);

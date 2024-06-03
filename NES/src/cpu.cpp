@@ -133,6 +133,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x65:
     ADC(addressing::immediate);
     break;
+  case 0x66:
+    ROR(addressing::zero);
+    break;
   case 0x68:
     PLA(addressing::implied);
     break;
@@ -1101,6 +1104,31 @@ void cpu::ROL(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::ROR(addressing mode) {
+  switch (mode) {
+  case zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t val = read(0x00FF & zaddr);
+    uint8_t carry = P & 1;
+    setFlag(0, val & 0b10000000);
+    uint8_t res = val << 1;
+    res |= carry;
+    write(0x00FF & zaddr, res);
+
+    // Zero bit
+    setFlag(1, res == 0);
+
+    // Negative bit
+    setFlag(7, res & 0b10000000);
     break;
   }
   default:

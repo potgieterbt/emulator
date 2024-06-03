@@ -85,6 +85,7 @@ public:
   void PLA(addressing mode);
   void PLP(addressing mode);
   void ROL(addressing mode);
+  void ROR(addressing mode);
   void RTS(addressing mode);
   void SBC(addressing mode);
   void SEC(addressing mode);

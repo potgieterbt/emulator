@@ -66,8 +66,10 @@ public:
   void CLI(addressing mode);
   void CMP(addressing mode);
   void CPX(addressing mode);
+  void CPY(addressing mode);
   void DEX(addressing mode);
   void DEY(addressing mode);
+  void EOR(addressing mode);
   void INC(addressing mode);
   void INX(addressing mode);
   void INY(addressing mode);
@@ -82,8 +84,10 @@ public:
   void PHP(addressing mode);
   void PLA(addressing mode);
   void PLP(addressing mode);
+  void ROL(addressing mode);
   void RTS(addressing mode);
   void SBC(addressing mode);
+  void SEC(addressing mode);
   void SED(addressing mode);
   void SEI(addressing mode);
   void STA(addressing mode);

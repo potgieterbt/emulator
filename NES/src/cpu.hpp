@@ -39,6 +39,7 @@ public:
   enum addressing {
     absolute,
     absoluteX,
+    absoluteY,
     accumulator,
     immediate,
     implied,

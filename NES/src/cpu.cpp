@@ -27,7 +27,7 @@ uint8_t cpu::read(uint16_t addr) {
   switch (addr) {
   case 0x0000 ... 0x0FFF:
     printf("%X\n", addr);
-    printf("%X\n", RAM[addr]);
+    printf("%X\n", RAM[addr % 0x0800]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
     return 0;
@@ -118,6 +118,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x48:
     PHA(addressing::implied);
     break;
+  case 0x49:
+    EOR(addressing::immediate);
+    break;
   case 0x4A:
     LSR(addressing::accumulator);
     break;
@@ -141,6 +144,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0x69:
     ADC(addressing::immediate);
+    break;
+  case 0x6A:
+    ROR(addressing::accumulator);
     break;
   case 0x6C:
     JMP(addressing::indirect);
@@ -187,6 +193,9 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x98:
     TYA(addressing::implied);
     break;
+  case 0x99:
+    STA(addressing::absoluteY);
+    break;
   case 0x9A:
     TXS(addressing::implied);
     break;
@@ -204,6 +213,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0xA5:
     LDA(addressing::zero);
+    break;
+  case 0xA6:
+    LDX(addressing::zero);
     break;
   case 0xA8:
     TAY(addressing::implied);
@@ -229,11 +241,17 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xB1:
     LDA(addressing::indirectY);
     break;
+  case 0xB9:
+    LDA(addressing::absoluteY);
+    break;
   case 0xBA:
     TSX(addressing::implied);
     break;
   case 0xBD:
     LDA(addressing::absoluteX);
+    break;
+  case 0xC0:
+    CPY(addressing::immediate);
     break;
   case 0xC4:
     CPY(addressing::zero);
@@ -572,6 +590,18 @@ void cpu::CPX(addressing mode) {
 
 void cpu::CPY(addressing mode) {
   switch (mode) {
+  case immediate: {
+    uint8_t val = read(++PC);
+    // Carry
+    setFlag(0, Y >= val);
+
+    // Zero bit
+    setFlag(1, Y == val);
+
+    // Negative bit
+    setFlag(7, (Y - val) & 0b10000000);
+    break;
+  }
   case zero: {
     uint8_t zaddr = read(++PC);
     uint8_t val = read(0x00FF & zaddr);
@@ -654,6 +684,17 @@ void cpu::CMP(addressing mode) {
 
 void cpu::EOR(addressing mode) {
   switch (mode) {
+  case addressing::immediate: {
+    uint8_t val = read(++PC);
+    A ^= val;
+
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    break;
+  }
   case addressing::zero: {
     uint8_t zaddr = read(++PC);
     uint8_t val = read(0x00FF & zaddr);
@@ -789,13 +830,10 @@ void cpu::JMP(addressing mode) {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
-    printf("%X", addr);
     uint8_t jaddr_low = read(addr);
     uint8_t jaddr_high = read(++addr);
     uint16_t jmp_addr = (jaddr_high << 8) | jaddr_low;
-    printf("%X", jmp_addr);
     PC = jmp_addr - 1;
-    printf("%X", PC);
     break;
   }
   default:
@@ -880,6 +918,20 @@ void cpu::LDA(addressing mode) {
     setFlag(7, A & 0b10000000);
     break;
   }
+  case addressing::absoluteY: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    addr += Y;
+    uint8_t val = read(addr);
+    A = val;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    break;
+  }
   case addressing::zero: {
     uint8_t zaddr = read(++PC);
     uint8_t val = read(0x00FF & zaddr);
@@ -917,6 +969,18 @@ void cpu::LDX(addressing mode) {
     uint16_t addr = (addr_high << 8) | addr_low;
 
     uint8_t val = read(addr);
+    X = val;
+    // Zero bit
+    setFlag(1, X == 0);
+
+    // Negative bit
+    setFlag(7, X & 0b10000000);
+    break;
+  }
+  case addressing::zero: {
+    uint16_t zaddr = read(++PC);
+
+    uint8_t val = read(zaddr);
     X = val;
     // Zero bit
     setFlag(1, X == 0);
@@ -1115,6 +1179,20 @@ void cpu::ROL(addressing mode) {
 
 void cpu::ROR(addressing mode) {
   switch (mode) {
+  case accumulator: {
+    uint8_t carry = P & 1;
+    setFlag(0, A & 0b10000000);
+    uint8_t res = A << 1;
+    res |= carry;
+    A = res;
+
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    break;
+  }
   case zero: {
     uint8_t zaddr = read(++PC);
     uint8_t val = read(0x00FF & zaddr);
@@ -1240,6 +1318,13 @@ void cpu::STA(addressing mode) {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = ((addr_high << 8) | addr_low) + X;
+    write(addr, A);
+    break;
+  }
+  case addressing::absoluteY: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = ((addr_high << 8) | addr_low) + Y;
     write(addr, A);
     break;
   }

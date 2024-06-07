@@ -511,12 +511,6 @@ void cpu::BPL(addressing mode) {
     // Read before the if statement to ensure that the program counter
     // increments correctly
     int8_t jmp_val = (int8_t)read(++PC);
-    if (PC == 0xE96C) {
-      return;
-    }
-    if (PC == 0xE86C) {
-      return;
-    }
     if (!neg) {
       PC += jmp_val;
     }

@@ -1,4 +1,5 @@
 #include "cpu.hpp"
+#include "rom.hpp"
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -13,10 +14,13 @@ int main(int argc, char *argv[]) {
 
   const std::string path = argv[1];
 
-  cpu CPU;
-  bool res = CPU.loadROM(path);
+  ROM cart;
+  bool res = cart.loadROM(path);
 
-  std::vector<uint8_t> test = CPU.getPRG();
+  const std::vector<uint8_t>& prg_rom = cart.getPRG();
+  cpu CPU(prg_rom);
+
+  std::vector<uint8_t> test = cart.getPRG();
 
   CPU.reset();
   printf("%x\n", CPU.PC);

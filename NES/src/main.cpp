@@ -1,4 +1,5 @@
 #include "cpu.hpp"
+#include "ppu.hpp"
 #include "rom.hpp"
 #include <cstdint>
 #include <iostream>
@@ -17,7 +18,10 @@ int main(int argc, char *argv[]) {
   ROM cart;
   bool res = cart.loadROM(path);
 
-  const std::vector<uint8_t>& prg_rom = cart.getPRG();
+  const std::vector<uint8_t> &chr_rom = cart.getCHR();
+  ppu ppu(chr_rom);
+
+  const std::vector<uint8_t> &prg_rom = cart.getPRG();
   cpu CPU(prg_rom);
 
   std::vector<uint8_t> test = cart.getPRG();

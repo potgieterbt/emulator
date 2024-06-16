@@ -13,7 +13,7 @@
 #include <sys/types.h>
 #include <vector>
 
-cpu::cpu(const std::vector<uint8_t> prg) : m_PRG_ROM(prg) {}
+cpu::cpu(const std::vector<uint8_t>& prg) : m_PRG_ROM(prg) {}
 
 void cpu::reset() {
   PC = ((read(0xFFFD) << 8) | read(0xFFFC));

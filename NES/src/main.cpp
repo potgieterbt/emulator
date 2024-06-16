@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   ppu ppu(chr_rom);
 
   const std::vector<uint8_t> &prg_rom = cart.getPRG();
-  cpu CPU(prg_rom);
+  cpu CPU(prg_rom, ppu);
 
   std::vector<uint8_t> test = cart.getPRG();
 

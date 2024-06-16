@@ -1,10 +1,12 @@
+#include "ppu.hpp"
 #include <array>
 #include <cstdint>
 #include <vector>
 
 class cpu {
 public:
-  cpu(const std::vector<uint8_t>&);
+  cpu(const std::vector<uint8_t> &, const ppu &);
+  ppu m_ppu;
   std::array<uint8_t, 0xFFFF> RAM;
   std::vector<uint8_t> m_PRG_ROM;
 

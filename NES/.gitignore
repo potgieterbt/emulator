@@ -11,3 +11,5 @@ CTestTestfile.cmake
 _deps
 .cache
 zig-cache
+SMB.nes
+

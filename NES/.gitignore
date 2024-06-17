@@ -12,4 +12,4 @@ _deps
 .cache
 zig-cache
 SMB.nes
-
+*.o

@@ -11,4 +11,4 @@ file(GLOB_RECURSE sources
 # Add precompiler definitions like that:
 add_definitions(-DSOME_DEFINITION)
 
-add_executable(NES ${sources})
+add_executable(NES.o ${sources})

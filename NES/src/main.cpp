@@ -2,6 +2,8 @@
 #include "ppu.hpp"
 #include "rom.hpp"
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,6 +19,10 @@ int main(int argc, char *argv[]) {
 
   ROM cart;
   bool res = cart.loadROM(path);
+  if (!res) {
+    printf("Could not load file, Aborting");
+    return 1;
+  }
 
   const std::vector<uint8_t> &chr_rom = cart.getCHR();
   ppu ppu(chr_rom);
@@ -27,7 +33,6 @@ int main(int argc, char *argv[]) {
   std::vector<uint8_t> test = cart.getPRG();
 
   CPU.reset();
-  printf("%x\n", CPU.PC);
 
   while (true) {
     CPU.runCycle();

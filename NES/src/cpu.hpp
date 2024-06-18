@@ -6,23 +6,26 @@
 class cpu {
 public:
   cpu(const std::vector<uint8_t> &, const ppu &);
-  ppu m_ppu;
-  std::array<uint8_t, 0xFFFF> RAM;
-  std::vector<uint8_t> m_PRG_ROM;
+  void reset();
+  void runCycle();
 
+private:
   uint8_t read(uint16_t addr);
   void write(uint16_t addr, uint8_t val);
   uint8_t fetchInstruction();
-  void reset();
   void setFlag(uint8_t flag, bool val);
-  void runCycle();
   void executeOpcode(uint8_t op);
+  uint8_t pageCross(uint16_t oldPC, uint16_t newPC);
 
   uint8_t Stack[0xFF];
+  std::array<uint8_t, 0xFFFF> RAM;
+  std::vector<uint8_t> m_PRG_ROM;
 
+  ppu m_ppu;
   bool Step = false;
   uint16_t last_jump;
 
+  uint8_t cycles;
   uint8_t S;
   uint16_t PC;
   uint8_t A;

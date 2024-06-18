@@ -13,7 +13,7 @@ private:
 
 public:
   ppu(const std::vector<uint8_t> &);
-  void tick();
+  void tick(uint8_t cycles);
 
 private:
   bool rendering;

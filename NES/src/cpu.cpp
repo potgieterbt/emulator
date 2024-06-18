@@ -1,8 +1,3 @@
-// TODO:
-// - implement a step variable that can be set to true at anytime to to start
-// stepping if needed in a situation for debugging
-// - Implement a save state to be able to save the state at a certain time and
-// load that same state to better implement debug Instruction
 #include "cpu.hpp"
 #include <cstdint>
 #include <cstdio>
@@ -13,7 +8,8 @@
 #include <sys/types.h>
 #include <vector>
 
-cpu::cpu(const std::vector<uint8_t>& prg, const ppu& ppu) : m_PRG_ROM(prg), m_ppu(ppu) {}
+cpu::cpu(const std::vector<uint8_t> &prg, const ppu &ppu)
+    : m_PRG_ROM(prg), m_ppu(ppu) {}
 
 void cpu::reset() {
   PC = ((read(0xFFFD) << 8) | read(0xFFFC));
@@ -63,11 +59,19 @@ void cpu::setFlag(uint8_t flag, bool val) {
 
 uint8_t cpu::fetchInstruction() { return read(PC); }
 
+uint8_t cpu::pageCross(uint16_t oldPC, uint16_t newPC) {
+  if ((oldPC >> 8) != (newPC >> 8)) {
+    return 1;
+  }
+  return 0;
+}
+
 void cpu::runCycle() {
   uint8_t op = fetchInstruction();
   printf("Instr: %x\n", op);
   executeOpcode(op);
   ++PC;
+  m_ppu.tick(cycles * 3);
 }
 
 void cpu::executeOpcode(uint8_t op) {
@@ -312,17 +316,20 @@ void cpu::ADC(addressing mode) {
     uint16_t addr = (addr_high << 8) | addr_low;
     val = read(addr);
     sum = A + (val + (P & 1));
+    cycles = 4;
     break;
   }
   case addressing::immediate: {
     val = read(++PC);
     sum = A + (val + (P & 1));
+    cycles = 2;
     break;
   }
   case addressing::zero: {
     uint8_t zaddr = read(++PC);
     val = read(0x00FF & zaddr);
     sum = A + (val + (P & 1));
+    cycles = 3;
     break;
   }
   default:
@@ -353,6 +360,7 @@ void cpu::AND(addressing mode) {
   case addressing::immediate: {
     val = read(++PC);
     A = A & val;
+    cycles = 2;
     break;
   }
   default:
@@ -381,6 +389,7 @@ void cpu::ASL(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 5;
     break;
   }
   default:
@@ -397,10 +406,13 @@ void cpu::BCC(addressing mode) {
     // Read before the if statement to ensure that the program counter
     // increments correctly
     int8_t jmp_val = (int8_t)read(++PC);
+    cycles = 2;
     if (!carry) {
       // added - 1 due to the way that I increment PC after the Instruction in
       // executed
+      cycles += pageCross(PC, (PC + jmp_val));
       PC += jmp_val;
+      cycles++;
     }
     break;
   }
@@ -418,10 +430,13 @@ void cpu::BCS(addressing mode) {
     // Read before the if statement to ensure that the program counter
     // increments correctly
     int8_t jmp_val = (int8_t)read(++PC);
+    cycles = 2;
     if (carry) {
       // added - 1 due to the way that I increment PC after the Instruction in
       // executed
+      cycles += pageCross(PC, (PC + jmp_val));
       PC += jmp_val;
+      cycles++;
     }
     break;
   }
@@ -439,10 +454,13 @@ void cpu::BEQ(addressing mode) {
     // Read before the if statement to ensure that the program counter
     // increments correctly
     int8_t jmp_val = (int8_t)read(++PC);
+    cycles = 2;
     if (zero) {
       // added - 1 due to the way that I increment PC after the Instruction in
       // executed
+      cycles += pageCross(PC, (PC + jmp_val));
       PC += jmp_val;
+      cycles++;
     }
     break;
   }
@@ -466,6 +484,7 @@ void cpu::BIT(addressing mode) {
 
     // Negative bit
     setFlag(7, (A - val) & 0b10000000);
+    cycles = 3;
     break;
   }
   case zero: {
@@ -477,6 +496,7 @@ void cpu::BIT(addressing mode) {
 
     // Negative bit
     setFlag(7, (A - val) & 0b10000000);
+    cycles = 2;
     break;
   }
 
@@ -494,8 +514,11 @@ void cpu::BMI(addressing mode) {
     // Read before the if statement to ensure that the program counter
     // increments correctly
     int8_t jmp_val = (int8_t)read(++PC);
+    cycles = 2;
     if (neg) {
+      cycles += pageCross(PC, (PC + jmp_val));
       PC += jmp_val;
+      cycles++;
     }
     break;
   }
@@ -513,8 +536,11 @@ void cpu::BPL(addressing mode) {
     // Read before the if statement to ensure that the program counter
     // increments correctly
     int8_t jmp_val = (int8_t)read(++PC);
+    cycles = 2;
     if (!neg) {
+      cycles += pageCross(PC, (PC + jmp_val));
       PC += jmp_val;
+      cycles++;
     }
     break;
   }
@@ -532,8 +558,11 @@ void cpu::BNE(addressing mode) {
     // Read before the if statement to ensure that the program counter
     // increments correctly
     int8_t jmp_val = (int8_t)read(++PC);
+    cycles = 2;
     if (!zero) {
+      cycles += pageCross(PC, (PC + jmp_val));
       PC += jmp_val;
+      cycles++;
     }
     break;
   }
@@ -549,79 +578,14 @@ void cpu::BVS(addressing mode) {
   case addressing::relative: {
     uint8_t overflow = (P >> 6) & 1;
     uint8_t jmp_val = read(++PC);
+    cycles = 2;
     if (overflow) {
       // added - 1 due to the way that I increment PC after the Instruction in
       // executed
-      PC += jmp_val - 1;
+      cycles += pageCross(PC, (PC + jmp_val));
+      PC += jmp_val;
+      cycles++;
     }
-    break;
-  }
-  default:
-    printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           __FUNCTION__, mode);
-    abort();
-  }
-}
-
-void cpu::CPX(addressing mode) {
-  switch (mode) {
-  case immediate: {
-    uint8_t val = read(++PC);
-    // Carry
-    setFlag(0, X >= val);
-
-    // Zero bit
-    setFlag(1, X == val);
-
-    // Negative bit
-    setFlag(7, (X - val) & 0b10000000);
-    break;
-  }
-  default:
-    printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           __FUNCTION__, mode);
-    abort();
-  }
-}
-
-void cpu::CPY(addressing mode) {
-  switch (mode) {
-  case immediate: {
-    uint8_t val = read(++PC);
-    // Carry
-    setFlag(0, Y >= val);
-
-    // Zero bit
-    setFlag(1, Y == val);
-
-    // Negative bit
-    setFlag(7, (Y - val) & 0b10000000);
-    break;
-  }
-  case zero: {
-    uint8_t zaddr = read(++PC);
-    uint8_t val = read(0x00FF & zaddr);
-    // Carry
-    setFlag(0, Y >= val);
-
-    // Zero bit
-    setFlag(1, Y == val);
-
-    // Negative bit
-    setFlag(7, (Y - val) & 0b10000000);
-    break;
-  }
-  default:
-    printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           __FUNCTION__, mode);
-    abort();
-  }
-}
-
-void cpu::CLD(addressing mode) {
-  switch (mode) {
-  case implied: {
-    setFlag(3, 0);
     break;
   }
   default:
@@ -635,6 +599,21 @@ void cpu::CLC(addressing mode) {
   switch (mode) {
   case implied: {
     setFlag(0, 0);
+    cycles = 2;
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::CLD(addressing mode) {
+  switch (mode) {
+  case implied: {
+    setFlag(3, 0);
+    cycles = 2;
     break;
   }
   default:
@@ -648,6 +627,7 @@ void cpu::CLI(addressing mode) {
   switch (mode) {
   case implied: {
     setFlag(2, 0);
+    cycles = 2;
     break;
   }
   default:
@@ -669,6 +649,7 @@ void cpu::CMP(addressing mode) {
 
     // Negative bit
     setFlag(7, (A - val) & 0b10000000);
+    cycles = 2;
     break;
   }
   default:
@@ -678,29 +659,55 @@ void cpu::CMP(addressing mode) {
   }
 }
 
-void cpu::EOR(addressing mode) {
+void cpu::CPX(addressing mode) {
   switch (mode) {
-  case addressing::immediate: {
+  case immediate: {
     uint8_t val = read(++PC);
-    A ^= val;
+    // Carry
+    setFlag(0, X >= val);
 
     // Zero bit
-    setFlag(1, A == 0);
+    setFlag(1, X == val);
 
     // Negative bit
-    setFlag(7, A & 0b10000000);
+    setFlag(7, (X - val) & 0b10000000);
+    cycles = 2;
     break;
   }
-  case addressing::zero: {
-    uint8_t zaddr = read(++PC);
-    uint8_t val = read(0x00FF & zaddr);
-    A ^= val;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::CPY(addressing mode) {
+  switch (mode) {
+  case immediate: {
+    uint8_t val = read(++PC);
+    // Carry
+    setFlag(0, Y >= val);
 
     // Zero bit
-    setFlag(1, A == 0);
+    setFlag(1, Y == val);
 
     // Negative bit
-    setFlag(7, A & 0b10000000);
+    setFlag(7, (Y - val) & 0b10000000);
+    cycles = 2;
+    break;
+  }
+  case zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t val = read(0x00FF & zaddr);
+    // Carry
+    setFlag(0, Y >= val);
+
+    // Zero bit
+    setFlag(1, Y == val);
+
+    // Negative bit
+    setFlag(7, (Y - val) & 0b10000000);
+    cycles = 3;
     break;
   }
   default:
@@ -719,6 +726,7 @@ void cpu::DEX(addressing mode) {
 
     // Negative bit
     setFlag(7, X & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -736,7 +744,42 @@ void cpu::DEY(addressing mode) {
 
     // Negative bit
     setFlag(7, Y & 0b10000000);
+    cycles = 2;
     break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::EOR(addressing mode) {
+  switch (mode) {
+  case addressing::immediate: {
+    uint8_t val = read(++PC);
+    A ^= val;
+
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 2;
+    break;
+  }
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t val = read(0x00FF & zaddr);
+    A ^= val;
+
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 3;
+    break;
+  }
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
@@ -756,6 +799,7 @@ void cpu::INC(addressing mode) {
 
     // Negative bit
     setFlag(7, val & 0b10000000);
+    cycles = 5;
     break;
   }
   case addressing::absolute: {
@@ -770,6 +814,7 @@ void cpu::INC(addressing mode) {
 
     // Negative bit
     setFlag(7, val & 0b10000000);
+    cycles = 6;
     break;
   }
   default:
@@ -788,6 +833,7 @@ void cpu::INX(addressing mode) {
 
     // Negative bit
     setFlag(7, X & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -805,6 +851,7 @@ void cpu::INY(addressing mode) {
 
     // Negative bit
     setFlag(7, Y & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -820,6 +867,7 @@ void cpu::JMP(addressing mode) {
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     PC = addr - 1;
+    cycles = 3;
     break;
   }
   case indirect: {
@@ -830,6 +878,7 @@ void cpu::JMP(addressing mode) {
     uint8_t jaddr_high = read(++addr);
     uint16_t jmp_addr = (jaddr_high << 8) | jaddr_low;
     PC = jmp_addr - 1;
+    cycles = 5;
     break;
   }
   default:
@@ -852,6 +901,7 @@ void cpu::JSR(addressing mode) {
     Stack[S] = MSB;
     --S;
     PC = addr - 1;
+    cycles = 6;
     break;
   }
 
@@ -872,12 +922,13 @@ void cpu::LDA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 2;
     break;
   }
   case addressing::indirectY: {
     uint8_t zaddr = read(++PC);
-    uint16_t addr = read(0x00FF & zaddr);
-    addr += Y;
+    uint16_t raddr = read(0x00FF & zaddr);
+    uint16_t addr = raddr + Y;
     uint8_t val = read(addr);
     A = val;
     // Zero bit
@@ -885,6 +936,8 @@ void cpu::LDA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 5;
+    cycles += pageCross((raddr >> 8), (addr >> 8));
     break;
   }
   case addressing::absolute: {
@@ -898,13 +951,14 @@ void cpu::LDA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 4;
     break;
   }
   case addressing::absoluteX: {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
-    uint16_t addr = (addr_high << 8) | addr_low;
-    addr += X;
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + X;
     uint8_t val = read(addr);
     A = val;
     // Zero bit
@@ -912,13 +966,15 @@ void cpu::LDA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 5;
+    cycles += pageCross((raddr >> 8), (addr >> 8));
     break;
   }
   case addressing::absoluteY: {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
-    uint16_t addr = (addr_high << 8) | addr_low;
-    addr += Y;
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + Y;
     uint8_t val = read(addr);
     A = val;
     // Zero bit
@@ -926,6 +982,8 @@ void cpu::LDA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 5;
+    cycles += pageCross((raddr >> 8), (addr >> 8));
     break;
   }
   case addressing::zero: {
@@ -937,6 +995,7 @@ void cpu::LDA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 3;
     break;
   }
 
@@ -957,6 +1016,7 @@ void cpu::LDX(addressing mode) {
 
     // Negative bit
     setFlag(7, X & 0b10000000);
+    cycles = 2;
     break;
   }
   case addressing::absolute: {
@@ -971,6 +1031,7 @@ void cpu::LDX(addressing mode) {
 
     // Negative bit
     setFlag(7, X & 0b10000000);
+    cycles = 4;
     break;
   }
   case addressing::zero: {
@@ -983,6 +1044,7 @@ void cpu::LDX(addressing mode) {
 
     // Negative bit
     setFlag(7, X & 0b10000000);
+    cycles = 3;
     break;
   }
   default:
@@ -1003,6 +1065,7 @@ void cpu::LDY(addressing mode) {
 
     // Negative bit
     setFlag(7, Y & 0b10000000);
+    cycles = 2;
     break;
   }
   case addressing::absolute: {
@@ -1017,6 +1080,7 @@ void cpu::LDY(addressing mode) {
 
     // Negative bit
     setFlag(7, Y & 0b10000000);
+    cycles = 4;
     break;
   }
   case addressing::zero: {
@@ -1029,6 +1093,7 @@ void cpu::LDY(addressing mode) {
 
     // Negative bit
     setFlag(7, Y & 0b10000000);
+    cycles = 3;
     break;
   }
   default:
@@ -1050,6 +1115,7 @@ void cpu::LSR(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1069,6 +1135,7 @@ void cpu::ORA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 2;
     break;
   }
   case addressing::absolute: {
@@ -1084,6 +1151,7 @@ void cpu::ORA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 4;
     break;
   }
   default:
@@ -1099,6 +1167,7 @@ void cpu::PHA(addressing mode) {
   case addressing::implied:
     Stack[S] = A;
     S--;
+    cycles = 3;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1112,6 +1181,7 @@ void cpu::PHP(addressing mode) {
   case addressing::implied:
     Stack[S] = P;
     S--;
+    cycles = 3;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1130,6 +1200,7 @@ void cpu::PLA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 4;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1143,6 +1214,7 @@ void cpu::PLP(addressing mode) {
   case implied:
     ++S;
     P = Stack[S];
+    cycles = 4;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1164,6 +1236,7 @@ void cpu::ROL(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 2;
     break;
   }
   default:
@@ -1187,6 +1260,7 @@ void cpu::ROR(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 2;
     break;
   }
   case zero: {
@@ -1203,6 +1277,7 @@ void cpu::ROR(addressing mode) {
 
     // Negative bit
     setFlag(7, res & 0b10000000);
+    cycles = 5;
     break;
   }
   default:
@@ -1220,6 +1295,7 @@ void cpu::RTS(addressing mode) {
     ++S;
     uint8_t LSB = Stack[S];
     PC = ((MSB << 8) | LSB);
+    cycles = 6;
     break;
   }
   default:
@@ -1238,6 +1314,7 @@ void cpu::SBC(addressing mode) {
     val = read(++PC);
     carry = P & 1;
     res = A - val - !carry;
+    cycles = 2;
     break;
   }
   default:
@@ -1263,6 +1340,7 @@ void cpu::SEC(addressing mode) {
   switch (mode) {
   case addressing::implied: {
     setFlag(0, 1);
+    cycles = 2;
     break;
   }
   default:
@@ -1277,6 +1355,7 @@ void cpu::SED(addressing mode) {
   switch (mode) {
   case addressing::implied: {
     setFlag(3, 1);
+    cycles = 2;
     break;
   }
   default:
@@ -1291,6 +1370,7 @@ void cpu::SEI(addressing mode) {
   switch (mode) {
   case addressing::implied: {
     setFlag(2, 1);
+    cycles = 2;
     break;
   }
   default:
@@ -1308,6 +1388,7 @@ void cpu::STA(addressing mode) {
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     write(addr, A);
+    cycles = 4;
     break;
   }
   case addressing::absoluteX: {
@@ -1315,6 +1396,7 @@ void cpu::STA(addressing mode) {
     uint8_t addr_high = read(++PC);
     uint16_t addr = ((addr_high << 8) | addr_low) + X;
     write(addr, A);
+    cycles = 5;
     break;
   }
   case addressing::absoluteY: {
@@ -1322,6 +1404,7 @@ void cpu::STA(addressing mode) {
     uint8_t addr_high = read(++PC);
     uint16_t addr = ((addr_high << 8) | addr_low) + Y;
     write(addr, A);
+    cycles = 5;
     break;
   }
   case addressing::indirectY: {
@@ -1329,40 +1412,21 @@ void cpu::STA(addressing mode) {
     uint16_t addr = read(0x00FF & zaddr);
     addr += Y;
     write(addr, A);
+    cycles = 6;
     break;
   }
   case addressing::zero: {
     uint8_t zaddr = read(++PC);
     uint8_t addr = read(0x00FF & zaddr);
     write(addr, A);
+    cycles = 3;
     break;
   }
   case addressing::zeroX: {
     uint8_t zaddr = read(++PC);
     uint16_t addr = read(0x00FF & (zaddr + X));
     write((addr % 0xFF), A);
-    break;
-  }
-  default:
-    printf("Instruction called with an invalid addressing mode: %s, %i\n",
-           __FUNCTION__, mode);
-    abort();
-    break;
-  }
-}
-
-void cpu::STY(addressing mode) {
-  switch (mode) {
-  case addressing::zero: {
-    uint8_t zaddr = read(++PC);
-    write(0x00FF & zaddr, Y);
-    break;
-  }
-  case addressing::absolute: {
-    uint8_t addr_low = read(++PC);
-    uint8_t addr_high = read(++PC);
-    uint16_t addr = (addr_high << 8) | addr_low;
-    write(addr, Y);
+    cycles = 4;
     break;
   }
   default:
@@ -1380,11 +1444,37 @@ void cpu::STX(addressing mode) {
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
     write(addr, X);
+    cycles = 4;
     break;
   }
   case addressing::zero: {
     uint8_t zaddr = read(++PC);
     write(0x00FF & zaddr, X);
+    cycles = 3;
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+    break;
+  }
+}
+
+void cpu::STY(addressing mode) {
+  switch (mode) {
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    write(0x00FF & zaddr, Y);
+    cycles = 3;
+    break;
+  }
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    write(addr, Y);
+    cycles = 4;
     break;
   }
   default:
@@ -1404,6 +1494,7 @@ void cpu::TAX(addressing mode) {
 
     // Negative bit
     setFlag(7, X & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1421,6 +1512,7 @@ void cpu::TAY(addressing mode) {
 
     // Negative bit
     setFlag(7, Y & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1438,6 +1530,7 @@ void cpu::TSX(addressing mode) {
 
     // Negative bit
     setFlag(7, X & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1455,6 +1548,7 @@ void cpu::TXS(addressing mode) {
 
     // Negative bit
     setFlag(7, S & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
@@ -1472,6 +1566,7 @@ void cpu::TYA(addressing mode) {
 
     // Negative bit
     setFlag(7, A & 0b10000000);
+    cycles = 2;
     break;
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",

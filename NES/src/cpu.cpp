@@ -28,6 +28,7 @@ uint8_t cpu::read(uint16_t addr) {
     printf("%X\n", RAM[addr % 0x0800]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
+    m_ppu.read(addr & 8);
     return 0;
   case 0x4000 ... 0x4017:
     return 0;

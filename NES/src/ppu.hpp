@@ -14,6 +14,7 @@ private:
 public:
   ppu(const std::vector<uint8_t> &);
   void tick(uint8_t cycles);
+  uint8_t read(uint8_t reg);
 
 private:
   bool rendering;

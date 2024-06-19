@@ -1,5 +1,6 @@
 #include "ppu.hpp"
 #include <cstdint>
+#include <cstdio>
 #include <vector>
 
 ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr){};
@@ -7,6 +8,7 @@ ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr){};
 void ppu::tick(uint8_t cycles) {
   // Run cycles to catch up with cpu cycles
   for (int i = 0; i < cycles; ++i) {
+    printf("Running cycle %i\n", i);
     // Visible and pre-render scanlines - this is the normal operations during a
     // scnaline
     if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {

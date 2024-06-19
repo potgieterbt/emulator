@@ -46,8 +46,23 @@ uint8_t cpu::read(uint16_t addr) {
 }
 
 void cpu::write(uint16_t addr, uint8_t val) {
-  RAM[(addr % 0x2000)] = val;
-  return;
+  switch (addr) {
+  case 0x0000 ... 0x0FFF:
+    RAM[(addr % 0x2000)] = val;
+    return;
+  case 0x2000 ... 0x3FFF:
+    return;
+  case 0x4000 ... 0x4017:
+    return 0;
+  case 0x4018 ... 0x401F:
+    return 0;
+  case 0x4020 ... 0xFFFF: {
+    printf("\n", );
+    return;
+  }
+  default:
+    return 0;
+  }
 }
 
 void cpu::setFlag(uint8_t flag, bool val) {

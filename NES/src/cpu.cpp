@@ -28,7 +28,7 @@ uint8_t cpu::read(uint16_t addr) {
     printf("%X\n", RAM[addr % 0x0800]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
-    // m_ppu.read(addr & 8);
+    m_ppu.cpu_read(addr & 8);
     return 0;
   case 0x4000 ... 0x4017:
     return 0;
@@ -50,18 +50,21 @@ void cpu::write(uint16_t addr, uint8_t val) {
   case 0x0000 ... 0x0FFF:
     RAM[(addr % 0x2000)] = val;
     return;
-  case 0x2000 ... 0x3FFF:
+  case 0x2000 ... 0x3FFF: {
+    uint8_t reg = addr % 8;
+    m_ppu.cpu_write(reg, val);
     return;
+  }
   case 0x4000 ... 0x4017:
-    return 0;
+    return;
   case 0x4018 ... 0x401F:
-    return 0;
+    return;
   case 0x4020 ... 0xFFFF: {
-    printf("\n", );
+    printf("PRGROM is read-only\n");
     return;
   }
   default:
-    return 0;
+    return;
   }
 }
 

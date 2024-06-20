@@ -4,6 +4,32 @@
 #include <vector>
 
 ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr){};
+uint8_t ppu::cpu_read(uint8_t reg) { return 0; }
+void ppu::cpu_write(uint8_t reg, uint8_t val) {}
+
+uint8_t ppu::ppu_read(uint8_t addr) {
+  switch (addr) {
+  case 0x0000 ... 0x1FFF: {
+    uint8_t val = m_CHR_ROM[addr];
+    return 0;
+  }
+  case 0x2000 ... 0x3EFF: {
+    uint16_t index = addr % 0xEFF;
+
+    uint16_t normAddr = addr;
+    if (normAddr > 0x3000) {
+        normAddr -= 0x1000;
+    }
+    return 0;
+  }
+  case 0x3F00 ... 0x3FFF:
+    return 0;
+  default:
+    return 0;
+  }
+  return 0;
+}
+void ppu::ppu_write(uint8_t reg, uint8_t val) {}
 
 void ppu::tick(uint8_t cycles) {
   // Run cycles to catch up with cpu cycles

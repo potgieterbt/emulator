@@ -18,7 +18,7 @@ uint8_t ppu::ppu_read(uint8_t addr) {
 
     uint16_t normAddr = addr;
     if (normAddr > 0x3000) {
-        normAddr -= 0x1000;
+      normAddr -= 0x1000;
     }
     return 0;
   }
@@ -30,6 +30,9 @@ uint8_t ppu::ppu_read(uint8_t addr) {
   return 0;
 }
 void ppu::ppu_write(uint8_t reg, uint8_t val) {}
+
+// I don't even know if I need the mapper in the ppu but I can remove in not needed
+void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
 
 void ppu::tick(uint8_t cycles) {
   // Run cycles to catch up with cpu cycles

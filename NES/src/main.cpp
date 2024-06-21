@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 
   const std::vector<uint8_t> &chr_rom = cart.getCHR();
   ppu ppu(chr_rom);
+  ppu.setMapper(cart.getMapperNumber());
 
   const std::vector<uint8_t> &prg_rom = cart.getPRG();
   cpu CPU(prg_rom, ppu);

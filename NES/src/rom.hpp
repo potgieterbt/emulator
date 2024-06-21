@@ -6,6 +6,7 @@ class ROM {
   std::vector<uint8_t> m_CHR_ROM;
   std::vector<uint8_t> m_PRG_ROM;
 
+private:
   uint8_t m_nameTableMirroring;
   uint8_t m_mapperNumber;
   bool m_extendedRAM;
@@ -15,4 +16,5 @@ public:
   bool loadROM(const std::string path);
   std::vector<uint8_t> getCHR();
   std::vector<uint8_t> getPRG();
+  uint8_t getMapperNumber();
 };

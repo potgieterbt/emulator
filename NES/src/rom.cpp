@@ -8,6 +8,7 @@
 
 std::vector<uint8_t> ROM::getCHR() { return m_CHR_ROM; }
 std::vector<uint8_t> ROM::getPRG() { return m_PRG_ROM; }
+uint8_t ROM::getMapperNumber() { return m_mapperNumber; }
 
 bool ROM::loadROM(const std::string path) {
   std::ifstream romFile(path, std::ios_base::binary | std::ios_base::in);

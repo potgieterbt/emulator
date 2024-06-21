@@ -69,11 +69,15 @@ void cpu::write(uint16_t addr, uint8_t val) {
 }
 
 void cpu::setFlag(uint8_t flag, bool val) {
+  P &= ~(1 << flag);
+  P |= (val << flag);
+  printf("Flag %i is set to %i, resulting in %b\n", flag, val, P);
   if (val) {
     P |= (1 << flag);
   } else {
     P &= ~(1 << flag);
   }
+  printf("Flag %i is set to %i, resulting in %b\n", flag, val, P);
 }
 
 uint8_t cpu::fetchInstruction() { return read(PC); }

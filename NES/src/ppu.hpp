@@ -18,6 +18,7 @@ public:
   void cpu_write(uint8_t reg, uint8_t val);
   uint8_t ppu_read(uint8_t addr);
   void ppu_write(uint8_t addr, uint8_t val);
+  void setMapper(uint8_t mapNum);
 
 private:
   bool rendering;
@@ -25,6 +26,8 @@ private:
   std::array<uint8_t, 32> pallete_table;
   std::array<uint8_t, 2048> vram;
   std::array<uint8_t, 256> oam_data;
+
+  uint8_t m_mapper;
 
   int scanLine = 0;
   int dot = 0;

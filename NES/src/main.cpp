@@ -30,6 +30,9 @@ int main(int argc, char *argv[]) {
   const std::vector<uint8_t> &chr_rom = cart.getCHR();
   ppu ppu(chr_rom);
   ppu.setMapper(cart.getMapperNumber());
+  for (int i = 0; i < 10; ++i) {
+    printf("%x\n", ppu.getVdisplayCopy()[i]);
+  }
 
   const std::vector<uint8_t> &prg_rom = cart.getPRG();
   cpu CPU(prg_rom, ppu);
@@ -71,20 +74,26 @@ int main(int argc, char *argv[]) {
       SDL_RenderSetLogicalSize(renderer, 512, 480);
 
       SDL_Texture *texture =
-          SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888,
+          SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
                             SDL_TEXTUREACCESS_STREAMING, 64, 32);
       if (texture == nullptr) {
         printf("Error in initialising rendering %s", SDL_GetError());
         SDL_Quit();
         exit(1);
       }
+      uint32_t pixels[61440];
+      int i = 0;
+      std::array<uint32_t, 61440> display = ppu.getVdisplayCopy();
+      for (uint32_t pixel : display) {
+        pixels[i] = pixel;
+        ++i;
+      }
 
-      SDL_CreateRGBSurfaceFrom(ppu.getVdisplay(), 256, 240, sizeof(uint32_t),
-                               256 * sizeof(uint32_t), 0xff000000, 0x00ff0000,
-                               0x0000ff00, 0x000000ff);
+      SDL_UpdateTexture(texture, NULL, pixels, 256 * sizeof(uint32_t));
 
-      // Update the surface
-      SDL_UpdateWindowSurface(window);
+      SDL_RenderClear(renderer);
+      SDL_RenderCopy(renderer, texture, NULL, NULL);
+      SDL_RenderPresent(renderer);
 
       // Wait ten seconds
       SDL_Delay(10000);

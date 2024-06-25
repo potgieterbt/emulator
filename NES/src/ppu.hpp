@@ -20,6 +20,7 @@ public:
   void ppu_write(uint8_t addr, uint8_t val);
   void setMapper(uint8_t mapNum);
   void *getVdisplay();
+  std::array<uint32_t, 61440> getVdisplayCopy();
 
   bool frame_complete = false;
 

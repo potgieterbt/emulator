@@ -4,7 +4,12 @@
 #include <cstdlib>
 #include <vector>
 
-ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr){};
+ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr) {
+
+  for (int i = 0; i < 61440; ++i) {
+    virt_display[i] = colors[rand() % 64];
+  }
+};
 uint8_t ppu::cpu_read(uint8_t reg) { return 0; }
 void ppu::cpu_write(uint8_t reg, uint8_t val) {}
 
@@ -38,6 +43,8 @@ void ppu::ppu_write(uint8_t reg, uint8_t val) {}
 void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
 
 void *ppu::getVdisplay() { return &virt_display; }
+
+std::array<uint32_t, 61440> ppu::getVdisplayCopy() { return virt_display; }
 
 void ppu::tick(uint8_t cycles) {
   // Run cycles to catch up with cpu cycles

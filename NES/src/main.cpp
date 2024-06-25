@@ -81,15 +81,9 @@ int main(int argc, char *argv[]) {
         SDL_Quit();
         exit(1);
       }
-      uint32_t pixels[61440];
-      int i = 0;
       std::array<uint32_t, 61440> display = ppu.getVdisplayCopy();
-      for (uint32_t pixel : display) {
-        pixels[i] = pixel;
-        ++i;
-      }
 
-      SDL_UpdateTexture(texture, NULL, pixels, 256 * sizeof(uint32_t));
+      SDL_UpdateTexture(texture, NULL, display.data(), 256 * sizeof(uint32_t));
 
       SDL_RenderClear(renderer);
       SDL_RenderCopy(renderer, texture, NULL, NULL);

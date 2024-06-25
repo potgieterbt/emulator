@@ -7,7 +7,7 @@ ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr){};
 uint8_t ppu::cpu_read(uint8_t reg) { return 0; }
 void ppu::cpu_write(uint8_t reg, uint8_t val) {}
 
-uint8_t ppu::ppu_read(uint8_t addr) {
+uint8_t ppu::ppu_read(uint16_t addr) {
   switch (addr) {
   case 0x0000 ... 0x1FFF: {
     uint8_t val = m_CHR_ROM[addr];
@@ -31,7 +31,8 @@ uint8_t ppu::ppu_read(uint8_t addr) {
 }
 void ppu::ppu_write(uint8_t reg, uint8_t val) {}
 
-// I don't even know if I need the mapper in the ppu but I can remove in not needed
+// I don't even know if I need the mapper in the ppu but I can remove in not
+// needed
 void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
 
 void ppu::tick(uint8_t cycles) {
@@ -40,6 +41,9 @@ void ppu::tick(uint8_t cycles) {
     printf("Running cycle %i\n", i);
     // Visible and pre-render scanlines - this is the normal operations during a
     // scnaline
+
+    // Random color value
+
     if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
       if (dot >= 0 && dot <= 256) {
         // Visible pixels
@@ -51,6 +55,13 @@ void ppu::tick(uint8_t cycles) {
         // registers
       } else if (dot >= 337 && dot <= 340) {
         // 2 unused Nametable fetches
+      } else if (dot >= 341) {
+        dot = 0;
+        scanLine++;
+        if (scanLine >= 261) {
+          scanLine = -1;
+          frame_complete = true;
+        }
       }
       // Normal operations
     } else if (scanLine == 240) {

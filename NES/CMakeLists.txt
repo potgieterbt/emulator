@@ -10,5 +10,8 @@ file(GLOB_RECURSE sources
         )
 # Add precompiler definitions like that:
 add_definitions(-DSOME_DEFINITION)
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
 
 add_executable(NES.o ${sources})
+target_link_libraries(NES.o ${SDL2_LIBRARIES})

@@ -19,6 +19,7 @@ public:
   uint8_t ppu_read(uint16_t addr);
   void ppu_write(uint8_t addr, uint8_t val);
   void setMapper(uint8_t mapNum);
+  void *getVdisplay();
 
   bool frame_complete = false;
 
@@ -28,6 +29,8 @@ private:
   std::array<uint8_t, 32> pallete_table;
   std::array<uint8_t, 2048> vram;
   std::array<uint8_t, 256> oam_data;
+
+  std::array<uint32_t, 61440> virt_display = {0};
 
   uint8_t m_mapper;
 

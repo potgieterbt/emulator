@@ -1,6 +1,7 @@
 #include "ppu.hpp"
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <vector>
 
 ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr){};
@@ -29,11 +30,14 @@ uint8_t ppu::ppu_read(uint16_t addr) {
   }
   return 0;
 }
+
 void ppu::ppu_write(uint8_t reg, uint8_t val) {}
 
 // I don't even know if I need the mapper in the ppu but I can remove in not
 // needed
 void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
+
+void *ppu::getVdisplay() { return &virt_display; }
 
 void ppu::tick(uint8_t cycles) {
   // Run cycles to catch up with cpu cycles
@@ -43,6 +47,7 @@ void ppu::tick(uint8_t cycles) {
     // scnaline
 
     // Random color value
+    virt_display[scanLine * dot] = colors[rand() % 64];
 
     if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
       if (dot >= 0 && dot <= 256) {

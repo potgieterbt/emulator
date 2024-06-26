@@ -41,11 +41,6 @@ int main(int argc, char *argv[]) {
 
   CPU.reset();
 
-  // while (true) {
-  //   CPU.runCycle();
-  //   // std::cin.get();
-  // }
-
   // The window we'll be rendering to
   SDL_Window *window = NULL;
 
@@ -55,44 +50,61 @@ int main(int argc, char *argv[]) {
   // Initialize SDL
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-  } else {
-    // Create window
-    window =
-        SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED,
-                         SDL_WINDOWPOS_UNDEFINED, 512, 480, SDL_WINDOW_SHOWN);
-    if (window == NULL) {
-      printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-    } else {
-      // Get window surface
-      SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
-      if (renderer == nullptr) {
-        printf("Error in initialising rendering %s", SDL_GetError());
-        SDL_Quit();
-        exit(1);
+  }
+
+  // Create window
+  window =
+      SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED,
+                       SDL_WINDOWPOS_UNDEFINED, 512, 480, SDL_WINDOW_SHOWN);
+  if (window == NULL) {
+    printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+  }
+  // Get window surface
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+  if (renderer == nullptr) {
+    printf("Error in initialising rendering %s", SDL_GetError());
+    SDL_Quit();
+    exit(1);
+  }
+
+  SDL_RenderSetLogicalSize(renderer, 512, 480);
+
+  SDL_Texture *texture =
+      SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
+                        SDL_TEXTUREACCESS_STREAMING, 256, 240);
+  if (texture == nullptr) {
+    printf("Error in initialising rendering %s", SDL_GetError());
+    SDL_Quit();
+    exit(1);
+  }
+
+  while (true) {
+    CPU.runCycle();
+    // std::cin.get();
+
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) {
+        exit(0);
       }
 
-      SDL_RenderSetLogicalSize(renderer, 512, 480);
-
-      SDL_Texture *texture =
-          SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
-                            SDL_TEXTUREACCESS_STREAMING, 256, 240);
-      if (texture == nullptr) {
-        printf("Error in initialising rendering %s", SDL_GetError());
-        SDL_Quit();
-        exit(1);
+      if (event.type == SDL_KEYDOWN) {
+        if (event.key.keysym.sym == SDLK_ESCAPE) {
+          exit(0);
+        }
       }
+    }
+    if (ppu.frame_complete) {
+      ppu.frame_complete = false;
       std::array<uint32_t, 61440> display = ppu.getVdisplayCopy();
 
       SDL_UpdateTexture(texture, NULL, display.data(), 256);
-
       SDL_RenderClear(renderer);
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);
-
-      // Wait ten seconds
-      SDL_Delay(10000);
     }
   }
+
   // Destroy window
   SDL_DestroyWindow(window);
 

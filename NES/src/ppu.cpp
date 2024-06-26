@@ -54,7 +54,7 @@ void ppu::tick(uint8_t cycles) {
     // scnaline
 
     // Random color value
-    virt_display[scanLine * dot] = colors[rand() % 64];
+    virt_display[scanLine * dot] = colors[rand() % 0x40];
 
     if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
       if (dot >= 0 && dot <= 256) {

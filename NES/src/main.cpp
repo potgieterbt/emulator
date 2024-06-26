@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     // Create window
     window =
         SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED,
-                         SDL_WINDOWPOS_UNDEFINED, 256, 240, SDL_WINDOW_SHOWN);
+                         SDL_WINDOWPOS_UNDEFINED, 512, 480, SDL_WINDOW_SHOWN);
     if (window == NULL) {
       printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
     } else {
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
 
       SDL_Texture *texture =
           SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888,
-                            SDL_TEXTUREACCESS_STREAMING, 64, 32);
+                            SDL_TEXTUREACCESS_STREAMING, 256, 240);
       if (texture == nullptr) {
         printf("Error in initialising rendering %s", SDL_GetError());
         SDL_Quit();
@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
       }
       std::array<uint32_t, 61440> display = ppu.getVdisplayCopy();
 
-      SDL_UpdateTexture(texture, NULL, display.data(), 256 * sizeof(uint32_t));
+      SDL_UpdateTexture(texture, NULL, display.data(), 256);
 
       SDL_RenderClear(renderer);
       SDL_RenderCopy(renderer, texture, NULL, NULL);

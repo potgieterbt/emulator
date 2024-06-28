@@ -2,11 +2,10 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 #include <vector>
 
-ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr) {
-  frame_complete = true;
-};
+ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr){};
 
 uint8_t ppu::cpu_read(uint8_t reg) { return 0; }
 void ppu::cpu_write(uint8_t reg, uint8_t val) {}
@@ -41,6 +40,11 @@ void ppu::ppu_write(uint8_t reg, uint8_t val) {}
 void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
 
 void *ppu::getVdisplay() { return &virt_display; }
+bool ppu::getFrameComplete() { return frame_complete; }
+
+void ppu::setFrameComplete(bool val) {
+  frame_complete = val;
+}
 
 std::array<uint32_t, 61440> ppu::getVdisplayCopy() { return virt_display; }
 
@@ -50,15 +54,13 @@ void ppu::tick(uint8_t cycles) {
     printf("Running cycle %i\n", i);
     // Visible and pre-render scanlines - this is the normal operations during a
     // scnaline
+    dot++;
 
-    if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
+    if (scanLine >= 0 & scanLine <= 239) {
       if (dot >= 0 && dot <= 256) {
         // Visible pixels
-        // Fetch Nametable byte
-        // Fetch Attribute Table byte
-        // Fetch Lower BG byte
-        // Fetch High BG byte
-        // Increment V
+        virt_display[scanLine * 255 + dot] = colors[rand() % 0x40];
+
       } else if (dot >= 257 && dot <= 320) {
         // Tile data of sprite for the next line fetched
       } else if (dot >= 321 && dot <= 336) {
@@ -69,19 +71,29 @@ void ppu::tick(uint8_t cycles) {
       } else if (dot >= 341) {
         dot = 0;
         scanLine++;
-        if (scanLine >= 261) {
-          scanLine = -1;
-          frame_complete = true;
-        }
       }
       // Normal operations
     } else if (scanLine == 240) {
       // post-render scnaline
-    } else if (scanLine >= 241 && scanLine <= 260) {
-      if (scanLine == 241) {
-        PPUSTATUS.vBlank = 1;
+      if (dot >= 341) {
+        dot = 0;
+        scanLine++;
       }
+    } else if (scanLine >= 241 && scanLine <= 260) {
       // VBlank scanlines
+      if (dot >= 341) {
+        dot = 0;
+        scanLine++;
+        if (scanLine >= 261) {
+          scanLine = 0;
+          frame_complete = true;
+          std::cin.get();
+        }
+      }
+    } else if (scanLine >= 261) {
+      // Pre-render scanline (Moved because was causing issues with the
+      // placeholder display rendering, should move back once I implement to
+      // correct rendering function)
     }
   }
   return;

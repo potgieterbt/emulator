@@ -4,12 +4,13 @@
 #include <fstream>
 #include <ios>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <sys/types.h>
 #include <vector>
 
-cpu::cpu(const std::vector<uint8_t> &prg, const ppu &ppu)
-    : m_PRG_ROM(prg), m_ppu(ppu) {}
+cpu::cpu(const std::vector<uint8_t> &prg, std::shared_ptr<ppu> PPU)
+    : m_PRG_ROM(prg), m_ppu(PPU) {}
 
 void cpu::reset() {
   PC = ((read(0xFFFD) << 8) | read(0xFFFC));
@@ -28,7 +29,7 @@ uint8_t cpu::read(uint16_t addr) {
     printf("%X\n", RAM[addr % 0x0800]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
-    m_ppu.cpu_read(addr & 8);
+    m_ppu->cpu_read(addr & 8);
     return 0;
   case 0x4000 ... 0x4017:
     return 0;
@@ -52,7 +53,7 @@ void cpu::write(uint16_t addr, uint8_t val) {
     return;
   case 0x2000 ... 0x3FFF: {
     uint8_t reg = addr % 8;
-    m_ppu.cpu_write(reg, val);
+    m_ppu->cpu_write(reg, val);
     return;
   }
   case 0x4000 ... 0x4017:
@@ -87,8 +88,8 @@ void cpu::runCycle() {
   printf("Instr: %x\n", op);
   executeOpcode(op);
   ++PC;
-  m_ppu.tick(cycles * 3);
-  std::cin.get();
+  m_ppu->tick(cycles * 3);
+  // std::cin.get();
 }
 
 void cpu::executeOpcode(uint8_t op) {

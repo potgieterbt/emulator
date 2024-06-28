@@ -21,10 +21,11 @@ public:
   void setMapper(uint8_t mapNum);
   void *getVdisplay();
   std::array<uint32_t, 61440> getVdisplayCopy();
-
-  bool frame_complete = false;
+  bool getFrameComplete();
+  void setFrameComplete(bool val);
 
 private:
+  bool frame_complete;
   bool rendering;
   std::vector<uint8_t> m_CHR_ROM;
   std::array<uint8_t, 32> pallete_table;

@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -28,14 +29,15 @@ int main(int argc, char *argv[]) {
   }
 
   const std::vector<uint8_t> &chr_rom = cart.getCHR();
-  ppu ppu(chr_rom);
-  ppu.setMapper(cart.getMapperNumber());
+  ppu PPU(chr_rom);
+  std::shared_ptr<ppu> ppu_ptr = std::shared_ptr<ppu>(&PPU);
+  PPU.setMapper(cart.getMapperNumber());
   for (int i = 0; i < 10; ++i) {
-    printf("%x\n", ppu.getVdisplayCopy()[i]);
+    printf("%x\n", PPU.getVdisplayCopy()[i]);
   }
 
   const std::vector<uint8_t> &prg_rom = cart.getPRG();
-  cpu CPU(prg_rom, ppu);
+  cpu CPU(prg_rom, ppu_ptr);
 
   std::vector<uint8_t> test = cart.getPRG();
 
@@ -94,11 +96,12 @@ int main(int argc, char *argv[]) {
         }
       }
     }
-    if (ppu.frame_complete) {
-      ppu.frame_complete = false;
-      std::array<uint32_t, 61440> display = ppu.getVdisplayCopy();
+    printf("main Frame: %i", PPU.getFrameComplete());
+    if (PPU.getFrameComplete() == true) {
+      PPU.setFrameComplete(false);
+      std::cin.get();
 
-      SDL_UpdateTexture(texture, NULL, display.data(), 256);
+      SDL_UpdateTexture(texture, NULL, PPU.getVdisplayCopy().data(), 256);
       SDL_RenderClear(renderer);
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);

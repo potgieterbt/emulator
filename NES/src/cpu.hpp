@@ -1,11 +1,12 @@
 #include "ppu.hpp"
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 class cpu {
 public:
-  cpu(const std::vector<uint8_t> &, const ppu &);
+  cpu(const std::vector<uint8_t> &, std::shared_ptr<ppu>);
   void reset();
   void runCycle();
 
@@ -21,7 +22,7 @@ private:
   std::array<uint8_t, 0xFFFF> RAM;
   std::vector<uint8_t> m_PRG_ROM;
 
-  ppu m_ppu;
+  std::shared_ptr<ppu> m_ppu;
   bool Step = false;
   uint16_t last_jump;
 

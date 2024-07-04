@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
   const std::string path = argv[1];
 
   ROM cart;
+  std::shared_ptr<ROM> rom_ptr = std::shared_ptr<ROM>(&cart);
   bool res = cart.loadROM(path);
   if (!res) {
     printf("Could not load file, Aborting");
@@ -29,15 +30,12 @@ int main(int argc, char *argv[]) {
   }
 
   const std::vector<uint8_t> &chr_rom = cart.getCHR();
-  ppu PPU(chr_rom);
+  ppu PPU(rom_ptr);
   std::shared_ptr<ppu> ppu_ptr = std::shared_ptr<ppu>(&PPU);
   PPU.setMapper(cart.getMapperNumber());
-  for (int i = 0; i < 10; ++i) {
-    printf("%x\n", PPU.getVdisplayCopy()[i]);
-  }
 
   const std::vector<uint8_t> &prg_rom = cart.getPRG();
-  cpu CPU(prg_rom, ppu_ptr);
+  cpu CPU(rom_ptr, ppu_ptr);
 
   std::vector<uint8_t> test = cart.getPRG();
 
@@ -82,7 +80,6 @@ int main(int argc, char *argv[]) {
 
   while (true) {
     CPU.runCycle();
-    // std::cin.get();
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
@@ -96,10 +93,8 @@ int main(int argc, char *argv[]) {
         }
       }
     }
-    printf("main Frame: %i", PPU.getFrameComplete());
     if (PPU.getFrameComplete() == true) {
       PPU.setFrameComplete(false);
-      std::cin.get();
 
       SDL_UpdateTexture(texture, NULL, PPU.getVdisplayCopy().data(), 256);
       SDL_RenderClear(renderer);

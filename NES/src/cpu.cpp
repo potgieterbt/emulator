@@ -9,8 +9,10 @@
 #include <sys/types.h>
 #include <vector>
 
-cpu::cpu(const std::vector<uint8_t> &prg, std::shared_ptr<ppu> PPU)
-    : m_PRG_ROM(prg), m_ppu(PPU) {}
+cpu::cpu(const std::shared_ptr<ROM> rom, std::shared_ptr<ppu> PPU)
+    : m_cart(rom), m_ppu(PPU) {
+  m_PRG_ROM = m_cart->getPRG();
+}
 
 void cpu::reset() {
   PC = ((read(0xFFFD) << 8) | read(0xFFFC));

@@ -6,7 +6,7 @@
 
 class cpu {
 public:
-  cpu(const std::vector<uint8_t> &, std::shared_ptr<ppu>);
+  cpu(std::shared_ptr<ROM>, std::shared_ptr<ppu>);
   void reset();
   void runCycle();
 
@@ -23,6 +23,7 @@ private:
   std::vector<uint8_t> m_PRG_ROM;
 
   std::shared_ptr<ppu> m_ppu;
+  std::shared_ptr<ROM> m_cart;
   bool Step = false;
   uint16_t last_jump;
 

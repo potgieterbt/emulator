@@ -1,7 +1,9 @@
 #pragma once
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <vector>
+#include "rom.hpp"
 
 class ppu {
 private:
@@ -12,7 +14,7 @@ private:
   const int FrameEndScanline = 261;
 
 public:
-  ppu(const std::vector<uint8_t> &);
+  ppu(const std::shared_ptr<ROM>);
   void tick(uint8_t cycles);
   uint8_t cpu_read(uint8_t reg);
   void cpu_write(uint8_t reg, uint8_t val);
@@ -27,8 +29,8 @@ public:
 private:
   bool frame_complete;
   bool rendering;
+  std::shared_ptr<ROM> m_cart;
   std::vector<uint8_t> m_CHR_ROM;
-  std::array<uint8_t, 32> pallete_table;
   std::array<uint8_t, 2048> vram;
   std::array<uint8_t, 256> oam_data;
 

@@ -1,27 +1,52 @@
 #include "ppu.hpp"
+#include "rom.hpp"
+#include <bits/fs_fwd.h>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <memory>
 #include <vector>
 
-ppu::ppu(const std::vector<uint8_t> &chr) : m_CHR_ROM(chr){};
+ppu::ppu(const std::shared_ptr<ROM> rom) : m_cart(rom) {
+  m_CHR_ROM = m_cart->getCHR();
+};
 
 uint8_t ppu::cpu_read(uint8_t reg) { return 0; }
 void ppu::cpu_write(uint8_t reg, uint8_t val) {}
 
 uint8_t ppu::ppu_read(uint16_t addr) {
+  uint8_t mirroring = m_cart->getMirroring();
+  addr &= 0x3FFF;
   switch (addr) {
   case 0x0000 ... 0x1FFF: {
     uint8_t val = m_CHR_ROM[addr];
     return 0;
   }
   case 0x2000 ... 0x3EFF: {
-    uint16_t index = addr % 0xEFF;
+    addr &= 0x0FFF;
+    // Horizontal
+    if (mirroring == 0) {
+      if ((addr >= 0x0000 && addr <= 0x03FF) ||
+          (addr >= 0x0800 && addr <= 0x0BFF)) {
+        return vram[addr & 0x0EFF];
+      } else if ((addr >= 0x0400 && addr <= 0x07FF) ||
+                 (addr >= 0x0C00 && addr <= 0x0FFF)) {
+        return vram[1024 + addr & 0x0EFF];
+      }
 
-    uint16_t normAddr = addr;
-    if (normAddr > 0x3000) {
-      normAddr -= 0x1000;
+      // Vertical
+    } else if (mirroring == 1) {
+
+      if ((addr >= 0x0000 && addr <= 0x03FF) ||
+          (addr >= 0x0400 && addr <= 0x07FF)) {
+
+        return vram[addr & 0x0EFF];
+      } else if ((addr >= 0x0800 && addr <= 0x0BFF) ||
+                 (addr >= 0x0C00 && addr <= 0x0FFF)) {
+
+        return vram[1024 + addr & 0x0EFF];
+      }
     }
     return 0;
   }
@@ -39,12 +64,9 @@ void ppu::ppu_write(uint8_t reg, uint8_t val) {}
 // needed
 void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
 
-void *ppu::getVdisplay() { return &virt_display; }
 bool ppu::getFrameComplete() { return frame_complete; }
 
-void ppu::setFrameComplete(bool val) {
-  frame_complete = val;
-}
+void ppu::setFrameComplete(bool val) { frame_complete = val; }
 
 std::array<uint32_t, 61440> ppu::getVdisplayCopy() { return virt_display; }
 
@@ -87,7 +109,6 @@ void ppu::tick(uint8_t cycles) {
         if (scanLine >= 261) {
           scanLine = 0;
           frame_complete = true;
-          std::cin.get();
         }
       }
     } else if (scanLine >= 261) {

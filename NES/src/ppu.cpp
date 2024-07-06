@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -20,9 +19,9 @@ uint8_t ppu::ppu_read(uint16_t addr) {
   addr &= 0x3FFF;
   switch (addr) {
   case 0x0000 ... 0x1FFF: {
-    uint8_t val = m_CHR_ROM[addr];
-    return 0;
-  }
+    addr &= 0x1FFF;
+    return m_CHR_ROM[addr];
+  };
   case 0x2000 ... 0x3EFF: {
     addr &= 0x0FFF;
     // Horizontal

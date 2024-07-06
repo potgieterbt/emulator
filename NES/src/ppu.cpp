@@ -78,19 +78,14 @@ void ppu::tick(uint8_t cycles) {
     // scnaline
     dot++;
 
-    if (scanLine >= 0 & scanLine <= 239) {
-      if (dot >= 0 && dot <= 256) {
+    if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
+      if (dot >= 1 && dot <= 257 || dot >= 321 && dot <= 337) {
         // Visible pixels
-        virt_display[scanLine * 255 + dot] = colors[rand() % 0x40];
-
-      } else if (dot >= 257 && dot <= 320) {
-        // Tile data of sprite for the next line fetched
-      } else if (dot >= 321 && dot <= 336) {
-        // First 2 tiles of next scanline fetched and loaded into shift
-        // registers
-      } else if (dot >= 337 && dot <= 340) {
-        // 2 unused Nametable fetches
-      } else if (dot >= 341) {
+        if (scanLine >= 0 && scanLine <= 239) {
+          if (dot >= 2 && dot <= 257) {
+            virt_display[scanLine * 255 + dot] = colors[rand() % 0x40];
+          }
+        }
         dot = 0;
         scanLine++;
       }

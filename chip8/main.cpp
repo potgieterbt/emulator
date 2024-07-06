@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
   uint32_t pixels[2048];
 
   if (!myChip8.loadGame(argv[1])) {
+
   }
   for (;;) {
     bool res = myChip8.emulateCycle();

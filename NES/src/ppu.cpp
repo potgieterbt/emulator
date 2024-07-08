@@ -12,7 +12,29 @@ ppu::ppu(const std::shared_ptr<ROM> rom) : m_cart(rom) {
 };
 
 uint8_t ppu::cpu_read(uint8_t reg) { return 0; }
-void ppu::cpu_write(uint8_t reg, uint8_t val) {}
+void ppu::cpu_write(uint8_t reg, uint8_t val) {
+  reg &= 0x8;
+  switch (reg) {
+  case 0:
+    break;
+  case 1:
+    break;
+  case 2:
+    break;
+  case 3:
+    break;
+  case 4:
+    break;
+  case 5:
+    break;
+  case 6:
+    break;
+  case 7:
+    break;
+  default:
+    return;
+  }
+}
 
 uint8_t ppu::ppu_read(uint16_t addr) {
   uint8_t mirroring = m_cart->getMirroring();

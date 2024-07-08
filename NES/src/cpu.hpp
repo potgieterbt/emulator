@@ -49,6 +49,8 @@ private:
     zeroX,
   };
 
+  void NMI();
+
   // Instructions
   void ADC(addressing mode);
   void AND(addressing mode);

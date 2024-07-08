@@ -86,6 +86,10 @@ uint8_t cpu::pageCross(uint16_t oldPC, uint16_t newPC) {
 }
 
 void cpu::runCycle() {
+  if (m_ppu->genNMI()) {
+    NMI();
+  }
+
   uint8_t op = fetchInstruction();
   printf("Instr: %x\n", op);
   executeOpcode(op);
@@ -323,6 +327,8 @@ void cpu::executeOpcode(uint8_t op) {
     std::cin.get();
   }
 }
+
+void cpu::NMI() { SEI(addressing::implied); }
 
 // Instructions
 

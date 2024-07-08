@@ -1,9 +1,9 @@
 #pragma once
+#include "rom.hpp"
 #include <array>
 #include <cstdint>
 #include <memory>
 #include <vector>
-#include "rom.hpp"
 
 class ppu {
 private:
@@ -25,15 +25,18 @@ public:
   std::array<uint32_t, 61440> getVdisplayCopy();
   bool getFrameComplete();
   void setFrameComplete(bool val);
+  bool genNMI();
 
 private:
   bool frame_complete;
+  bool nmiOccured;
   bool rendering;
   std::shared_ptr<ROM> m_cart;
   std::vector<uint8_t> m_CHR_ROM;
   std::array<uint8_t, 2048> vram;
   std::array<uint8_t, 256> oam_data;
 
+  std::array<uint32_t, 61440> bgPatternTable = {0};
   std::array<uint32_t, 61440> virt_display = {0};
 
   uint8_t m_mapper;
@@ -101,10 +104,24 @@ private:
     uint8_t val;
   } PPUSTATUS;
 
+  union loopy_register {
+    struct {
+      uint16_t course_x : 5;
+      uint16_t course_y : 5;
+      uint16_t nametable_x : 1;
+      uint16_t nametable_y : 1;
+      uint16_t fine_y : 3;
+      uint16_t unused : 1;
+    };
+    uint16_t reg;
+  };
+
+  loopy_register PPUVADDR;
+  loopy_register PPUTADDR;
+
   uint8_t OAMADDR;
   uint8_t OAMDATA;
   uint8_t PPUSCROLL;
-  uint8_t PPUADDR;
   uint8_t PPUDATA;
   uint8_t OAMDMA;
 };

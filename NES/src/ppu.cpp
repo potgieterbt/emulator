@@ -11,25 +11,71 @@ ppu::ppu(const std::shared_ptr<ROM> rom) : m_cart(rom) {
   m_CHR_ROM = m_cart->getCHR();
 };
 
-uint8_t ppu::cpu_read(uint8_t reg) { return 0; }
+bool ppu::genNMI() {
+  if (nmiOccured) {
+    nmiOccured = false;
+    return true;
+  }
+  return false;
+}
+
+uint8_t ppu::cpu_read(uint8_t reg) {
+
+  reg &= 0x8;
+  switch (reg) {
+  case 0:
+    return PPUCTRL.val;
+    break;
+  case 1:
+    return PPUMASK.val;
+    break;
+  case 2:
+    return PPUSTATUS.val;
+    break;
+  case 3:
+    return OAMADDR;
+    break;
+  case 4:
+    return OAMDATA;
+    break;
+  case 5:
+    return PPUSCROLL;
+    break;
+  case 6:
+    return PPUVADDR.reg;
+    break;
+  case 7:
+    return PPUDATA;
+    break;
+  }
+  return 0;
+}
 void ppu::cpu_write(uint8_t reg, uint8_t val) {
   reg &= 0x8;
   switch (reg) {
   case 0:
+    PPUCTRL.val = val;
     break;
   case 1:
+    PPUMASK.val = val;
     break;
   case 2:
+    PPUSTATUS.val = val;
     break;
   case 3:
+    OAMADDR = val;
     break;
   case 4:
+    OAMDATA = val;
     break;
   case 5:
+    PPUSCROLL = val;
     break;
   case 6:
+    PPUVADDR.reg = val;
     break;
   case 7:
+    PPUDATA = val;
     break;
   default:
     return;
@@ -97,7 +143,6 @@ void ppu::tick(uint8_t cycles) {
     printf("Running cycle %i\n", i);
     // Visible and pre-render scanlines - this is the normal operations during a
     // scnaline
-    dot++;
 
     if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
       if (dot >= 1 && dot <= 257 || dot >= 321 && dot <= 337) {
@@ -107,30 +152,36 @@ void ppu::tick(uint8_t cycles) {
             virt_display[scanLine * 255 + dot] = colors[rand() % 0x40];
           }
         }
-        dot = 0;
-        scanLine++;
       }
       // Normal operations
     } else if (scanLine == 240) {
       // post-render scnaline
-      if (dot >= 341) {
-        dot = 0;
-        scanLine++;
+      if (scanLine == 240 && dot == 0) {
+        frame_complete = true;
       }
     } else if (scanLine >= 241 && scanLine <= 260) {
       // VBlank scanlines
-      if (dot >= 341) {
-        dot = 0;
-        scanLine++;
-        if (scanLine >= 261) {
-          scanLine = 0;
-          frame_complete = true;
+      if (scanLine == 241 && dot == 1) {
+        PPUSTATUS.vBlank |= 1;
+
+        if (PPUCTRL.genNMI) {
+          nmiOccured = true;
         }
       }
     } else if (scanLine >= 261) {
       // Pre-render scanline (Moved because was causing issues with the
       // placeholder display rendering, should move back once I implement to
       // correct rendering function)
+    }
+
+    if (dot == 340) {
+      scanLine = (scanLine + 1) % 262;
+      if (scanLine == 0) {
+        odd = !odd;
+      }
+      dot = 0;
+    } else {
+      dot++;
     }
   }
   return;

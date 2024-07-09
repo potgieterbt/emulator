@@ -19,8 +19,7 @@ bool ppu::genNMI() {
   return false;
 }
 
-uint8_t ppu::cpu_read(uint8_t reg) {
-
+uint8_t ppu::peakregister(uint8_t reg) {
   reg &= 0x8;
   switch (reg) {
   case 0:
@@ -50,6 +49,42 @@ uint8_t ppu::cpu_read(uint8_t reg) {
   }
   return 0;
 }
+
+uint8_t ppu::cpu_read(uint8_t reg) {
+
+  reg &= 0x8;
+  switch (reg) {
+  case 0:
+    // Write only
+    break;
+  case 1:
+    // Write only
+    break;
+  case 2:
+    PPUSTATUS_COPY.val = PPUSTATUS.val;
+    PPUSTATUS.val &= ~0x80;
+    w = 0;
+    return PPUSTATUS_COPY.val;
+    break;
+  case 3:
+    // Write only
+    break;
+  case 4:
+    return OAMDATA;
+    break;
+  case 5:
+    // Write only
+    break;
+  case 6:
+    // Write only
+    break;
+  case 7:
+    return PPUDATA;
+    break;
+  }
+  return 0;
+}
+
 void ppu::cpu_write(uint8_t reg, uint8_t val) {
   reg &= 0x8;
   switch (reg) {
@@ -60,7 +95,7 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
     PPUMASK.val = val;
     break;
   case 2:
-    PPUSTATUS.val = val;
+    // Read only
     break;
   case 3:
     OAMADDR = val;
@@ -140,7 +175,6 @@ std::array<uint32_t, 61440> ppu::getVdisplayCopy() { return virt_display; }
 void ppu::tick(uint8_t cycles) {
   // Run cycles to catch up with cpu cycles
   for (int i = 0; i < cycles; ++i) {
-    printf("Running cycle %i\n", i);
     // Visible and pre-render scanlines - this is the normal operations during a
     // scnaline
 

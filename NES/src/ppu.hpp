@@ -16,6 +16,7 @@ private:
 public:
   ppu(const std::shared_ptr<ROM>);
   void tick(uint8_t cycles);
+  uint8_t peakregister(uint8_t reg);
   uint8_t cpu_read(uint8_t reg);
   void cpu_write(uint8_t reg, uint8_t val);
   uint8_t ppu_read(uint16_t addr);
@@ -28,6 +29,7 @@ public:
   bool genNMI();
 
 private:
+  bool w = false;
   bool frame_complete;
   bool nmiOccured;
   bool rendering;
@@ -103,6 +105,16 @@ private:
     };
     uint8_t val;
   } PPUSTATUS;
+
+  union {
+    struct {
+      unsigned leastSignificantBits : 5;
+      unsigned spriteOverflow : 1;
+      unsigned spriteZeroHit : 1;
+      unsigned vBlank : 1;
+    };
+    uint8_t val;
+  } PPUSTATUS_COPY;
 
   union loopy_register {
     struct {

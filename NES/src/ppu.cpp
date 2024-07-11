@@ -70,6 +70,7 @@ uint8_t ppu::cpu_read(uint8_t reg) {
     // Write only
     break;
   case 4:
+    // Need to return the value read from OAMADDR
     return OAMDATA;
     break;
   case 5:
@@ -79,6 +80,7 @@ uint8_t ppu::cpu_read(uint8_t reg) {
     // Write only
     break;
   case 7:
+    // Need to return the value read from PPUADDR
     return PPUDATA;
     break;
   }
@@ -90,6 +92,8 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
   switch (reg) {
   case 0:
     PPUCTRL.val = val;
+    PPUTADDR.nametable_x = PPUCTRL.nametable_x;
+    PPUTADDR.nametable_y = PPUCTRL.nametable_y;
     break;
   case 1:
     PPUMASK.val = val;
@@ -104,13 +108,30 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
     OAMDATA = val;
     break;
   case 5:
+    if (w == 0) {
+      x = val & 0x07;
+      PPUTADDR.course_x = val >> 3;
+      w = 1;
+    } else {
+      PPUTADDR.fine_y = val & 0x07;
+      PPUTADDR.course_y = val >> 3;
+      w = 0;
+    }
     PPUSCROLL = val;
     break;
   case 6:
-    PPUVADDR.reg = val;
+    if (w == 0) {
+      PPUTADDR.reg = (uint16_t)((val & 0x3F) << 8) || (PPUTADDR.reg & 0xFF);
+      w = 1;
+    } else {
+      PPUTADDR.reg = (PPUTADDR.reg & 0xFF00) | val;
+      PPUVADDR = PPUTADDR;
+      w = 0;
+    }
     break;
   case 7:
-    PPUDATA = val;
+    ppu_write(PPUVADDR.reg, val);
+    PPUVADDR.reg += (PPUCTRL.vramIncrement ? 32 : 1);
     break;
   default:
     return;

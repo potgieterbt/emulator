@@ -30,6 +30,7 @@ public:
 
 private:
   bool w = false;
+  uint8_t x;
   bool frame_complete;
   bool nmiOccured;
   bool rendering;
@@ -71,7 +72,8 @@ private:
 
   union {
     struct {
-      unsigned nametableAddress : 2;
+      unsigned nametable_x : 1;
+      unsigned nametable_y : 1;
       unsigned vramIncrement : 1;
       unsigned spritePatternTable : 1;
       unsigned bgPatternTable : 1;

@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -52,7 +53,7 @@ uint8_t ppu::peakregister(uint8_t reg) {
 
 uint8_t ppu::cpu_read(uint8_t reg) {
 
-  reg &= 0x8;
+  reg %= 0x8;
   switch (reg) {
   case 0:
     // Write only
@@ -61,8 +62,9 @@ uint8_t ppu::cpu_read(uint8_t reg) {
     // Write only
     break;
   case 2:
-    PPUSTATUS_COPY.val = PPUSTATUS.val;
-    PPUSTATUS.val &= ~0x80;
+    printf("2002: %x\n", PPUSTATUS.val);
+    PPUSTATUS_COPY.val = (PPUSTATUS.val & 0xE0) | (read_buffer_cpy & 0x1F);
+    PPUSTATUS.vBlank = 0;
     w = 0;
     return PPUSTATUS_COPY.val;
     break;
@@ -111,7 +113,7 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
     OAMADDR = val;
     break;
   case 4:
-    OAMDATA = val;
+    pOAM[OAMADDR] = val;
     break;
   case 5:
     if (w == 0) {
@@ -223,7 +225,8 @@ void ppu::tick(uint8_t cycles) {
     } else if (scanLine >= 241 && scanLine <= 260) {
       // VBlank scanlines
       if (scanLine == 241 && dot == 1) {
-        PPUSTATUS.vBlank |= 1;
+        PPUSTATUS.vBlank = 1;
+        printf("VBlank set");
 
         if (PPUCTRL.genNMI) {
           nmiOccured = true;

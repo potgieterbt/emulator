@@ -31,7 +31,7 @@ uint8_t cpu::read(uint16_t addr) {
     printf("%X\n", RAM[addr % 0x0800]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
-    return m_ppu->cpu_read(addr & 8);
+    return m_ppu->cpu_read(addr);
   case 0x4000 ... 0x4017:
     return 0;
   case 0x4018 ... 0x401F:
@@ -891,8 +891,10 @@ void cpu::JMP(addressing mode) {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
+    printf("%x\n", addr);
     PC = addr - 1;
     cycles = 3;
+    std::cin.get();
     break;
   }
   case indirect: {

@@ -71,7 +71,7 @@ uint8_t ppu::cpu_read(uint8_t reg) {
     break;
   case 4:
     // Need to return the value read from OAMADDR
-    return OAMDATA;
+    return pOAM[OAMADDR];
     break;
   case 5:
     // Write only
@@ -81,7 +81,13 @@ uint8_t ppu::cpu_read(uint8_t reg) {
     break;
   case 7:
     // Need to return the value read from PPUADDR
-    return PPUDATA;
+    read_buffer = read_buffer_cpy;
+    read_buffer_cpy = ppu_read(PPUVADDR.reg);
+    if (PPUVADDR.reg >= 0x3F00) {
+      read_buffer = read_buffer_cpy;
+    }
+    PPUVADDR.reg += (PPUCTRL.vramIncrement ? 32 : 1);
+    return read_buffer;
     break;
   }
   return 0;

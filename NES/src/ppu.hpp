@@ -34,6 +34,8 @@ private:
   bool frame_complete;
   bool nmiOccured;
   bool rendering;
+  uint8_t read_buffer;
+  uint8_t read_buffer_cpy;
   std::shared_ptr<ROM> m_cart;
   std::vector<uint8_t> m_CHR_ROM;
   std::array<uint8_t, 2048> vram;
@@ -42,6 +44,19 @@ private:
   std::array<uint32_t, 61440> bgPatternTable = {0};
   std::array<uint32_t, 61440> virt_display = {0};
 
+  struct Sprite {
+    uint8_t y;
+    uint8_t tileNum;
+    uint8_t attr;
+    uint8_t x;
+  };
+
+  Sprite OAM[64];
+
+public:
+  uint8_t *pOAM = (uint8_t *)OAM;
+
+private:
   uint8_t m_mapper;
 
   int scanLine = 0;

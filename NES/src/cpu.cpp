@@ -31,6 +31,7 @@ uint8_t cpu::read(uint16_t addr) {
     printf("%X\n", RAM[addr % 0x0800]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
+
     return m_ppu->cpu_read(addr);
   case 0x4000 ... 0x4017:
     return 0;
@@ -53,8 +54,7 @@ void cpu::write(uint16_t addr, uint8_t val) {
     RAM[(addr % 0x2000)] = val;
     return;
   case 0x2000 ... 0x3FFF: {
-    uint8_t reg = addr % 8;
-    m_ppu->cpu_write(reg, val);
+    m_ppu->cpu_write(addr, val);
     return;
   }
   case 0x4000 ... 0x4017:

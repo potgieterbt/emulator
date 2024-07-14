@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <random>
 #include <vector>
 
 ppu::ppu(const std::shared_ptr<ROM> rom) : m_cart(rom) {
@@ -213,6 +214,32 @@ void ppu::tick(uint8_t cycles) {
         if (scanLine >= 0 && scanLine <= 239) {
           if (dot >= 2 && dot <= 257) {
             virt_display[scanLine * 255 + dot] = colors[rand() % 0x40];
+          }
+        }
+        // Fetch tiles
+        if (PPUMASK.showBackground || PPUMASK.showSprites) {
+          int cycle = dot % 8;
+          switch (cycle) {
+          case 1:
+              // Fetch NameTable byte
+            break;
+          case 3:
+              // Fetch Attribute Table byte
+            break;
+          case 5:
+              // Fetch Pattern Table Lower byte
+            break;
+          case 7:
+              // Fetch Pattern Table Upper byte
+            break;
+          case 0:
+              if (dot == 256) {
+                // Increment Y
+              }
+              // Increment X
+            break;
+          default:
+            break;
           }
         }
       }

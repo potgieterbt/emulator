@@ -209,7 +209,31 @@ void ppu::tick(uint8_t cycles) {
     // scnaline
 
     if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
-      if (dot >= 1 && dot <= 257 || dot >= 321 && dot <= 337) {
+      if (scanLine == 261) {
+        if (dot == 2) {
+          PPUSTATUS.vBlank = 0;
+          PPUSTATUS.spriteOverflow = 0;
+          PPUSTATUS.spriteZeroHit = 0;
+        }
+
+        if (dot >= 280 && dot <= 304) {
+          // Copy virtical bits
+        }
+      }
+
+      if (scanLine >= 0 && scanLine <= 239) {
+        // Eval sprites
+      }
+
+      if (dot == 257) {
+        // Copy horizontal bits
+      }
+
+      if ((dot >= 1 && dot <= 257) || (dot >= 321 && dot <= 337)) {
+        if ((dot >= 2 && dot <= 257) || (dot <= 322 && dot <= 337)) {
+          // Reload shift registers and shift
+        }
+
         // Visible pixels
         if (scanLine >= 0 && scanLine <= 239) {
           if (dot >= 2 && dot <= 257) {
@@ -221,22 +245,22 @@ void ppu::tick(uint8_t cycles) {
           int cycle = dot % 8;
           switch (cycle) {
           case 1:
-              // Fetch NameTable byte
+            // Fetch NameTable byte
             break;
           case 3:
-              // Fetch Attribute Table byte
+            // Fetch Attribute Table byte
             break;
           case 5:
-              // Fetch Pattern Table Lower byte
+            // Fetch Pattern Table Lower byte
             break;
           case 7:
-              // Fetch Pattern Table Upper byte
+            // Fetch Pattern Table Upper byte
             break;
           case 0:
-              if (dot == 256) {
-                // Increment Y
-              }
-              // Increment X
+            if (dot == 256) {
+              // Increment Y
+            }
+            // Increment X
             break;
           default:
             break;
@@ -259,21 +283,16 @@ void ppu::tick(uint8_t cycles) {
           nmiOccured = true;
         }
       }
-    } else if (scanLine >= 261) {
-      // Pre-render scanline (Moved because was causing issues with the
-      // placeholder display rendering, should move back once I implement to
-      // correct rendering function)
-    }
 
-    if (dot == 340) {
-      scanLine = (scanLine + 1) % 262;
-      if (scanLine == 0) {
-        odd = !odd;
+      if (dot == 340) {
+        scanLine = (scanLine + 1) % 262;
+        if (scanLine == 0) {
+          odd = !odd;
+        }
+        dot = 0;
+      } else {
+        dot++;
       }
-      dot = 0;
-    } else {
-      dot++;
     }
+    return;
   }
-  return;
-}

@@ -207,7 +207,6 @@ void ppu::tick(uint8_t cycles) {
   for (int i = 0; i < cycles; ++i) {
     // Visible and pre-render scanlines - this is the normal operations during a
     // scnaline
-
     if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
       if (scanLine == 261) {
         if (dot == 2) {

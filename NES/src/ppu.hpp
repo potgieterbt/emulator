@@ -31,6 +31,10 @@ public:
 private:
   bool w = false;
   uint8_t x;
+  uint8_t nametableByte;
+  uint8_t attributetableByte;
+  uint8_t petternLow;
+  uint8_t petternHigh;
   bool frame_complete;
   bool nmiOccured;
   bool rendering;

@@ -245,9 +245,13 @@ void ppu::tick(uint8_t cycles) {
           switch (cycle) {
           case 1:
             // Fetch NameTable byte
+            nametableByte = ppu_read(0x2000 | (PPUVADDR.reg & 0x0FFF));
             break;
           case 3:
             // Fetch Attribute Table byte
+            attributetableByte = ppu_read(0x23C0 | (PPUVADDR.reg & 0x0C00) |
+                                          ((PPUVADDR.reg >> 4) & 0x38) |
+                                          ((PPUVADDR.reg >> 2) & 0x7));
             break;
           case 5:
             // Fetch Pattern Table Lower byte
@@ -293,5 +297,6 @@ void ppu::tick(uint8_t cycles) {
         dot++;
       }
     }
-    return;
   }
+  return;
+}

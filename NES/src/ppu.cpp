@@ -249,12 +249,14 @@ void ppu::tick(uint8_t cycles) {
             break;
           case 3:
             // Fetch Attribute Table byte
-            attributetableByte = ppu_read(0x23C0 | (PPUVADDR.reg & 0x0C00) |
-                                          ((PPUVADDR.reg >> 4) & 0x38) |
-                                          ((PPUVADDR.reg >> 2) & 0x7));
+            attributetableByte = ppu_read(
+                0x23C0 | (PPUVADDR.nametable_y << 11) |
+                (PPUVADDR.nametable_x << 10) | ((PPUVADDR.course_y >> 2) << 3) |
+                (PPUVADDR.course_x >> 2));
             break;
           case 5:
             // Fetch Pattern Table Lower byte
+            patternLow = ppu_read(1);
             break;
           case 7:
             // Fetch Pattern Table Upper byte

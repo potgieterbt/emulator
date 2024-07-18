@@ -256,10 +256,14 @@ void ppu::tick(uint8_t cycles) {
             break;
           case 5:
             // Fetch Pattern Table Lower byte
-            patternLow = ppu_read(1);
+            patternLow =
+                ppu_read((PPUCTRL.bgPatternTable << 12) +
+                         ((uint16_t)nametableByte << 4) + (PPUVADDR.fine_y));
             break;
           case 7:
             // Fetch Pattern Table Upper byte
+            ppu_read((PPUCTRL.bgPatternTable << 12) +
+                     ((uint16_t)nametableByte << 4) + (PPUVADDR.fine_y) + 8);
             break;
           case 0:
             if (dot == 256) {

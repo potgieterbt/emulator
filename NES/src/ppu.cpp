@@ -237,6 +237,7 @@ void ppu::tick(uint8_t cycles) {
         if (scanLine >= 0 && scanLine <= 239) {
           if (dot >= 2 && dot <= 257) {
             // Draw the pixel from the pattern byte and NameTable byte
+            virt_display[scanLine * 255 + dot] = colors[1];
           }
         }
         // Fetch tiles

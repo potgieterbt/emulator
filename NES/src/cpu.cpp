@@ -327,7 +327,22 @@ void cpu::executeOpcode(uint8_t op) {
   }
 }
 
-void cpu::NMI() { SEI(addressing::implied); }
+void cpu::NMI() {
+  SEI(addressing::implied);
+  uint8_t LSB = (PC & 0xFF);
+  uint8_t MSB = (PC >> 8);
+  Stack[S] = LSB;
+  --S;
+  Stack[S] = MSB;
+  --S;
+  Stack[S] = P;
+  --S;
+
+  uint8_t lsb = read(0xFFFE);
+  uint8_t msb = read(0xFFFF);
+  PC = (msb << 8) + lsb;
+  return;
+}
 
 // Instructions
 

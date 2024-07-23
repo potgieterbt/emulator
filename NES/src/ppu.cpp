@@ -3,10 +3,7 @@
 #include <bits/fs_fwd.h>
 #include <cstdint>
 #include <cstdio>
-#include <cstdlib>
-#include <iostream>
 #include <memory>
-#include <random>
 #include <vector>
 
 ppu::ppu(const std::shared_ptr<ROM> rom) : m_cart(rom) {

@@ -27,6 +27,7 @@ public:
   bool getFrameComplete();
   void setFrameComplete(bool val);
   bool genNMI();
+  int frames_complete = 0;
 
 private:
   bool w = false;
@@ -124,7 +125,7 @@ private:
       unsigned spriteZeroHit : 1;
       unsigned vBlank : 1;
     };
-    uint8_t val;
+    uint8_t val = 0;
   } PPUSTATUS;
 
   union {

@@ -3,11 +3,13 @@
 #include <bits/fs_fwd.h>
 #include <cstdint>
 #include <cstdio>
+#include <iostream>
 #include <memory>
 #include <vector>
 
 ppu::ppu(const std::shared_ptr<ROM> rom) : m_cart(rom) {
   m_CHR_ROM = m_cart->getCHR();
+  PPUMASK.showBackground = 1;
 };
 
 bool ppu::genNMI() {
@@ -94,7 +96,9 @@ uint8_t ppu::cpu_read(uint8_t reg) {
 }
 
 void ppu::cpu_write(uint8_t reg, uint8_t val) {
+  std::cin.get();
   reg &= 0x8;
+  PPUSTATUS.leastSignificantBits = val & 0b00011111;
   switch (reg) {
   case 0:
     PPUCTRL.val = val;
@@ -187,7 +191,12 @@ uint8_t ppu::ppu_read(uint16_t addr) {
   return 0;
 }
 
-void ppu::ppu_write(uint8_t reg, uint8_t val) {}
+void ppu::ppu_write(uint8_t addr, uint8_t val) {
+  switch (addr) {
+    case 0x0000 ... 0x1FFF:
+      break;
+  }
+}
 
 // I don't even know if I need the mapper in the ppu but I can remove in not
 // needed
@@ -205,6 +214,8 @@ void ppu::tick(uint8_t cycles) {
     // Visible and pre-render scanlines - this is the normal operations during a
     // scnaline
     if (scanLine >= 0 & scanLine <= 239 || scanLine == 261) {
+      // printf("%i", scanLine);
+      // printf("%i\n", dot);
       if (scanLine == 261) {
         if (dot == 2) {
           PPUSTATUS.vBlank = 0;
@@ -234,7 +245,7 @@ void ppu::tick(uint8_t cycles) {
         if (scanLine >= 0 && scanLine <= 239) {
           if (dot >= 2 && dot <= 257) {
             // Draw the pixel from the pattern byte and NameTable byte
-            virt_display[scanLine * 255 + dot] = colors[1];
+            virt_display[scanLine * 255 + dot] = colors[frames_complete % 64];
           }
         }
         // Fetch tiles
@@ -244,6 +255,13 @@ void ppu::tick(uint8_t cycles) {
           case 1:
             // Fetch NameTable byte
             nametableByte = ppu_read(0x2000 | (PPUVADDR.reg & 0x0FFF));
+            if (nametableByte != 0) {
+
+              printf("\n%b\n", nametableByte);
+              printf("\n%i\n", nametableByte);
+              std::cin.get();
+            }
+            // std::cin.get();
             break;
           case 3:
             // Fetch Attribute Table byte
@@ -251,6 +269,12 @@ void ppu::tick(uint8_t cycles) {
                 0x23C0 | (PPUVADDR.nametable_y << 11) |
                 (PPUVADDR.nametable_x << 10) | ((PPUVADDR.course_y >> 2) << 3) |
                 (PPUVADDR.course_x >> 2));
+            if (attributetableByte != 0) {
+              printf("\n%b\n", attributetableByte);
+              printf("\n%i\n", attributetableByte);
+
+              std::cin.get();
+            }
             break;
           case 5:
             // Fetch Pattern Table Lower byte
@@ -276,9 +300,11 @@ void ppu::tick(uint8_t cycles) {
       }
       // Normal operations
     } else if (scanLine == 240) {
+      // std::cin.get();
       // post-render scnaline
       if (scanLine == 240 && dot == 0) {
         frame_complete = true;
+        frames_complete++;
       }
     } else if (scanLine >= 241 && scanLine <= 260) {
       // VBlank scanlines
@@ -290,16 +316,15 @@ void ppu::tick(uint8_t cycles) {
           nmiOccured = true;
         }
       }
-
-      if (dot == 340) {
-        scanLine = (scanLine + 1) % 262;
-        if (scanLine == 0) {
-          odd = !odd;
-        }
-        dot = 0;
-      } else {
-        dot++;
+    }
+    if (dot == 340) {
+      scanLine = (scanLine + 1) % 262;
+      if (scanLine == 0) {
+        odd = !odd;
       }
+      dot = 0;
+    } else {
+      dot++;
     }
   }
   return;

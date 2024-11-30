@@ -91,7 +91,7 @@ void cpu::runCycle() {
   executeOpcode(op);
   ++PC;
   m_ppu->tick(cycles * 3);
-  // std::cin.get();
+  std::cin.get();
 }
 
 void cpu::executeOpcode(uint8_t op) {

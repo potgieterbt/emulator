@@ -1,0 +1,20 @@
+Reading header, it dictates: 
+16KB PRG-ROM Banks: 2
+8KB CHR-ROM Banks: 1
+Name Table Mirroring: Vertical
+Mapper #: 0
+Extended (CPU) RAM: false
+ROM is NTSC compatible.
+7FFD
+80
+7FFC
+0
+0
+78
+Instr: 78
+00
+01
+02
+03
+04
+05

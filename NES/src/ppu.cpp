@@ -191,6 +191,7 @@ uint8_t ppu::ppu_read(uint16_t addr) {
   return 0;
 }
 
+// PPU Communicate with PPUBus
 void ppu::ppu_write(uint8_t addr, uint8_t val) {
   switch (addr) {
     case 0x0000 ... 0x1FFF:

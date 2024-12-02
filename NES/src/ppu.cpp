@@ -61,26 +61,31 @@ uint8_t ppu::cpu_read(uint8_t reg) {
   case 1:
     // Write only
     break;
+
   case 2:
-    printf("2002: %x\n", PPUSTATUS.val);
     PPUSTATUS_COPY.val = (PPUSTATUS.val & 0xE0) | (read_buffer_cpy & 0x1F);
     PPUSTATUS.vBlank = 0;
     w = 0;
     return PPUSTATUS_COPY.val;
     break;
+
   case 3:
     // Write only
     break;
+
   case 4:
     // Need to return the value read from OAMADDR
     return pOAM[OAMADDR];
     break;
+
   case 5:
     // Write only
     break;
+
   case 6:
     // Write only
     break;
+
   case 7:
     // Need to return the value read from PPUADDR
     read_buffer = read_buffer_cpy;
@@ -194,8 +199,8 @@ uint8_t ppu::ppu_read(uint16_t addr) {
 // PPU Communicate with PPUBus
 void ppu::ppu_write(uint8_t addr, uint8_t val) {
   switch (addr) {
-    case 0x0000 ... 0x1FFF:
-      break;
+  case 0x0000 ... 0x1FFF:
+    break;
   }
 }
 

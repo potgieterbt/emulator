@@ -9,6 +9,8 @@
 std::vector<uint8_t> ROM::getCHR() { return m_CHR_ROM; }
 std::vector<uint8_t> ROM::getPRG() { return m_PRG_ROM; }
 uint8_t ROM::getMapperNumber() { return m_mapperNumber; }
+uint8_t ROM::getPRGBanks() { return m_banks; }
+uint8_t ROM::getCHRBanks() { return m_vbanks; }
 uint8_t ROM::getMirroring() { return m_nameTableMirroring; };
 
 bool ROM::loadROM(const std::string path) {
@@ -35,15 +37,15 @@ bool ROM::loadROM(const std::string path) {
   }
   std::cout << "Reading header, it dictates: \n";
 
-  uint8_t banks = header[4];
-  std::cout << "16KB PRG-ROM Banks: " << +banks << "\n";
-  if (!banks) {
+  m_banks = header[4];
+  std::cout << "16KB PRG-ROM Banks: " << +m_banks << "\n";
+  if (!m_banks) {
     std::cout << "ROM has no PRG-ROM banks. Loading ROM failed.\n";
     return false;
   }
 
-  uint8_t vbanks = header[5];
-  std::cout << "8KB CHR-ROM Banks: " << +vbanks << "\n";
+  m_vbanks = header[5];
+  std::cout << "8KB CHR-ROM Banks: " << +m_vbanks << "\n";
 
   if (header[6] & 0x8) {
     m_nameTableMirroring = 8;
@@ -78,18 +80,18 @@ bool ROM::loadROM(const std::string path) {
     std::cout << "ROM is NTSC compatible.\n";
 
   // PRG-ROM 16KB banks
-  m_PRG_ROM.resize(0x4000 * banks);
-  if (!romFile.read(reinterpret_cast<char *>(&m_PRG_ROM[0]), 0x4000 * banks)) {
+  m_PRG_ROM.resize(0x4000 * m_banks);
+  if (!romFile.read(reinterpret_cast<char *>(&m_PRG_ROM[0]), 0x4000 * m_banks)) {
     std::cout << "Reading PRG-ROM from image file failed."
               << "\n";
     return false;
   }
 
   // CHR-ROM 8KB banks
-  if (vbanks) {
-    m_CHR_ROM.resize(0x2000 * vbanks);
+  if (m_vbanks) {
+    m_CHR_ROM.resize(0x2000 * m_vbanks);
     if (!romFile.read(reinterpret_cast<char *>(&m_CHR_ROM[0]),
-                      0x2000 * vbanks)) {
+                      0x2000 * m_vbanks)) {
       std::cout << "Reading CHR-ROM from image file failed."
                 << "\n";
       return false;

@@ -12,6 +12,10 @@ private:
   const int VisibleScanlines = 240;
   const int ScanlineVisibleDots = 256;
   const int FrameEndScanline = 261;
+  void fetchTiles();
+  void incrementY();
+  void incrementX();
+  void loadShifters();
 
 public:
   ppu(const std::shared_ptr<ROM>);
@@ -20,7 +24,7 @@ public:
   uint8_t cpu_read(uint8_t reg);
   void cpu_write(uint8_t reg, uint8_t val);
   uint8_t ppu_read(uint16_t addr);
-  void ppu_write(uint8_t addr, uint8_t val);
+  void ppu_write(uint16_t addr, uint8_t val);
   void setMapper(uint8_t mapNum);
   void *getVdisplay();
   std::array<uint32_t, 61440> getVdisplayCopy();
@@ -34,8 +38,14 @@ private:
   uint8_t x;
   uint8_t nametableByte;
   uint8_t attributetableByte;
+  uint8_t quadrabnt_num;
   uint8_t patternLow;
   uint8_t patternHigh;
+  uint16_t bgShiftRegLo;
+  uint16_t bgShiftRegHi;
+  uint16_t attrShiftReg1;
+  uint16_t attrShiftReg2;
+
   bool frame_complete;
   bool nmiOccured;
   bool rendering;
@@ -46,6 +56,7 @@ private:
   std::array<uint8_t, 2048> vram;
   std::array<uint8_t, 256> oam_data;
 
+  uint8_t m_tbl_palette[32];
   std::array<uint32_t, 61440> bgPatternTable = {0};
   std::array<uint32_t, 61440> virt_display = {0};
 
@@ -125,7 +136,7 @@ private:
       unsigned spriteZeroHit : 1;
       unsigned vBlank : 1;
     };
-    uint8_t val = 0;
+    uint8_t val;
   } PPUSTATUS;
 
   union {
@@ -140,8 +151,8 @@ private:
 
   union loopy_register {
     struct {
-      uint16_t course_x : 5;
-      uint16_t course_y : 5;
+      uint16_t coarse_x : 5;
+      uint16_t coarse_y : 5;
       uint16_t nametable_x : 1;
       uint16_t nametable_y : 1;
       uint16_t fine_y : 3;

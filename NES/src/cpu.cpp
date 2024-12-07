@@ -23,22 +23,22 @@ void cpu::reset() {
 
 uint8_t cpu::read(uint16_t addr) {
   switch (addr) {
-  case 0x0000 ... 0x0FFF:
+  case 0x0000 ... 0x1FFF:
     printf("%X\n", addr);
     printf("%X\n", RAM[addr % 0x0800]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
-
     return m_ppu->cpu_read(addr);
   case 0x4000 ... 0x4017:
     return 0;
   case 0x4018 ... 0x401F:
     return 0;
   case 0x4020 ... 0xFFFF: {
-    uint16_t address = addr % 0x8000;
-    printf("%X\n", address);
-    printf("%X\n", m_PRG_ROM[address]);
-    return m_PRG_ROM[address];
+    uint8_t PRG_banks = m_cart->getPRGBanks();
+    addr %= (PRG_banks >= 2 ? 0x8000 : 0x4000);
+    // printf("%X\n", addr);
+    // printf("%X\n", m_PRG_ROM[addr]);
+    return m_PRG_ROM[addr];
   }
   default:
     return 0;
@@ -51,6 +51,8 @@ void cpu::write(uint16_t addr, uint8_t val) {
     RAM[(addr % 0x2000)] = val;
     return;
   case 0x2000 ... 0x3FFF: {
+    printf("PPU Write: %i, %i", (addr % 8), val);
+    std::cin.get();
     m_ppu->cpu_write(addr, val);
     return;
   }
@@ -87,11 +89,12 @@ void cpu::runCycle() {
   }
 
   uint8_t op = fetchInstruction();
+  printf("PC: %X\n", PC);
   printf("Instr: %x\n", op);
   executeOpcode(op);
   ++PC;
   m_ppu->tick(cycles * 3);
-  std::cin.get();
+  // std::cin.get();
 }
 
 void cpu::executeOpcode(uint8_t op) {

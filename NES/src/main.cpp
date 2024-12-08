@@ -58,7 +58,6 @@ int main(int argc, char *argv[]) {
       SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED,
                        SDL_WINDOWPOS_UNDEFINED, 512, 480, SDL_WINDOW_SHOWN);
 
-  std::cin.get();
   if (window == NULL) {
     printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
   }

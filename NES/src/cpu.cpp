@@ -98,6 +98,15 @@ void cpu::runCycle() {
 
 void cpu::executeOpcode(uint8_t op) {
   switch (op) {
+  case 0x00:
+    BRK(addressing::implied);
+    break;
+  case 0x01:
+    ORA(addressing::indirect);
+    break;
+  case 0x05:
+    ORA(addressing::zero);
+    break;
   case 0x06:
     ASL(addressing::zero);
     break;
@@ -107,20 +116,53 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x09:
     ORA(addressing::immediate);
     break;
+  case 0x0A:
+    ASL(addressing::accumulator);
+    break;
   case 0x0D:
     ORA(addressing::absolute);
+    break;
+  case 0x0E:
+    ASL(addressing::absolute);
     break;
   case 0x10:
     BPL(addressing::relative);
     break;
+  case 0x11:
+    ORA(addressing::indirectY);
+    break;
+  case 0x15:
+    ORA(addressing::zeroX);
+    break;
+  case 0x16:
+    ASL(addressing::zeroX);
+    break;
   case 0x18:
     CLC(addressing::implied);
+    break;
+  case 0x19:
+    ORA(addressing::absoluteY);
+    break;
+  case 0x1D:
+    ORA(addressing::absoluteX);
+    break;
+  case 0x1E:
+    ASL(addressing::absoluteX);
     break;
   case 0x20:
     JSR(addressing::absolute);
     break;
+  case 0x21:
+    AND(addressing::indirect);
+    break;
   case 0x24:
     BIT(addressing::zero);
+    break;
+  case 0x25:
+    AND(addressing::zero);
+    break;
+  case 0x26:
+    ROL(addressing::zero);
     break;
   case 0x28:
     PLP(addressing::implied);
@@ -134,14 +176,47 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x2C:
     BIT(addressing::absolute);
     break;
+  case 0x2D:
+    AND(addressing::absolute);
+    break;
+  case 0x2E:
+    ROL(addressing::absolute);
+    break;
   case 0x30:
     BMI(addressing::relative);
+    break;
+  case 0x31:
+    AND(addressing::indirectY);
+    break;
+  case 0x35:
+    AND(addressing::zeroX);
+    break;
+  case 0x36:
+    ROL(addressing::zeroX);
     break;
   case 0x38:
     SEC(addressing::implied);
     break;
+  case 0x39:
+    AND(addressing::absoluteY);
+    break;
+  case 0x3D:
+    AND(addressing::absoluteX);
+    break;
+  case 0x3E:
+    ROL(addressing::absoluteX);
+    break;
+  case 0x40:
+    RTI(addressing::implied);
+    break;
+  case 0x41:
+    EOR(addressing::indirect);
+    break;
   case 0x45:
     EOR(addressing::zero);
+    break;
+  case 0x46:
+    LSR(addressing::zero);
     break;
   case 0x48:
     PHA(addressing::implied);
@@ -155,11 +230,41 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x4C:
     JMP(addressing::absolute);
     break;
+  case 0x4D:
+    EOR(addressing::absolute);
+    break;
+  case 0x4E:
+    LSR(addressing::absolute);
+    break;
+  case 0x50:
+    BVC(addressing::relative);
+    break;
+  case 0x51:
+    EOR(addressing::indirectY);
+    break;
+  case 0x55:
+    EOR(addressing::zeroX);
+    break;
+  case 0x56:
+    LSR(addressing::zeroX);
+    break;
   case 0x58:
     CLI(addressing::implied);
     break;
+  case 0x59:
+    EOR(addressing::absoluteY);
+    break;
+  case 0x5D:
+    EOR(addressing::absoluteX);
+    break;
+  case 0x5E:
+    LSR(addressing::absoluteX);
+    break;
   case 0x60:
     RTS(addressing::implied);
+    break;
+  case 0x61:
+    ADC(addressing::indirect);
     break;
   case 0x65:
     ADC(addressing::immediate);
@@ -182,11 +287,35 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x6D:
     ADC(addressing::absolute);
     break;
+  case 0x6E:
+    ROR(addressing::absolute);
+    break;
   case 0x70:
     BVS(addressing::relative);
     break;
+  case 0x71:
+    ADC(addressing::indirectY);
+    break;
+  case 0x75:
+    ADC(addressing::zeroX);
+    break;
+  case 0x76:
+    ROR(addressing::zeroX);
+    break;
   case 0x78:
     SEI(addressing::implied);
+    break;
+  case 0x79:
+    ADC(addressing::absoluteY);
+    break;
+  case 0x7D:
+    ADC(addressing::absoluteX);
+    break;
+  case 0x7E:
+    ROR(addressing::absoluteX);
+    break;
+  case 0x81:
+    STA(addressing::indirect);
     break;
   case 0x84:
     STY(addressing::zero);
@@ -199,6 +328,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0x88:
     DEY(addressing::implied);
+    break;
+  case 0x8A:
+    TXA(addressing::implied);
     break;
   case 0x8C:
     STY(addressing::absolute);
@@ -215,8 +347,14 @@ void cpu::executeOpcode(uint8_t op) {
   case 0x91:
     STA(addressing::indirectY);
     break;
+  case 0x94:
+    STY(addressing::zeroX);
+    break;
   case 0x95:
     STA(addressing::zeroX);
+    break;
+  case 0x96:
+    STX(addressing::zeroY);
     break;
   case 0x98:
     TYA(addressing::implied);
@@ -232,6 +370,9 @@ void cpu::executeOpcode(uint8_t op) {
     break;
   case 0xA0:
     LDY(addressing::immediate);
+    break;
+  case 0xA1:
+    LDA(addressing::indirect);
     break;
   case 0xA2:
     LDX(addressing::immediate);
@@ -269,20 +410,47 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xB1:
     LDA(addressing::indirectY);
     break;
+  case 0xB4:
+    LDY(addressing::zeroX);
+    break;
+  case 0xB5:
+    LDA(addressing::zeroX);
+    break;
+  case 0xB6:
+    LDX(addressing::zeroY);
+    break;
+  case 0xB8:
+    CLV(addressing::implied);
+    break;
   case 0xB9:
     LDA(addressing::absoluteY);
     break;
   case 0xBA:
     TSX(addressing::implied);
     break;
+  case 0xBC:
+    LDY(addressing::absoluteX);
+    break;
   case 0xBD:
     LDA(addressing::absoluteX);
+    break;
+  case 0xBE:
+    LDX(addressing::absoluteY);
     break;
   case 0xC0:
     CPY(addressing::immediate);
     break;
+  case 0xC1:
+    CMP(addressing::indirect);
+    break;
   case 0xC4:
     CPY(addressing::zero);
+    break;
+  case 0xC5:
+    CMP(addressing::zero);
+    break;
+  case 0xC6:
+    DEC(addressing::zero);
     break;
   case 0xC8:
     INY(addressing::implied);
@@ -293,8 +461,50 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xCA:
     DEX(addressing::implied);
     break;
+  case 0xCC:
+    CPY(addressing::absolute);
+    break;
+  case 0xCD:
+    CMP(addressing::absolute);
+    break;
+  case 0xCE:
+    DEC(addressing::absolute);
+    break;
+  case 0xD0:
+    BNE(addressing::relative);
+    break;
+  case 0xD1:
+    CMP(addressing::indirectY);
+    break;
+  case 0xD5:
+    CMP(addressing::zeroX);
+    break;
+  case 0xD6:
+    DEC(addressing::zeroX);
+    break;
+  case 0xD8:
+    CLD(addressing::implied);
+    break;
+  case 0xD9:
+    CMP(addressing::absoluteY);
+    break;
+  case 0xDD:
+    CMP(addressing::absoluteX);
+    break;
+  case 0xDE:
+    DEC(addressing::absoluteX);
+    break;
   case 0xE0:
     CPX(addressing::immediate);
+    break;
+  case 0xE1:
+    SBC(addressing::indirect);
+    break;
+  case 0xE4:
+    CPX(addressing::zero);
+    break;
+  case 0xE5:
+    SBC(addressing::zero);
     break;
   case 0xE6:
     INC(addressing::zero);
@@ -305,20 +515,41 @@ void cpu::executeOpcode(uint8_t op) {
   case 0xE9:
     SBC(addressing::immediate);
     break;
+  case 0xEA:
+    NOP(addressing::implied);
+    break;
+  case 0xEC:
+    CPX(addressing::absolute);
+    break;
   case 0xEE:
     INC(addressing::absolute);
     break;
-  case 0xD0:
-    BNE(addressing::relative);
-    break;
-  case 0xD8:
-    CLD(addressing::implied);
+  case 0xED:
+    SBC(addressing::absolute);
     break;
   case 0xF0:
     BEQ(addressing::relative);
     break;
+  case 0xF1:
+    SBC(addressing::indirectY);
+    break;
+  case 0xF5:
+    SBC(addressing::zeroX);
+    break;
+  case 0xF6:
+    INC(addressing::zeroX);
+    break;
   case 0xF8:
     SED(addressing::implied);
+    break;
+  case 0xF9:
+    SBC(addressing::absoluteY);
+    break;
+  case 0xFD:
+    SBC(addressing::absoluteX);
+    break;
+  case 0xFE:
+    INC(addressing::absoluteX);
     break;
   default:
     printf("Unimplemented/Incorrent OP: %X\n", op);
@@ -1068,6 +1299,23 @@ void cpu::LDX(addressing mode) {
   case addressing::absolute: {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + Y;
+
+    uint8_t val = read(addr);
+    X = val;
+    // Zero bit
+    setFlag(1, X == 0);
+
+    // Negative bit
+    setFlag(7, X & 0b10000000);
+    cycles = 3;
+    cycles += pageCross((raddr >> 8), (addr >> 8));
+    break;
+  }
+  case addressing::absoluteY: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
 
     uint8_t val = read(addr);
@@ -1533,6 +1781,24 @@ void cpu::STY(addressing mode) {
            __FUNCTION__, mode);
     abort();
     break;
+  }
+}
+
+void cpu::TXA(addressing mode) {
+  switch (mode) {
+  case implied:
+    A = X;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 2;
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
   }
 }
 

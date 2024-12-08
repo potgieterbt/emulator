@@ -47,6 +47,7 @@ private:
     relative,
     zero,
     zeroX,
+    zeroY,
   };
 
   void NMI();
@@ -97,6 +98,7 @@ private:
   void STX(addressing mode);
   void STY(addressing mode);
   void TAX(addressing mode);
+  void TXA(addressing mode);
   void TAY(addressing mode);
   void TSX(addressing mode);
   void TXS(addressing mode);

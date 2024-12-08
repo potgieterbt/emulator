@@ -63,13 +63,17 @@ private:
   void BNE(addressing mode);
   void BMI(addressing mode);
   void BPL(addressing mode);
+  void BRK(addressing mode);
+  void BVC(addressing mode);
   void BVS(addressing mode);
   void CLD(addressing mode);
   void CLC(addressing mode);
   void CLI(addressing mode);
+  void CLV(addressing mode);
   void CMP(addressing mode);
   void CPX(addressing mode);
   void CPY(addressing mode);
+  void DEC(addressing mode);
   void DEX(addressing mode);
   void DEY(addressing mode);
   void EOR(addressing mode);
@@ -82,6 +86,7 @@ private:
   void LDX(addressing mode);
   void LDY(addressing mode);
   void LSR(addressing mode);
+  void NOP(addressing mode);
   void ORA(addressing mode);
   void PHA(addressing mode);
   void PHP(addressing mode);
@@ -89,6 +94,7 @@ private:
   void PLP(addressing mode);
   void ROL(addressing mode);
   void ROR(addressing mode);
+  void RTI(addressing mode);
   void RTS(addressing mode);
   void SBC(addressing mode);
   void SEC(addressing mode);

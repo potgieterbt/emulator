@@ -799,6 +799,28 @@ void cpu::BMI(addressing mode) {
   }
 }
 
+void cpu::BNE(addressing mode) {
+  switch (mode) {
+  case addressing::relative: {
+    uint8_t zero = (P & 0b00000010) >> 1;
+    // Read before the if statement to ensure that the program counter
+    // increments correctly
+    int8_t jmp_val = (int8_t)read(++PC);
+    cycles = 2;
+    if (!zero) {
+      cycles += pageCross(PC, (PC + jmp_val));
+      PC += jmp_val;
+      cycles++;
+    }
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
 void cpu::BPL(addressing mode) {
   switch (mode) {
   case addressing::relative: {
@@ -821,19 +843,21 @@ void cpu::BPL(addressing mode) {
   }
 }
 
-void cpu::BNE(addressing mode) {
+void cpu::BRK(addressing mode) {
   switch (mode) {
-  case addressing::relative: {
-    uint8_t zero = (P & 0b00000010) >> 1;
-    // Read before the if statement to ensure that the program counter
-    // increments correctly
-    int8_t jmp_val = (int8_t)read(++PC);
-    cycles = 2;
-    if (!zero) {
-      cycles += pageCross(PC, (PC + jmp_val));
-      PC += jmp_val;
-      cycles++;
-    }
+  case addressing::implied: {
+    uint8_t LSB = (PC & 0xFF);
+    uint8_t MSB = (PC >> 8);
+    Stack[S] = LSB;
+    --S;
+    Stack[S] = MSB;
+    --S;
+    Stack[S] = P;
+    --S;
+
+    setFlag(4, 1);
+    PC = ((read(0xFFFD) << 8) | read(0xFFFC));
+    cycles = 7;
     break;
   }
   default:

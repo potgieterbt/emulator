@@ -113,8 +113,7 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
     PPUTADDR.nametable_y = PPUCTRL.nametable_y;
     break;
   case 1:
-    printf("%i", val);
-    std::cin.get();
+    printf("Mask write: %i", val);
     PPUMASK.val = val;
     break;
   case 2:
@@ -149,8 +148,7 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
     }
     break;
   case 7:
-    printf("VRAM write: %i\n", val);
-    std::cin.get();
+    printf("VRAM write: Addr: %X, val: %i\n", PPUVADDR.reg, val);
     ppu_write(PPUVADDR.reg, val);
     PPUVADDR.reg += (PPUCTRL.vramIncrement ? 32 : 1);
     break;
@@ -214,7 +212,6 @@ void ppu::ppu_write(uint16_t addr, uint8_t val) {
   case 0x2000 ... 0x3EFF: {
     addr &= 0x0FFF;
     printf("VRAM write");
-    std::cin.get();
     // Horizontal
     if (mirroring == 0) {
       if ((addr >= 0x0000 && addr <= 0x03FF) ||

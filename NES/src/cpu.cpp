@@ -14,7 +14,7 @@ cpu::cpu(const std::shared_ptr<ROM> rom, std::shared_ptr<ppu> PPU)
 void cpu::reset() {
   PC = ((read(0xFFFD) << 8) | read(0xFFFC));
   A = 0;
-  S = 0xFF;
+  S = 253;
   A = 0;
   X = 0;
   Y = 0;
@@ -52,7 +52,6 @@ void cpu::write(uint16_t addr, uint8_t val) {
     return;
   case 0x2000 ... 0x3FFF: {
     printf("PPU Write: %i, %i", (addr % 8), val);
-    std::cin.get();
     m_ppu->cpu_write(addr, val);
     return;
   }
@@ -322,7 +321,7 @@ void cpu::executeOpcode(uint8_t op) {
     SED(addressing::implied);
     break;
   default:
-    printf("%X", op);
+    printf("Unimplemented/Incorrent OP: %X\n", op);
     std::cin.get();
   }
 }
@@ -338,8 +337,8 @@ void cpu::NMI() {
   Stack[S] = P;
   --S;
 
-  uint8_t lsb = read(0xFFFE);
-  uint8_t msb = read(0xFFFF);
+  uint8_t lsb = read(0xFFFA);
+  uint8_t msb = read(0xFFFB);
   PC = (msb << 8) + lsb;
   return;
 }
@@ -906,10 +905,9 @@ void cpu::JMP(addressing mode) {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
-    printf("%x\n", addr);
+    printf("JADDR: %X\n", addr);
     PC = addr - 1;
     cycles = 3;
-    std::cin.get();
     break;
   }
   case indirect: {
@@ -938,9 +936,15 @@ void cpu::JSR(addressing mode) {
     uint16_t addr = (addr_high << 8) | addr_low;
     uint8_t LSB = (PC & 0xFF);
     uint8_t MSB = (PC >> 8);
+    printf("Stack addr: %i", S);
+    printf("Jump: %X, %X", MSB, LSB);
     Stack[S] = LSB;
+    printf("Jump: %X", Stack[S]);
     --S;
     Stack[S] = MSB;
+    printf("Stack addr: %i", S);
+    printf("Jump: %X", Stack[S]);
+    printf("Jump: %X", Stack[S + 1]);
     --S;
     PC = addr - 1;
     cycles = 6;
@@ -1332,10 +1336,15 @@ void cpu::ROR(addressing mode) {
 void cpu::RTS(addressing mode) {
   switch (mode) {
   case implied: {
+    printf("Return: %X, %X, %X", Stack[S], Stack[S + 1], Stack[S + 2]);
+    printf("%i", S);
     ++S;
+    printf("%i", S);
     uint8_t MSB = Stack[S];
     ++S;
+    printf("%i", S);
     uint8_t LSB = Stack[S];
+    printf("Return: %X, %X", MSB, LSB);
     PC = ((MSB << 8) | LSB);
     cycles = 6;
     break;
@@ -1584,7 +1593,7 @@ void cpu::TSX(addressing mode) {
 void cpu::TXS(addressing mode) {
   switch (mode) {
   case implied:
-    S = X;
+    S = X - 1;
     // Zero bit
     setFlag(1, S == 0);
 

@@ -13,3 +13,4 @@ _deps
 zig-cache
 SMB.nes
 *.o
+log.txt

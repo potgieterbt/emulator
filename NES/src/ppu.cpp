@@ -403,6 +403,7 @@ void ppu::tick(uint8_t cycles) {
               // decrementSpriteCounter();
             }
             // Emit Pixel
+            virt_display[scanLine * 256 + dot] = colors[patternLow + patternHigh];
             // emitPixel();
           }
         }
@@ -422,6 +423,7 @@ void ppu::tick(uint8_t cycles) {
 
       if (scanLine == 241 && dot == 1) {
         PPUSTATUS.vBlank = 1;
+        frame_complete = true;
         if (PPUCTRL.genNMI) {
           nmiOccured = true;
         }

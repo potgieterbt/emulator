@@ -1,0 +1,63 @@
+  switch (mode) {
+  case addressing::accumulator: {
+    val = A;
+    break;
+  }
+  case addressing::immediate: {
+    val = read(++PC);
+    break;
+  }
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    break;
+  }
+  case addressing::absoluteX: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + X;
+    break;
+  }
+  case addressing::absoluteY: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + Y;
+    break;
+  }
+  case addressing::indirect: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read((temp_addr + X) & 0x00FF);
+    uint8_t addr_high = read((temp_addr + X + 1) & 0x00FF);
+
+    uint16_t addr = (addr_high << 8) | addr_low;
+    uint8_t val = read(addr);
+    break;
+  }
+  case addressing::indirectY: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read(temp_addr & 0x00FF);
+    uint8_t addr_high = read((temp_addr + 1) & 0x00FF);
+
+    uint16_t raddr = ((addr_high << 8) | addr_low);
+    uint16_t addr = raddr + Y;
+    break;
+  }
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t addr = read(0x00FF & zaddr);
+    break;
+  }
+  case addressing::zeroX: {
+    uint8_t zaddr = read(++PC);
+    uint16_t addr = read(0x00FF & (zaddr + X));
+    break;
+  }
+  case addressing::zeroY: {
+    uint8_t zaddr = read(++PC);
+    uint16_t addr = read(0x00FF & (zaddr + Y));
+    break;
+  }
+

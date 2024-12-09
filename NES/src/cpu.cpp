@@ -24,8 +24,8 @@ void cpu::reset() {
 uint8_t cpu::read(uint16_t addr) {
   switch (addr) {
   case 0x0000 ... 0x1FFF:
-    printf("%X\n", addr);
-    printf("%X\n", RAM[addr % 0x0800]);
+    // printf("%X\n", addr);
+    // printf("%X\n", RAM[addr % 0x0800]);
     return RAM[addr % 0x0800];
   case 0x2000 ... 0x3FFF:
     return m_ppu->cpu_read(addr);
@@ -633,6 +633,85 @@ void cpu::AND(addressing mode) {
     cycles = 2;
     break;
   }
+
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    val = read(addr);
+    A = A & val;
+    cycles = 4;
+    break;
+  }
+
+  case addressing::absoluteX: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + X;
+    val = read(addr);
+    A = A & val;
+    cycles = 4;
+    cycles += pageCross(raddr, addr);
+    break;
+  }
+
+  case addressing::absoluteY: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + Y;
+    val = read(addr);
+    A = A & val;
+    cycles = 4;
+    cycles += pageCross(raddr, addr);
+    break;
+  }
+
+  case addressing::indirect: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read((temp_addr + X) & 0x00FF);
+    uint8_t addr_high = read((temp_addr + X + 1) & 0x00FF);
+
+    uint16_t addr = (addr_high << 8) | addr_low;
+    val = read(addr);
+    A = A & val;
+    cycles = 6;
+    break;
+  }
+
+  case addressing::indirectY: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read(temp_addr & 0x00FF);
+    uint8_t addr_high = read((temp_addr + 1) & 0x00FF);
+
+    uint16_t raddr = ((addr_high << 8) | addr_low);
+    uint16_t addr = raddr + Y;
+    val = read(addr);
+    A = A & val;
+    cycles = 5;
+    cycles += pageCross(raddr, addr);
+    break;
+  }
+
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t addr = read(0x00FF & zaddr);
+    val = read(addr);
+    A = A & val;
+    cycles = 3;
+    break;
+  }
+
+  case addressing::zeroX: {
+    uint8_t zaddr = read(++PC);
+    uint16_t addr = read(0x00FF & (zaddr + X));
+    val = read(addr);
+    A = A & val;
+    cycles = 4;
+    break;
+  }
+
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
@@ -649,11 +728,9 @@ void cpu::AND(addressing mode) {
 
 void cpu::ASL(addressing mode) {
   switch (mode) {
-  case addressing::zero: {
-    uint8_t zaddr = read(++PC);
-    uint8_t val = read(0x00FF & zaddr);
-    setFlag(0, (val & 0b10000000) >> 7);
-    uint8_t res = val << 1;
+  case addressing::accumulator: {
+    setFlag(0, (A & 0b10000000) >> 7);
+    A = A << 1;
     // Zero bit
     setFlag(1, A == 0);
 
@@ -662,6 +739,81 @@ void cpu::ASL(addressing mode) {
     cycles = 5;
     break;
   }
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    uint8_t val = read(addr);
+    setFlag(0, (val & 0b10000000) >> 7);
+    uint8_t res = val << 1;
+
+    write(addr, res);
+
+    // Zero bit
+    setFlag(1, res == 0);
+
+    // Negative bit
+    setFlag(7, res & 0b10000000);
+    cycles = 6;
+    break;
+  }
+  case addressing::absoluteX: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + X;
+    uint8_t val = read(addr);
+
+    setFlag(0, (val & 0b10000000) >> 7);
+    uint8_t res = val << 1;
+
+    write(addr, res);
+
+    // Zero bit
+    setFlag(1, res == 0);
+
+    // Negative bit
+    setFlag(7, res & 0b10000000);
+    cycles = 7;
+    break;
+  }
+
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t val = read(0x00FF & zaddr);
+    setFlag(0, (val & 0b10000000) >> 7);
+    uint8_t res = val << 1;
+
+    write(0x00FF & zaddr, res);
+
+    // Zero bit
+    setFlag(1, res == 0);
+
+    // Negative bit
+    setFlag(7, res & 0b10000000);
+    cycles = 5;
+    break;
+  }
+
+  case addressing::zeroX: {
+    uint8_t zaddr = read(++PC);
+    uint16_t addr = read(0x00FF & (zaddr + X));
+    uint8_t val = read(addr);
+
+    setFlag(0, (val & 0b10000000) >> 7);
+    uint8_t res = val << 1;
+
+    write(addr, res);
+
+    // Zero bit
+    setFlag(1, res == 0);
+
+    // Negative bit
+    setFlag(7, res & 0b10000000);
+    cycles = 6;
+    break;
+  }
+
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
@@ -889,6 +1041,28 @@ void cpu::BVS(addressing mode) {
   }
 }
 
+void cpu::BVC(addressing mode) {
+  switch (mode) {
+  case addressing::relative: {
+    uint8_t overflow = (P >> 6) & 1;
+    uint8_t jmp_val = read(++PC);
+    cycles = 2;
+    if (overflow) {
+      // added - 1 due to the way that I increment PC after the Instruction in
+      // executed
+      cycles += pageCross(PC, (PC + jmp_val));
+      PC += jmp_val;
+      cycles++;
+    }
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
 void cpu::CLC(addressing mode) {
   switch (mode) {
   case implied: {
@@ -921,6 +1095,20 @@ void cpu::CLI(addressing mode) {
   switch (mode) {
   case implied: {
     setFlag(2, 0);
+    cycles = 2;
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::CLV(addressing mode) {
+  switch (mode) {
+  case implied: {
+    setFlag(5, 0);
     cycles = 2;
     break;
   }
@@ -1002,6 +1190,72 @@ void cpu::CPY(addressing mode) {
     // Negative bit
     setFlag(7, (Y - val) & 0b10000000);
     cycles = 3;
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::DEC(addressing mode) {
+  switch (mode) {
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t val = read(0x00FF & zaddr);
+    val--;
+    write(0x00FF & zaddr, val);
+
+    // Zero bit
+    setFlag(1, val == 0);
+
+    // Negative bit
+    setFlag(7, val & 0b10000000);
+    break;
+  }
+  case addressing::zeroX: {
+    uint8_t zaddr = read(++PC);
+    uint16_t addr = read(0x00FF & (zaddr + X));
+    uint8_t val = read(0x00FF & addr);
+    val--;
+    write(0x00FF & zaddr, val);
+    // Zero bit
+    setFlag(1, val == 0);
+
+    // Negative bit
+    setFlag(7, val & 0b10000000);
+    break;
+  }
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+    uint8_t val = read(addr);
+    val--;
+    write(addr, val);
+
+    // Zero bit
+    setFlag(1, val == 0);
+
+    // Negative bit
+    setFlag(7, val & 0b10000000);
+    break;
+  }
+  case addressing::absoluteX: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + X;
+    uint8_t val = read(addr);
+    val++;
+    write(addr, val);
+
+    // Zero bit
+    setFlag(1, val == 0);
+
+    // Negative bit
+    setFlag(7, val & 0b10000000);
     break;
   }
   default:
@@ -1156,7 +1410,7 @@ void cpu::INY(addressing mode) {
 
 void cpu::JMP(addressing mode) {
   switch (mode) {
-  case absolute: {
+  case addressing::absolute: {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
     uint16_t addr = (addr_high << 8) | addr_low;
@@ -1165,13 +1419,16 @@ void cpu::JMP(addressing mode) {
     cycles = 3;
     break;
   }
-  case indirect: {
-    uint8_t addr_low = read(++PC);
-    uint8_t addr_high = read(++PC);
+  case addressing::indirect: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read((temp_addr + X) & 0x00FF);
+    uint8_t addr_high = read((temp_addr + X + 1) & 0x00FF);
+
     uint16_t addr = (addr_high << 8) | addr_low;
     uint8_t jaddr_low = read(addr);
     uint8_t jaddr_high = read(++addr);
     uint16_t jmp_addr = (jaddr_high << 8) | jaddr_low;
+    printf("JADDR: %X\n", jmp_addr);
     PC = jmp_addr - 1;
     cycles = 5;
     break;
@@ -1191,15 +1448,9 @@ void cpu::JSR(addressing mode) {
     uint16_t addr = (addr_high << 8) | addr_low;
     uint8_t LSB = (PC & 0xFF);
     uint8_t MSB = (PC >> 8);
-    printf("Stack addr: %i", S);
-    printf("Jump: %X, %X", MSB, LSB);
     Stack[S] = LSB;
-    printf("Jump: %X", Stack[S]);
     --S;
     Stack[S] = MSB;
-    printf("Stack addr: %i", S);
-    printf("Jump: %X", Stack[S]);
-    printf("Jump: %X", Stack[S + 1]);
     --S;
     PC = addr - 1;
     cycles = 6;
@@ -1227,8 +1478,11 @@ void cpu::LDA(addressing mode) {
     break;
   }
   case addressing::indirectY: {
-    uint8_t zaddr = read(++PC);
-    uint16_t raddr = read(0x00FF & zaddr);
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read(temp_addr & 0x00FF);
+    uint8_t addr_high = read((temp_addr + 1) & 0x00FF);
+
+    uint16_t raddr = ((addr_high << 8) | addr_low);
     uint16_t addr = raddr + Y;
     uint8_t val = read(addr);
     A = val;
@@ -1284,7 +1538,7 @@ void cpu::LDA(addressing mode) {
     // Negative bit
     setFlag(7, A & 0b10000000);
     cycles = 5;
-    cycles += pageCross((raddr >> 8), (addr >> 8));
+    cycles += pageCross(raddr, addr);
     break;
   }
   case addressing::zero: {
@@ -1456,6 +1710,36 @@ void cpu::ORA(addressing mode) {
     cycles = 2;
     break;
   }
+
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t val = read(0x00FF & zaddr);
+    uint8_t res = A | val;
+    A = res;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 3;
+    break;
+  }
+
+  case addressing::zeroX: {
+    uint8_t zaddr = read(++PC);
+    uint8_t addr = read(0x00FF & (zaddr + X));
+    uint8_t val = read(0x00FF & addr);
+    uint8_t res = A | val;
+    A = res;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 4;
+    break;
+  }
+
   case addressing::absolute: {
     uint8_t addr_low = read(++PC);
     uint8_t addr_high = read(++PC);
@@ -1472,11 +1756,102 @@ void cpu::ORA(addressing mode) {
     cycles = 4;
     break;
   }
+
+  case addressing::absoluteX: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + X;
+    uint8_t val = read(addr);
+
+    uint8_t res = A | val;
+    A = res;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 4;
+    cycles += pageCross(raddr, addr);
+    break;
+  }
+
+  case addressing::absoluteY: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + Y;
+    uint8_t val = read(addr);
+
+    uint8_t res = A | val;
+    A = res;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 4;
+    cycles += pageCross(raddr, addr);
+    break;
+  }
+
+  case addressing::indirect: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read((temp_addr + X) & 0x00FF);
+    uint8_t addr_high = read((temp_addr + X + 1) & 0x00FF);
+
+    uint16_t addr = (addr_high << 8) | addr_low;
+    uint8_t val = read(addr);
+
+    uint8_t res = A | val;
+    A = res;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 6;
+    break;
+  }
+
+  case addressing::indirectY: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read(temp_addr & 0x00FF);
+    uint8_t addr_high = read((temp_addr + 1) & 0x00FF);
+
+    uint16_t raddr = ((addr_high << 8) | addr_low);
+    uint16_t addr = raddr + Y;
+    uint8_t val = read(addr);
+
+    uint8_t res = A | val;
+    A = res;
+    // Zero bit
+    setFlag(1, A == 0);
+
+    // Negative bit
+    setFlag(7, A & 0b10000000);
+    cycles = 6;
+    cycles += pageCross(raddr, addr);
+    break;
+  }
+
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
     abort();
     break;
+  }
+}
+
+void cpu::NOP(addressing mode) {
+  switch (mode) {
+  case addressing::implied:
+    cycles = 2;
+    break;
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
   }
 }
 
@@ -1568,9 +1943,9 @@ void cpu::ROR(addressing mode) {
   switch (mode) {
   case accumulator: {
     uint8_t carry = P & 1;
-    setFlag(0, A & 0b10000000);
-    uint8_t res = A << 1;
-    res |= carry;
+    setFlag(0, A & 1);
+    uint8_t res = A >> 1;
+    res |= carry << 7;
     A = res;
 
     // Zero bit
@@ -1581,13 +1956,59 @@ void cpu::ROR(addressing mode) {
     cycles = 2;
     break;
   }
+
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+
+    uint8_t val = read(addr);
+    uint8_t carry = P & 1;
+
+    setFlag(0, val & 1);
+    uint8_t res = val >> 1;
+    res |= carry << 7;
+    write(addr, res);
+
+    // Zero bit
+    setFlag(1, res == 0);
+
+    // Negative bit
+    setFlag(7, res & 0b10000000);
+    cycles = 6;
+    break;
+  }
+
+  case addressing::absoluteX: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + X;
+
+    uint8_t val = read(addr);
+    uint8_t carry = P & 1;
+
+    setFlag(0, val & 1);
+    uint8_t res = val >> 1;
+    res |= carry << 7;
+    write(addr, res);
+
+    // Zero bit
+    setFlag(1, res == 0);
+
+    // Negative bit
+    setFlag(7, res & 0b10000000);
+    cycles = 7;
+    break;
+  }
+
   case zero: {
     uint8_t zaddr = read(++PC);
     uint8_t val = read(0x00FF & zaddr);
     uint8_t carry = P & 1;
-    setFlag(0, val & 0b10000000);
-    uint8_t res = val << 1;
-    res |= carry;
+    setFlag(0, val & 1);
+    uint8_t res = val >> 1;
+    res |= carry << 7;
     write(0x00FF & zaddr, res);
 
     // Zero bit
@@ -1598,6 +2019,27 @@ void cpu::ROR(addressing mode) {
     cycles = 5;
     break;
   }
+
+  case addressing::zeroX: {
+    uint8_t zaddr = read(++PC);
+    uint16_t addr = read(0x00FF & (zaddr + X));
+
+    uint8_t val = read(addr);
+    uint8_t carry = P & 1;
+    setFlag(0, val & 1);
+    uint8_t res = val >> 1;
+    res |= carry << 7;
+    write(addr, res);
+
+    // Zero bit
+    setFlag(1, res == 0);
+
+    // Negative bit
+    setFlag(7, res & 0b10000000);
+    cycles = 6;
+    break;
+  }
+
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
@@ -1608,15 +2050,30 @@ void cpu::ROR(addressing mode) {
 void cpu::RTS(addressing mode) {
   switch (mode) {
   case implied: {
-    printf("Return: %X, %X, %X", Stack[S], Stack[S + 1], Stack[S + 2]);
-    printf("%i", S);
     ++S;
-    printf("%i", S);
     uint8_t MSB = Stack[S];
     ++S;
-    printf("%i", S);
     uint8_t LSB = Stack[S];
-    printf("Return: %X, %X", MSB, LSB);
+    PC = ((MSB << 8) | LSB);
+    cycles = 6;
+    break;
+  }
+  default:
+    printf("Instruction called with an invalid addressing mode: %s, %i\n",
+           __FUNCTION__, mode);
+    abort();
+  }
+}
+
+void cpu::RTI(addressing mode) {
+  switch (mode) {
+  case implied: {
+    ++S;
+    P = Stack[S];
+    ++S;
+    uint8_t MSB = Stack[S];
+    ++S;
+    uint8_t LSB = Stack[S];
     PC = ((MSB << 8) | LSB);
     cycles = 6;
     break;
@@ -1632,6 +2089,7 @@ void cpu::SBC(addressing mode) {
   uint8_t val;
   uint8_t carry;
   uint16_t res;
+
   switch (mode) {
   case addressing::immediate: {
     val = read(++PC);
@@ -1640,6 +2098,98 @@ void cpu::SBC(addressing mode) {
     cycles = 2;
     break;
   }
+
+  case addressing::absolute: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t addr = (addr_high << 8) | addr_low;
+
+    val = read(addr);
+    carry = P & 1;
+    res = A - val - !carry;
+    cycles = 4;
+    break;
+  }
+
+  case addressing::absoluteX: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + X;
+
+    val = read(addr);
+    carry = P & 1;
+    res = A - val - !carry;
+    cycles = 4;
+    cycles += pageCross(raddr, addr);
+    break;
+  }
+
+  case addressing::absoluteY: {
+    uint8_t addr_low = read(++PC);
+    uint8_t addr_high = read(++PC);
+    uint16_t raddr = (addr_high << 8) | addr_low;
+    uint16_t addr = raddr + Y;
+
+    val = read(addr);
+    carry = P & 1;
+    res = A - val - !carry;
+    cycles = 4;
+    cycles += pageCross(raddr, addr);
+    break;
+  }
+
+  case addressing::indirect: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read((temp_addr + X) & 0x00FF);
+    uint8_t addr_high = read((temp_addr + X + 1) & 0x00FF);
+
+    uint16_t addr = (addr_high << 8) | addr_low;
+
+    val = read(addr);
+    carry = P & 1;
+    res = A - val - !carry;
+    cycles = 6;
+    break;
+  }
+
+  case addressing::indirectY: {
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read(temp_addr & 0x00FF);
+    uint8_t addr_high = read((temp_addr + 1) & 0x00FF);
+
+    uint16_t raddr = ((addr_high << 8) | addr_low);
+    uint16_t addr = raddr + Y;
+
+    val = read(addr);
+    carry = P & 1;
+    res = A - val - !carry;
+    cycles = 5;
+    break;
+  }
+
+  case addressing::zero: {
+    uint8_t zaddr = read(++PC);
+    uint8_t addr = read(0x00FF & zaddr);
+
+    val = read(addr);
+    carry = P & 1;
+    res = A - val - !carry;
+    cycles = 3;
+    break;
+  }
+
+  case addressing::zeroX: {
+    uint8_t zaddr = read(++PC);
+    uint16_t addr = read(0x00FF & (zaddr + X));
+
+    val = read(addr);
+    carry = P & 1;
+    res = A - val - !carry;
+    cycles = 4;
+    break;
+  }
+
   default:
     printf("Instruction called with an invalid addressing mode: %s, %i\n",
            __FUNCTION__, mode);
@@ -1731,9 +2281,12 @@ void cpu::STA(addressing mode) {
     break;
   }
   case addressing::indirectY: {
-    uint8_t zaddr = read(++PC);
-    uint16_t addr = read(0x00FF & zaddr);
-    addr += Y;
+    uint8_t temp_addr = read(++PC);
+    uint8_t addr_low = read(temp_addr & 0x00FF);
+    uint8_t addr_high = read((temp_addr + 1) & 0x00FF);
+
+    uint16_t raddr = ((addr_high << 8) | addr_low);
+    uint16_t addr = raddr + Y;
     write(addr, A);
     cycles = 6;
     break;

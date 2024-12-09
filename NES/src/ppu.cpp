@@ -11,7 +11,6 @@
 
 ppu::ppu(const std::shared_ptr<ROM> rom) : m_cart(rom) {
   m_CHR_ROM = m_cart->getCHR();
-  PPUMASK.showBackground = 1;
 };
 
 bool ppu::genNMI() {
@@ -115,6 +114,7 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
   case 1:
     printf("Mask write: %i", val);
     PPUMASK.val = val;
+    printf("Mask: %b, SB: %i", val, PPUMASK.showBackground);
     break;
   case 2:
     // Read only
@@ -321,12 +321,14 @@ void ppu::fetchTiles() {
   case 1: {
     // printf("Read Addr: %X\n ", 0x2000 | (PPUVADDR.reg & 0x0FFF));
     nametableByte = ppu_read(0x2000 | (PPUVADDR.reg & 0x0FFF));
+    printf("NT: %X", nametableByte);
     // printf("NT: %i\n", nametableByte);
     break;
   }
   case 3: {
     attributetableByte = ppu_read(0x23C0 | (PPUVADDR.reg & 0x0C00) |
                                   ((PPUVADDR.reg >> 2) & 0x07));
+    printf("AT: %X", attributetableByte);
     // printf("AT: %i\n", attributetableByte);
     quadrabnt_num =
         (((PPUVADDR.reg & 2) >> 1) | ((PPUVADDR.reg & 64) >> 5)) * 2;
@@ -337,6 +339,7 @@ void ppu::fetchTiles() {
                            ((uint16_t)nametableByte << 4) +
                            ((PPUVADDR.reg & 0x7000) >> 12);
     patternLow = ppu_read(patternAddr);
+    printf("PL: %X", patternLow);
     // printf("PL: %b\n", patternLow);
     // printf("Pattern Addr: %X\n", patternAddr);
     break;
@@ -346,6 +349,7 @@ void ppu::fetchTiles() {
                            ((uint16_t)nametableByte << 4) +
                            ((PPUVADDR.reg & 0x7000) >> 12) + 8;
     patternHigh = ppu_read(patternAddr);
+    printf("PH: %X", patternHigh);
     // printf("PH: %b\n", patternHigh);
     break;
   }
@@ -403,7 +407,11 @@ void ppu::tick(uint8_t cycles) {
               // decrementSpriteCounter();
             }
             // Emit Pixel
-            virt_display[scanLine * 256 + dot] = colors[patternLow + patternHigh];
+            if (PPUMASK.showBackground || PPUMASK.showSprites) {
+
+              virt_display[scanLine * 256 + dot] =
+                  colors[patternLow + patternHigh];
+            }
             // emitPixel();
           }
         }

@@ -27,7 +27,7 @@
     uint16_t addr = raddr + Y;
     break;
   }
-  case addressing::indirect: {
+  case addressing::indirectX: {
     uint8_t temp_addr = read(++PC);
     uint8_t addr_low = read((temp_addr + X) & 0x00FF);
     uint8_t addr_high = read((temp_addr + X + 1) & 0x00FF);
@@ -46,8 +46,8 @@
     break;
   }
   case addressing::zero: {
-    uint8_t zaddr = read(++PC);
-    uint8_t addr = read(0x00FF & zaddr);
+    uint8_t addr = read(++PC);
+    uint8_t val = read(0x00FF & addr);
     break;
   }
   case addressing::zeroX: {

@@ -43,6 +43,7 @@ private:
     immediate,
     implied,
     indirect,
+    indirectX,
     indirectY,
     relative,
     zero,

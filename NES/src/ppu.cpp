@@ -310,6 +310,222 @@ void ppu::setFrameComplete(bool val) { frame_complete = val; }
 
 std::array<uint32_t, 61440> ppu::getVdisplayCopy() { return virt_display; }
 
+bool ppu::isUninit(const Sprite &sprite) {
+  return ((sprite.attr == 0xFF) && (sprite.tileNum == 0xFF) &&
+          (sprite.x == 0xFF) && (sprite.y == 0xFF)) ||
+         ((sprite.x == 0) && (sprite.y == 0) && (sprite.attr == 0) &&
+          (sprite.tileNum == 0));
+}
+
+uint16_t ppu::getSpritePatternAddress(const Sprite &sprite,
+                                      bool flipVertically) {
+  uint16_t addr = 0;
+  int fineOffset = scanLine - sprite.y;
+
+  if (flipVertically) {
+    fineOffset = spriteHeight - 1 - fineOffset;
+  }
+
+  if (spriteHeight == 16 && fineOffset >= 8) {
+    fineOffset += 8;
+  }
+
+  if (spriteHeight == 8) {
+    addr = ((uint16_t)PPUCTRL.spritePatternTable << 12) |
+           ((uint16_t)sprite.tileNum << 4) | fineOffset;
+  } else {
+    addr = (((uint16_t)sprite.tileNum & 1) << 12) |
+           ((uint16_t)((sprite.tileNum & ~1) << 4)) | fineOffset;
+  }
+
+  return addr;
+}
+
+void ppu::evalSprites() {
+  if (dot >= 1 && dot <= 64) {
+    if (dot == 1) {
+      secondaryOAMCursor = 0;
+    }
+
+    secondaryOAM[secondaryOAMCursor].attr = 0xFF;
+    secondaryOAM[secondaryOAMCursor].tileNum = 0xFF;
+    secondaryOAM[secondaryOAMCursor].x = 0xFF;
+    secondaryOAM[secondaryOAMCursor].y = 0xFF;
+
+    if (dot % 8 == 0) {
+      secondaryOAMCursor++;
+    }
+  }
+
+  if (dot > 65 && dot <= 256) {
+    secondaryOAMCursor = 0;
+    OAMCursor = 0;
+
+    if (secondaryOAMCursor == 8) {
+      return;
+    }
+    if (OAMCursor == 64) {
+      return;
+    }
+    if ((dot % 2) == 1) {
+      tmpOAM = OAM[OAMCursor];
+
+      if (!isUninit(tmpOAM) &&
+          ((scanLine >= tmpOAM.y) && (scanLine < (tmpOAM.y + spriteHeight)))) {
+        inRangeCycles--;
+        inRange = true;
+      }
+    } else {
+      if (inRange) {
+        inRangeCycles--;
+
+        if (inRangeCycles == 0) {
+          OAMCursor++;
+          secondaryOAMCursor++;
+          inRangeCycles = 8;
+          inRange = true;
+        } else {
+          tmpOAM.id = OAMCursor;
+          secondaryOAM[secondaryOAMCursor] = tmpOAM;
+        }
+      } else {
+        OAMCursor++;
+      }
+    }
+  }
+  if (dot >= 257 && dot <= 320) {
+    if (dot == 257) {
+      secondaryOAMCursor = 0;
+      spriteRenderEntities.clear();
+    }
+    Sprite sprite = secondaryOAM[secondaryOAMCursor];
+
+    int cycle = (dot - 1) % 8;
+    switch (cycle) {
+    case 0 ... 1:
+      if (!isUninit(sprite)) {
+        out = SpriteRenderEntity();
+      }
+      break;
+
+    case 2:
+      if (!isUninit(sprite)) {
+        out.attr = sprite.attr;
+        out.flipHorizontally = sprite.attr & 64;
+        out.flipVertically = sprite.attr & 128;
+        out.id = sprite.id;
+      }
+      break;
+
+    case 3:
+      if (!isUninit(sprite)) {
+        out.counter = sprite.x;
+      }
+      break;
+
+    case 4:
+      if (!isUninit(sprite)) {
+        spritePatternLowAddr =
+            getSpritePatternAddress(sprite, out.flipVertically);
+        out.lo = ppu_read(spritePatternLowAddr);
+      }
+
+      break;
+    case 5:
+      break;
+
+    case 6:
+      if (!isUninit(sprite)) {
+        spritePatternHighAddr = spritePatternLowAddr + 8;
+        out.hi = ppu_read(spritePatternHighAddr);
+      }
+      break;
+
+    case 7:
+      if (!isUninit(sprite)) {
+        spriteRenderEntities.push_back(out);
+      }
+      secondaryOAMCursor++;
+      break;
+
+    default:
+      break;
+    }
+  }
+}
+
+void ppu::emitPixel() {
+  if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
+    pixelIndex++;
+    return;
+  }
+
+  uint16_t fineSelect = 0x8000 >> x;
+  uint16_t pixel1 = (bgShiftRegLo & fineSelect) << x;
+  uint16_t pixel2 = (bgShiftRegLo & fineSelect) << x;
+  uint16_t pixel3 = (attrShiftReg1 & fineSelect) << x;
+  uint16_t pixel4 = (attrShiftReg2 & fineSelect) << x;
+  uint8_t bgBit12 = (pixel2 >> 14) | (pixel1 >> 15);
+
+  uint8_t spritePixel1 = 0;
+  uint8_t spritePixel2 = 0;
+  uint8_t spritePixel3 = 0;
+  uint8_t spritePixel4 = 0;
+  uint8_t spriteBit12 = 0;
+  uint8_t paletteIndex =
+      0 | (pixel4 >> 12) | (pixel3 >> 13) | (pixel2 >> 14) | (pixel1 >> 15);
+  uint8_t spritePaletteIndex = 0;
+  bool showSprite = false;
+  bool spriteFound = false;
+
+  for (auto &sprite : spriteRenderEntities) {
+    if (sprite.counter == 0 && sprite.shifted != 8) {
+      if (spriteFound) {
+        sprite.shift();
+        continue;
+      }
+      spritePixel1 =
+          sprite.flipHorizontally ? ((sprite.lo & 1) << 7) : sprite.lo & 128;
+
+      spritePixel2 =
+          sprite.flipHorizontally ? ((sprite.hi & 1) << 7) : sprite.hi & 128;
+
+      spritePixel3 = sprite.attr & 1;
+      spritePixel4 = sprite.attr & 2;
+      spriteBit12 = (spritePixel2 >> 6) | (spritePixel1 >> 7);
+
+      if (!PPUSTATUS.spriteZeroHit && spriteBit12 && bgBit12 &&
+          sprite.id == 0 && PPUMASK.showSprites && PPUMASK.showBackground &&
+          dot < 256) {
+        PPUSTATUS.val |= 64;
+      }
+
+      if (spriteBit12) {
+        showSprite = ((bgBit12 && !(sprite.attr & 32)) || !bgBit12) &&
+                     PPUMASK.showSprites;
+        spritePaletteIndex =
+            0x10 | (spritePixel4 << 2) | (spritePixel3 << 2) | spriteBit12;
+        spriteFound = true;
+      }
+      sprite.shift();
+    }
+  }
+  if (!PPUMASK.showBackground) {
+    paletteIndex = 0;
+  }
+
+  uint8_t pindex =
+      ppu_read(0x3F00 | (showSprite ? spritePaletteIndex : paletteIndex)) % 64;
+
+  uint8_t p = PPUMASK.greyscale ? (pindex & 0x30) : pindex;
+
+  if (dot <= 9 || dot >= 249 || scanLine <= 7 || scanLine >= 232) {
+    showSprite = false;
+    p = 13;
+  }
+  virt_display[pixelIndex++] = palette[p];
+}
+
 void ppu::fetchTiles() {
   if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
     return;
@@ -371,7 +587,7 @@ void ppu::tick(uint8_t cycles) {
     case -1 ... 239: {
       if (scanLine == -1) {
         if (dot == 1) {
-
+          pixelIndex = 0;
           PPUSTATUS.vBlank = 0;
           PPUSTATUS.spriteOverflow = 0;
           PPUSTATUS.spriteZeroHit = 0;
@@ -383,15 +599,22 @@ void ppu::tick(uint8_t cycles) {
       }
 
       if (scanLine >= 0 && scanLine <= 239) {
+        evalSprites();
         // Evaluate Sprites
       }
 
       if (dot >= 280 && dot <= 304) {
         // Copy Vertical bits
+        if (PPUMASK.showSprites || PPUMASK.showBackground) {
+          PPUVADDR.reg = (PPUVADDR.reg & ~0x7BE0) | (PPUTADDR.reg & 0x7BE0);
+        }
       }
 
-      if (dot == 256) {
+      if (dot == 257) {
         // Copy Horizontal Bits
+        if (PPUMASK.showSprites || PPUMASK.showBackground) {
+          PPUVADDR.reg = (PPUVADDR.reg & ~0x41F) | (PPUTADDR.reg & 0x41F);
+        }
       }
 
       if ((dot >= 1 && dot <= 257) || (dot >= 321 && dot <= 337)) {
@@ -407,12 +630,7 @@ void ppu::tick(uint8_t cycles) {
               // decrementSpriteCounter();
             }
             // Emit Pixel
-            if (PPUMASK.showBackground || PPUMASK.showSprites) {
-
-              virt_display[scanLine * 256 + dot] =
-                  colors[patternLow + patternHigh];
-            }
-            // emitPixel();
+            emitPixel();
           }
         }
         // Fetch NameTable, AttributeTable, Pattern Low & High

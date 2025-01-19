@@ -14,3 +14,5 @@ zig-cache
 SMB.nes
 *.o
 log.txt
+.ccls-cache
+.cache

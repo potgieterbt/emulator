@@ -17,7 +17,8 @@ private:
   void evalSprites();
   void incrementY();
   void incrementX();
-  void loadShifters();
+  void reloadShiftersAndShift();
+  void decrementSpriteCounter();
 
 public:
   ppu(const std::shared_ptr<ROM>);

@@ -281,10 +281,11 @@ void ppu::incrementX() {
   }
 }
 
-void ppu::loadShifters() {
+void ppu::reloadShiftersAndShift() {
   if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
     return;
   }
+
   bgShiftRegLo <<= 1;
   bgShiftRegHi <<= 1;
   attrShiftReg1 <<= 1;
@@ -450,6 +451,18 @@ void ppu::evalSprites() {
 
     default:
       break;
+    }
+  }
+}
+
+void ppu::decrementSpriteCounter() {
+  if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
+    return;
+  }
+
+  for (auto &sprite : spriteRenderEntities) {
+    if (sprite.counter > 0) {
+      sprite.counter--;
     }
   }
 }
@@ -620,14 +633,14 @@ void ppu::tick(uint8_t cycles) {
       if ((dot >= 1 && dot <= 257) || (dot >= 321 && dot <= 337)) {
         if ((dot >= 1 && dot <= 257) || (dot >= 322 && dot <= 337)) {
           // Reload shift registers and shift
-          loadShifters();
+          reloadShiftersAndShift();
         }
 
         if (scanLine >= 0 && scanLine <= 239) {
           if (dot >= 2 && dot <= 257) {
             if (scanLine > 0) {
               // Decrement Sprite Counters
-              // decrementSpriteCounter();
+              decrementSpriteCounter();
             }
             // Emit Pixel
             emitPixel();

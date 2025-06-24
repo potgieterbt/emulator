@@ -11,6 +11,16 @@ ppu::ppu(const std::shared_ptr<ROM> rom) : m_cart(rom) {
   m_CHR_ROM = m_cart->getCHR();
 };
 
+// I don't even know if I need the mapper in the ppu but I can remove if not
+// needed
+void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
+
+bool ppu::getFrameComplete() { return frame_complete; }
+
+void ppu::setFrameComplete(bool val) { frame_complete = val; }
+
+std::array<uint32_t, 61440> ppu::getVdisplayCopy() { return virt_display; }
+
 bool ppu::genNMI() {
   if (nmiOccured) {
     nmiOccured = false;
@@ -252,63 +262,6 @@ void ppu::ppu_write(uint16_t addr, uint8_t val) {
   return;
 }
 
-void ppu::incrementY() {
-  if ((PPUVADDR.reg & 0x7000) != 0x7000) {
-    PPUVADDR.reg += 0x1000;
-  } else {
-    PPUVADDR.reg &= 0x7000;
-    int y = PPUVADDR.coarse_y >> 5;
-    if (y == 29) {
-      y = 0;
-      PPUVADDR.reg ^= 0x0800;
-    } else if (y == 31) {
-      y = 0;
-    } else {
-      y++;
-    }
-    PPUVADDR.reg = (PPUVADDR.reg & ~0x03E0) | (y << 5);
-  }
-}
-
-void ppu::incrementX() {
-  if (PPUVADDR.coarse_x == 31) {
-    PPUVADDR.coarse_x = 0;
-    PPUVADDR.nametable_x = ~PPUVADDR.nametable_x;
-  } else {
-    PPUVADDR.coarse_x++;
-  }
-}
-
-void ppu::reloadShiftersAndShift() {
-  if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
-    return;
-  }
-
-  bgShiftRegLo <<= 1;
-  bgShiftRegHi <<= 1;
-  attrShiftReg1 <<= 1;
-  attrShiftReg2 <<= 1;
-
-  if (dot % 8 == 1) {
-    uint8_t attr_bits1 = (attributetableByte >> quadrant_num) & 1;
-    uint8_t attr_bits2 = (attributetableByte >> quadrant_num) & 2;
-    attr_bits1 |= attr_bits1 ? 255 : 0;
-    attr_bits2 |= attr_bits2 ? 255 : 0;
-    bgShiftRegLo |= patternLow;
-    bgShiftRegHi |= patternHigh;
-  }
-}
-
-// I don't even know if I need the mapper in the ppu but I can remove if not
-// needed
-void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
-
-bool ppu::getFrameComplete() { return frame_complete; }
-
-void ppu::setFrameComplete(bool val) { frame_complete = val; }
-
-std::array<uint32_t, 61440> ppu::getVdisplayCopy() { return virt_display; }
-
 bool ppu::isUninit(const Sprite &sprite) {
   return ((sprite.attr == 0xFF) && (sprite.tileNum == 0xFF) &&
           (sprite.x == 0xFF) && (sprite.y == 0xFF)) ||
@@ -316,188 +269,7 @@ bool ppu::isUninit(const Sprite &sprite) {
           (sprite.tileNum == 0));
 }
 
-uint16_t ppu::getSpritePatternAddress(const Sprite &sprite,
-                                      bool flipVertically) {
-  uint16_t addr = 0;
-  int fineOffset = scanLine - sprite.y;
-
-  if (flipVertically) {
-    fineOffset = spriteHeight - 1 - fineOffset;
-  }
-
-  if (spriteHeight == 16 && fineOffset >= 8) {
-    fineOffset += 8;
-  }
-
-  if (spriteHeight == 8) {
-    addr = ((uint16_t)PPUCTRL.spritePatternTable << 12) |
-           ((uint16_t)sprite.tileNum << 4) | fineOffset;
-  } else {
-    addr = (((uint16_t)sprite.tileNum & 1) << 12) |
-           ((uint16_t)((sprite.tileNum & ~1) << 4)) | fineOffset;
-  }
-
-  return addr;
-}
-
-void ppu::evalSprites() {}
-
-void ppu::decrementSpriteCounter() {
-  if (!PPUMASK.showSprites && !PPUMASK.showBackground) {
-    return;
-  }
-  for (auto &sprite : spriteRenderEntities) {
-    if (sprite.counter > 0) {
-      sprite.counter--;
-    }
-  }
-}
-
-void ppu::decrementSpriteCounter() {
-  if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
-    return;
-  }
-
-  for (auto &sprite : spriteRenderEntities) {
-    if (sprite.counter > 0) {
-      sprite.counter--;
-    }
-  }
-}
-
-void ppu::emitPixel() {
-  if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
-    pixelIndex++;
-    return;
-  }
-
-  uint16_t fineSelect = 0x8000 >> x;
-  uint16_t pixel1 = (bgShiftRegLo & fineSelect) << x;
-  uint16_t pixel2 = (bgShiftRegLo & fineSelect) << x;
-  uint16_t pixel3 = (attrShiftReg1 & fineSelect) << x;
-  uint16_t pixel4 = (attrShiftReg2 & fineSelect) << x;
-  uint8_t bgBit12 = (pixel2 >> 14) | (pixel1 >> 15);
-
-  uint8_t spritePixel1 = 0;
-  uint8_t spritePixel2 = 0;
-  uint8_t spritePixel3 = 0;
-  uint8_t spritePixel4 = 0;
-  uint8_t spriteBit12 = 0;
-  uint8_t paletteIndex =
-      0 | (pixel4 >> 12) | (pixel3 >> 13) | (pixel2 >> 14) | (pixel1 >> 15);
-  uint8_t spritePaletteIndex = 0;
-  bool showSprite = false;
-  bool spriteFound = false;
-
-  for (auto &sprite : spriteRenderEntities) {
-    if (sprite.counter == 0 && sprite.shifted != 8) {
-      if (spriteFound) {
-        sprite.shift();
-        continue;
-      }
-      spritePixel1 =
-          sprite.flipHorizontally ? ((sprite.lo & 1) << 7) : sprite.lo & 128;
-
-      spritePixel2 =
-          sprite.flipHorizontally ? ((sprite.hi & 1) << 7) : sprite.hi & 128;
-
-      spritePixel3 = sprite.attr & 1;
-      spritePixel4 = sprite.attr & 2;
-      spriteBit12 = (spritePixel2 >> 6) | (spritePixel1 >> 7);
-
-      if (!PPUSTATUS.spriteZeroHit && spriteBit12 && bgBit12 &&
-          sprite.id == 0 && PPUMASK.showSprites && PPUMASK.showBackground &&
-          dot < 256) {
-        PPUSTATUS.val |= 64;
-      }
-
-      if (spriteBit12) {
-        showSprite = ((bgBit12 && !(sprite.attr & 32)) || !bgBit12) &&
-                     PPUMASK.showSprites;
-        spritePaletteIndex =
-            0x10 | (spritePixel4 << 2) | (spritePixel3 << 2) | spriteBit12;
-        spriteFound = true;
-      }
-      sprite.shift();
-    }
-  }
-  if (!PPUMASK.showBackground) {
-    paletteIndex = 0;
-  }
-
-  uint8_t pindex =
-      ppu_read(0x3F00 | (showSprite ? spritePaletteIndex : paletteIndex)) % 64;
-
-  uint8_t p = PPUMASK.greyscale ? (pindex & 0x30) : pindex;
-
-  if (dot <= 9 || dot >= 249 || scanLine <= 7 || scanLine >= 232) {
-    showSprite = false;
-    p = 13;
-  }
-  virt_display[pixelIndex++] = colors[p];
-}
-
-void ppu::fetchTiles() {
-  if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
-    return;
-  }
-
-  // printf("VADDR: %X\n", PPUVADDR.reg);
-  // printf("dot: %i\n", dot);
-  switch (dot % 8) {
-
-  // NameTable byte Fetch
-  case 1: {
-    // printf("Read Addr: %X\n ", 0x2000 | (PPUVADDR.reg & 0x0FFF));
-    nametableByte = ppu_read(0x2000 | (PPUVADDR.reg & 0x0FFF));
-    printf("NT: %X", nametableByte);
-    // printf("NT: %i\n", nametableByte);
-    break;
-  }
-
-  // AttributeTable byte Fetch
-  case 3: {
-    attributetableByte = ppu_read(0x23C0 | (PPUVADDR.reg & 0x0C00) |
-                                  ((PPUVADDR.reg >> 2) & 0x07));
-    printf("AT: %X", attributetableByte);
-    // printf("AT: %i\n", attributetableByte);
-    quadrant_num =
-        (((PPUVADDR.reg & 2) >> 1) | ((PPUVADDR.reg & 64) >> 5)) * 2;
-    break;
-  }
-
-  // BG lsbits Fetch
-  case 5: {
-    uint16_t patternAddr = ((uint16_t)PPUCTRL.bgPatternTable << 12) +
-                           ((uint16_t)nametableByte << 4) +
-                           ((PPUVADDR.reg & 0x7000) >> 12);
-    patternLow = ppu_read(patternAddr);
-    printf("PL: %X", patternLow);
-    // printf("PL: %b\n", patternLow);
-    // printf("Pattern Addr: %X\n", patternAddr);
-    break;
-  }
-
-  // BG msbits Fetch
-  case 7: {
-    uint16_t patternAddr = ((uint16_t)PPUCTRL.bgPatternTable << 12) +
-                           ((uint16_t)nametableByte << 4) +
-                           ((PPUVADDR.reg & 0x7000) >> 12) + 8;
-    patternHigh = ppu_read(patternAddr);
-    printf("PH: %X", patternHigh);
-    // printf("PH: %b\n", patternHigh);
-    break;
-  }
-  case 0: {
-    if (dot == 256) {
-      incrementY();
-    }
-    incrementX();
-    break;
-  }
-  }
-  return;
-}
+// void ppu::emitPixel() { virt_display[pixelIndex++] = colors[p]; }
 
 void ppu::tick(uint8_t cycles) {
   for (int cycle = 0; cycle < cycles; ++cycle) {

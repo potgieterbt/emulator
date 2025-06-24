@@ -29,7 +29,6 @@ public:
   uint8_t ppu_read(uint16_t addr);
   void ppu_write(uint16_t addr, uint8_t val);
   void setMapper(uint8_t mapNum);
-  void decrementSpriteCounter();
   void *getVdisplay();
   std::array<uint32_t, 61440> getVdisplayCopy();
   bool getFrameComplete();

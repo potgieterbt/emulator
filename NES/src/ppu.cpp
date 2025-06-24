@@ -1,8 +1,6 @@
 #include "ppu.hpp"
 #include "rom.hpp"
 #include <bits/fs_fwd.h>
-#include <cinttypes>
-#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
@@ -292,8 +290,8 @@ void ppu::reloadShiftersAndShift() {
   attrShiftReg2 <<= 1;
 
   if (dot % 8 == 1) {
-    uint8_t attr_bits1 = (attributetableByte >> quadrabnt_num) & 1;
-    uint8_t attr_bits2 = (attributetableByte >> quadrabnt_num) & 2;
+    uint8_t attr_bits1 = (attributetableByte >> quadrant_num) & 1;
+    uint8_t attr_bits2 = (attributetableByte >> quadrant_num) & 2;
     attr_bits1 |= attr_bits1 ? 255 : 0;
     attr_bits2 |= attr_bits2 ? 255 : 0;
     bgShiftRegLo |= patternLow;
@@ -301,7 +299,7 @@ void ppu::reloadShiftersAndShift() {
   }
 }
 
-// I don't even know if I need the mapper in the ppu but I can remove in not
+// I don't even know if I need the mapper in the ppu but I can remove if not
 // needed
 void ppu::setMapper(uint8_t mapNum) { m_mapper = mapNum; }
 
@@ -342,115 +340,15 @@ uint16_t ppu::getSpritePatternAddress(const Sprite &sprite,
   return addr;
 }
 
-void ppu::evalSprites() {
-  if (dot >= 1 && dot <= 64) {
-    if (dot == 1) {
-      secondaryOAMCursor = 0;
-    }
+void ppu::evalSprites() {}
 
-    secondaryOAM[secondaryOAMCursor].attr = 0xFF;
-    secondaryOAM[secondaryOAMCursor].tileNum = 0xFF;
-    secondaryOAM[secondaryOAMCursor].x = 0xFF;
-    secondaryOAM[secondaryOAMCursor].y = 0xFF;
-
-    if (dot % 8 == 0) {
-      secondaryOAMCursor++;
-    }
+void ppu::decrementSpriteCounter() {
+  if (!PPUMASK.showSprites && !PPUMASK.showBackground) {
+    return;
   }
-
-  if (dot > 65 && dot <= 256) {
-    secondaryOAMCursor = 0;
-    OAMCursor = 0;
-
-    if (secondaryOAMCursor == 8) {
-      return;
-    }
-    if (OAMCursor == 64) {
-      return;
-    }
-    if ((dot % 2) == 1) {
-      tmpOAM = OAM[OAMCursor];
-
-      if (!isUninit(tmpOAM) &&
-          ((scanLine >= tmpOAM.y) && (scanLine < (tmpOAM.y + spriteHeight)))) {
-        inRangeCycles--;
-        inRange = true;
-      }
-    } else {
-      if (inRange) {
-        inRangeCycles--;
-
-        if (inRangeCycles == 0) {
-          OAMCursor++;
-          secondaryOAMCursor++;
-          inRangeCycles = 8;
-          inRange = true;
-        } else {
-          tmpOAM.id = OAMCursor;
-          secondaryOAM[secondaryOAMCursor] = tmpOAM;
-        }
-      } else {
-        OAMCursor++;
-      }
-    }
-  }
-  if (dot >= 257 && dot <= 320) {
-    if (dot == 257) {
-      secondaryOAMCursor = 0;
-      spriteRenderEntities.clear();
-    }
-    Sprite sprite = secondaryOAM[secondaryOAMCursor];
-
-    int cycle = (dot - 1) % 8;
-    switch (cycle) {
-    case 0 ... 1:
-      if (!isUninit(sprite)) {
-        out = SpriteRenderEntity();
-      }
-      break;
-
-    case 2:
-      if (!isUninit(sprite)) {
-        out.attr = sprite.attr;
-        out.flipHorizontally = sprite.attr & 64;
-        out.flipVertically = sprite.attr & 128;
-        out.id = sprite.id;
-      }
-      break;
-
-    case 3:
-      if (!isUninit(sprite)) {
-        out.counter = sprite.x;
-      }
-      break;
-
-    case 4:
-      if (!isUninit(sprite)) {
-        spritePatternLowAddr =
-            getSpritePatternAddress(sprite, out.flipVertically);
-        out.lo = ppu_read(spritePatternLowAddr);
-      }
-
-      break;
-    case 5:
-      break;
-
-    case 6:
-      if (!isUninit(sprite)) {
-        spritePatternHighAddr = spritePatternLowAddr + 8;
-        out.hi = ppu_read(spritePatternHighAddr);
-      }
-      break;
-
-    case 7:
-      if (!isUninit(sprite)) {
-        spriteRenderEntities.push_back(out);
-      }
-      secondaryOAMCursor++;
-      break;
-
-    default:
-      break;
+  for (auto &sprite : spriteRenderEntities) {
+    if (sprite.counter > 0) {
+      sprite.counter--;
     }
   }
 }
@@ -536,7 +434,7 @@ void ppu::emitPixel() {
     showSprite = false;
     p = 13;
   }
-  virt_display[pixelIndex++] = palette[p];
+  virt_display[pixelIndex++] = colors[p];
 }
 
 void ppu::fetchTiles() {
@@ -547,6 +445,8 @@ void ppu::fetchTiles() {
   // printf("VADDR: %X\n", PPUVADDR.reg);
   // printf("dot: %i\n", dot);
   switch (dot % 8) {
+
+  // NameTable byte Fetch
   case 1: {
     // printf("Read Addr: %X\n ", 0x2000 | (PPUVADDR.reg & 0x0FFF));
     nametableByte = ppu_read(0x2000 | (PPUVADDR.reg & 0x0FFF));
@@ -554,15 +454,19 @@ void ppu::fetchTiles() {
     // printf("NT: %i\n", nametableByte);
     break;
   }
+
+  // AttributeTable byte Fetch
   case 3: {
     attributetableByte = ppu_read(0x23C0 | (PPUVADDR.reg & 0x0C00) |
                                   ((PPUVADDR.reg >> 2) & 0x07));
     printf("AT: %X", attributetableByte);
     // printf("AT: %i\n", attributetableByte);
-    quadrabnt_num =
+    quadrant_num =
         (((PPUVADDR.reg & 2) >> 1) | ((PPUVADDR.reg & 64) >> 5)) * 2;
     break;
   }
+
+  // BG lsbits Fetch
   case 5: {
     uint16_t patternAddr = ((uint16_t)PPUCTRL.bgPatternTable << 12) +
                            ((uint16_t)nametableByte << 4) +
@@ -573,6 +477,8 @@ void ppu::fetchTiles() {
     // printf("Pattern Addr: %X\n", patternAddr);
     break;
   }
+
+  // BG msbits Fetch
   case 7: {
     uint16_t patternAddr = ((uint16_t)PPUCTRL.bgPatternTable << 12) +
                            ((uint16_t)nametableByte << 4) +
@@ -612,8 +518,9 @@ void ppu::tick(uint8_t cycles) {
       }
 
       if (scanLine >= 0 && scanLine <= 239) {
-        evalSprites();
+        // TODO
         // Evaluate Sprites
+        evalSprites();
       }
 
       if (dot >= 280 && dot <= 304) {
@@ -639,6 +546,7 @@ void ppu::tick(uint8_t cycles) {
         if (scanLine >= 0 && scanLine <= 239) {
           if (dot >= 2 && dot <= 257) {
             if (scanLine > 0) {
+              // TODO
               // Decrement Sprite Counters
               decrementSpriteCounter();
             }
@@ -666,10 +574,6 @@ void ppu::tick(uint8_t cycles) {
         if (PPUCTRL.genNMI) {
           nmiOccured = true;
         }
-      }
-
-      if (scanLine >= 261) {
-        scanLine = -1;
       }
 
       break;

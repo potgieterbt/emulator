@@ -29,6 +29,7 @@ public:
   uint8_t ppu_read(uint16_t addr);
   void ppu_write(uint16_t addr, uint8_t val);
   void setMapper(uint8_t mapNum);
+  void decrementSpriteCounter();
   void *getVdisplay();
   std::array<uint32_t, 61440> getVdisplayCopy();
   bool getFrameComplete();
@@ -70,7 +71,7 @@ private:
   uint8_t x;
   uint8_t nametableByte;
   uint8_t attributetableByte;
-  uint8_t quadrabnt_num;
+  uint8_t quadrant_num;
   uint8_t patternLow;
   uint8_t patternHigh;
   uint16_t bgShiftRegLo;
@@ -145,7 +146,8 @@ private:
       4283224096, 4281912428, 4281906380, 4282137660, 4278190080, 4278190080,
       4293717740, 4289252588, 4290559212, 4292129516, 4293701356, 4293701332,
       4293702832, 4293182608, 4291613304, 4290043512, 4289258128, 4288209588,
-      4288730852, 4288717472, 4278190080, 4278190080};
+      4288730852, 4288717472, 4278190080, 4278190080,
+  };
 
   const uint32_t colors[64] = {
       0x666666ff, 0x002a88ff, 0x1412a7ff, 0x3b00a4ff, 0x5c007eff, 0x6e0040ff,

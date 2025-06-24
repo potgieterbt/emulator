@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
     if (PPU.getFrameComplete() == true) {
       PPU.setFrameComplete(false);
 
-      SDL_UpdateTexture(texture, NULL, PPU.getVdisplayCopy().data(), 256);
+      SDL_UpdateTexture(texture, NULL, PPU.getVdisplayCopy().data(), 256 * 4);
       SDL_RenderClear(renderer);
       SDL_RenderCopy(renderer, texture, NULL, NULL);
       SDL_RenderPresent(renderer);

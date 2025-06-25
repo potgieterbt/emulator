@@ -353,18 +353,6 @@ void ppu::decrementSpriteCounter() {
   }
 }
 
-void ppu::decrementSpriteCounter() {
-  if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
-    return;
-  }
-
-  for (auto &sprite : spriteRenderEntities) {
-    if (sprite.counter > 0) {
-      sprite.counter--;
-    }
-  }
-}
-
 void ppu::emitPixel() {
   if (!(PPUMASK.showBackground || PPUMASK.showSprites)) {
     pixelIndex++;
@@ -461,8 +449,7 @@ void ppu::fetchTiles() {
                                   ((PPUVADDR.reg >> 2) & 0x07));
     printf("AT: %X", attributetableByte);
     // printf("AT: %i\n", attributetableByte);
-    quadrant_num =
-        (((PPUVADDR.reg & 2) >> 1) | ((PPUVADDR.reg & 64) >> 5)) * 2;
+    quadrant_num = (((PPUVADDR.reg & 2) >> 1) | ((PPUVADDR.reg & 64) >> 5)) * 2;
     break;
   }
 
@@ -511,6 +498,12 @@ void ppu::tick(uint8_t cycles) {
           PPUSTATUS.spriteOverflow = 0;
           PPUSTATUS.spriteZeroHit = 0;
         }
+        if (dot >= 280 && dot <= 304) {
+          // Copy Vertical bits
+          if (PPUMASK.showSprites || PPUMASK.showBackground) {
+            PPUVADDR.reg = (PPUVADDR.reg & ~0x7BE0) | (PPUTADDR.reg & 0x7BE0);
+          }
+        }
       }
 
       if (scanLine == 0 && dot == 0 && odd) {
@@ -521,13 +514,6 @@ void ppu::tick(uint8_t cycles) {
         // TODO
         // Evaluate Sprites
         evalSprites();
-      }
-
-      if (dot >= 280 && dot <= 304) {
-        // Copy Vertical bits
-        if (PPUMASK.showSprites || PPUMASK.showBackground) {
-          PPUVADDR.reg = (PPUVADDR.reg & ~0x7BE0) | (PPUTADDR.reg & 0x7BE0);
-        }
       }
 
       if (dot == 257) {

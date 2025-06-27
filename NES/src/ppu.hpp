@@ -36,35 +36,6 @@ public:
   bool genNMI();
   int frames_complete = 0;
 
-  struct SpriteRenderEntity {
-    uint8_t lo;
-    uint8_t hi;
-    uint8_t attr;
-    uint8_t counter;
-    uint8_t id;
-    bool flipHorizontally;
-    bool flipVertically;
-    int shifted = 0;
-
-    void shift() {
-      if (shifted == 8) {
-        return;
-      }
-
-      if (flipHorizontally) {
-        lo >>= 1;
-        hi >>= 1;
-      } else {
-        lo <<= 1;
-        hi <<= 1;
-      }
-
-      shifted++;
-    }
-  };
-  std::vector<SpriteRenderEntity> spriteRenderEntities;
-  SpriteRenderEntity out;
-
 private:
   bool w = false;
   uint8_t x;

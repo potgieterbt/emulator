@@ -166,6 +166,7 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
 }
 
 uint8_t ppu::ppu_read(uint16_t addr) {
+  printf("addr: %X\n", addr);
   addr &= 0x3FFF;
   switch (addr) {
   case 0x0000 ... 0x1FFF: {
@@ -173,15 +174,18 @@ uint8_t ppu::ppu_read(uint16_t addr) {
   }
   case 0x2000 ... 0x3EFF: {
     uint8_t mirroring = m_cart->getMirroring();
+    printf("addr: %X\n", addr);
     addr &= 0x0FFF;
     // Horizontal
+    printf("addr: %X\n", addr);
     if (mirroring == 0) {
       if ((addr >= 0x0000 && addr <= 0x03FF) ||
           (addr >= 0x0800 && addr <= 0x0BFF)) {
         return vram[addr & 0x0EFF];
       } else if ((addr >= 0x0400 && addr <= 0x07FF) ||
                  (addr >= 0x0C00 && addr <= 0x0FFF)) {
-        return vram[1024 + addr & 0x0EFF];
+        printf("=============== %X\n", 1024 + addr & 0x0EFF);
+        return vram[1024 + (addr & 0x0EFF)];
       }
 
       // Vertical
@@ -193,13 +197,16 @@ uint8_t ppu::ppu_read(uint16_t addr) {
 
       } else if ((addr >= 0x0800 && addr <= 0x0BFF) ||
                  (addr >= 0x0C00 && addr <= 0x0FFF)) {
-        return vram[1024 + addr & 0x0EFF];
+        uint16_t add = 1024 + (addr & 0x0EFF);
+        printf("addx %X\n", add);
+        return vram[add];
       }
     }
     return 0;
   }
   case 0x3F00 ... 0x3FFF:
     addr &= 0x001F;
+    printf("addr: %X\n", addr);
     if (addr == 0x0010 || addr == 0x0014 || addr == 0x0018 || addr == 0x001C) {
       addr &= 0X000F;
     }
@@ -269,7 +276,138 @@ bool ppu::isUninit(const Sprite &sprite) {
           (sprite.tileNum == 0));
 }
 
-// void ppu::emitPixel() { virt_display[pixelIndex++] = colors[p]; }
+void ppu::reloadShiftersAndShift() {
+  if (!(PPUMASK.showSprites || PPUMASK.showBackground)) {
+    return;
+  }
+
+  bgShiftRegHi <<= 1;
+  bgShiftRegLo <<= 1;
+  attrShiftReg1 <<= 1;
+  attrShiftReg2 <<= 1;
+
+  if ((dot & 8) == 1) {
+    uint8_t attrbits1 = (attributetableByte >> quadrant_num) & 1;
+    uint8_t attrbits2 = (attributetableByte >> quadrant_num) & 2;
+    attrShiftReg1 |= attrbits1 ? 255 : 0;
+    attrShiftReg2 |= attrbits2 ? 255 : 0;
+    bgShiftRegLo = patternLow;
+    bgShiftRegHi = patternHigh;
+  }
+}
+
+void ppu::incrementX() {
+  if (!(PPUMASK.showSprites || PPUMASK.showBackground)) {
+    return;
+  }
+  if (PPUVADDR.coarse_x == 31) {
+    PPUVADDR.coarse_x = 0;
+    PPUVADDR.nametable_x = ~PPUVADDR.nametable_x;
+  } else {
+    PPUVADDR.coarse_x++;
+  }
+}
+
+void ppu::incrementY() {
+  if (!(PPUMASK.showSprites || PPUMASK.showBackground)) {
+    return;
+  }
+  if (PPUVADDR.fine_y < 7) {
+    PPUVADDR.fine_y++;
+  } else {
+    PPUVADDR.fine_y = 0;
+
+    if (PPUVADDR.coarse_y == 29) {
+      PPUVADDR.coarse_y = 0;
+      PPUVADDR.nametable_y = ~PPUVADDR.nametable_y;
+    } else if (PPUVADDR.coarse_y == 31) {
+      PPUVADDR.coarse_y = 0;
+    } else {
+      PPUVADDR.coarse_y++;
+    }
+  }
+}
+
+void ppu::fetchTiles() {
+  if (!(PPUMASK.showSprites || PPUMASK.showBackground)) {
+    return;
+  }
+
+  switch (dot % 8) {
+
+  // NameTable
+  case 1:
+    nametableByte = ppu_read(0x2000 | (PPUVADDR.reg & 0x0FFF));
+    printf("NT: %X\n", nametableByte);
+    break;
+
+  // AttributeTable
+  case 3:
+    attributetableByte = ppu_read(
+        0x23C0 | (PPUVADDR.nametable_y << 11) | (PPUVADDR.nametable_x << 10) |
+        (PPUVADDR.coarse_y >> 2) << 3 | (PPUVADDR.coarse_x >> 2));
+    printf("AT: %X\n", attributetableByte);
+    quadrant_num =
+        (((PPUVADDR.reg & 0x2) >> 1) | ((PPUVADDR.reg & 0x64) >> 5)) * 2;
+    break;
+
+    // For both BG bytes:
+    // PPUVADDR.reg & 0x7000 is fetching the fine_y scroll
+    // PPUVADDR.reg << 4 only allows coarse x and y into the address
+  // BG lsbits
+  case 5:
+    patternLow = ppu_read((PPUCTRL.bgPatternTable << 12) |
+                          ((uint16_t)nametableByte << 4) | (PPUVADDR.fine_y));
+    break;
+
+  // BG msbits
+  case 7:
+    patternHigh =
+        ppu_read((PPUCTRL.bgPatternTable << 12) |
+                 ((uint16_t)nametableByte << 4) | (PPUVADDR.fine_y + 8));
+    break;
+
+  case 0:
+    if (dot == 256) {
+      incrementY();
+    }
+    incrementX();
+    break;
+
+  default:
+    break;
+  }
+}
+
+void ppu::emitPixel() {
+  if (!(PPUMASK.showSprites || PPUMASK.showBackground)) {
+    pixelIndex++;
+    return;
+  }
+  uint16_t fine_sel = 0x8000 >> x;
+  uint16_t pixel1 = (bgShiftRegLo & fine_sel) << x;
+  uint16_t pixel2 = (bgShiftRegHi & fine_sel) << x;
+  uint16_t pixel3 = (attrShiftReg1 & fine_sel) << x;
+  uint16_t pixel4 = (attrShiftReg1 & fine_sel) << x;
+  uint8_t bg_bit_12 = (pixel2 >> 14) | (pixel1 >> 15);
+
+  uint8_t paletteIndex =
+      0 | (pixel4 >> 12) | (pixel3 >> 13) | (pixel2 >> 14) | (pixel1 >> 15);
+
+  if (!PPUMASK.showBackground) {
+    paletteIndex = 0;
+  }
+
+  uint8_t pindex = ppu_read(0x3F00 | (paletteIndex)) % 64;
+
+  uint8_t p = PPUMASK.greyscale ? (pindex & 0x30) : pindex;
+
+  if (dot <= 9 || dot >= 249 || scanLine <= 7 || scanLine >= 232) {
+    p = 13;
+  }
+
+  virt_display[pixelIndex++] = colors[p];
+}
 
 void ppu::tick(uint8_t cycles) {
   for (int cycle = 0; cycle < cycles; ++cycle) {
@@ -283,6 +421,13 @@ void ppu::tick(uint8_t cycles) {
           PPUSTATUS.spriteOverflow = 0;
           PPUSTATUS.spriteZeroHit = 0;
         }
+
+        if (dot >= 280 && dot <= 304) {
+          // Copy Vertical bits
+          if (PPUMASK.showSprites || PPUMASK.showBackground) {
+            PPUVADDR.reg = (PPUVADDR.reg & ~0x7BE0) | (PPUTADDR.reg & 0x7BE0);
+          }
+        }
       }
 
       if (scanLine == 0 && dot == 0 && odd) {
@@ -290,16 +435,12 @@ void ppu::tick(uint8_t cycles) {
       }
 
       if (scanLine >= 0 && scanLine <= 239) {
+        if (PPUMASK.showSprites || PPUMASK.showBackground) {
+          // printf("TODO: Eval Sprites\n");
+        }
         // TODO
         // Evaluate Sprites
-        evalSprites();
-      }
-
-      if (dot >= 280 && dot <= 304) {
-        // Copy Vertical bits
-        if (PPUMASK.showSprites || PPUMASK.showBackground) {
-          PPUVADDR.reg = (PPUVADDR.reg & ~0x7BE0) | (PPUTADDR.reg & 0x7BE0);
-        }
+        // evalSprites();
       }
 
       if (dot == 257) {
@@ -318,9 +459,12 @@ void ppu::tick(uint8_t cycles) {
         if (scanLine >= 0 && scanLine <= 239) {
           if (dot >= 2 && dot <= 257) {
             if (scanLine > 0) {
+              if (PPUMASK.showSprites || PPUMASK.showBackground) {
+                // printf("TODO: Decrement Sprite Counter\n");
+              }
               // TODO
               // Decrement Sprite Counters
-              decrementSpriteCounter();
+              // decrementSpriteCounter();
             }
             // Emit Pixel
             emitPixel();
@@ -343,6 +487,7 @@ void ppu::tick(uint8_t cycles) {
       if (scanLine == 241 && dot == 1) {
         PPUSTATUS.vBlank = 1;
         frame_complete = true;
+        printf("frame\n");
         if (PPUCTRL.genNMI) {
           nmiOccured = true;
         }

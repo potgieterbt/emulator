@@ -193,11 +193,11 @@ uint8_t ppu::ppu_read(uint16_t addr) {
 
       if ((addr >= 0x0000 && addr <= 0x03FF) ||
           (addr >= 0x0400 && addr <= 0x07FF)) {
-        return vram[addr & 0x0EFF];
+        return vram[addr & 0x03FF];
 
       } else if ((addr >= 0x0800 && addr <= 0x0BFF) ||
                  (addr >= 0x0C00 && addr <= 0x0FFF)) {
-        uint16_t add = 1024 + (addr & 0x0EFF);
+        uint16_t add = 1024 + (addr & 0x03FF);
         printf("addx %X\n", add);
         return vram[add];
       }
@@ -309,23 +309,26 @@ void ppu::incrementX() {
 }
 
 void ppu::incrementY() {
-  if (!(PPUMASK.showSprites || PPUMASK.showBackground)) {
-    return;
-  }
-  if (PPUVADDR.fine_y < 7) {
+  printf("IncY\n");
+  printf("%X\n", PPUVADDR.reg);
+  if (PPUVADDR.fine_y != 7) {
     PPUVADDR.fine_y++;
+
   } else {
     PPUVADDR.fine_y = 0;
 
     if (PPUVADDR.coarse_y == 29) {
       PPUVADDR.coarse_y = 0;
       PPUVADDR.nametable_y = ~PPUVADDR.nametable_y;
+
     } else if (PPUVADDR.coarse_y == 31) {
       PPUVADDR.coarse_y = 0;
+
     } else {
       PPUVADDR.coarse_y++;
     }
   }
+  printf("%X\n", PPUVADDR.reg);
 }
 
 void ppu::fetchTiles() {
@@ -370,8 +373,10 @@ void ppu::fetchTiles() {
   case 0:
     if (dot == 256) {
       incrementY();
+      printf("%X\n", PPUVADDR.reg);
     }
     incrementX();
+    printf("%X\n", PPUVADDR.reg);
     break;
 
   default:

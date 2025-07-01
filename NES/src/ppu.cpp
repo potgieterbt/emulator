@@ -166,7 +166,6 @@ void ppu::cpu_write(uint8_t reg, uint8_t val) {
 }
 
 uint8_t ppu::ppu_read(uint16_t addr) {
-  printf("addr: %X\n", addr);
   addr &= 0x3FFF;
   switch (addr) {
   case 0x0000 ... 0x1FFF: {
@@ -174,18 +173,15 @@ uint8_t ppu::ppu_read(uint16_t addr) {
   }
   case 0x2000 ... 0x3EFF: {
     uint8_t mirroring = m_cart->getMirroring();
-    printf("addr: %X\n", addr);
     addr &= 0x0FFF;
     // Horizontal
-    printf("addr: %X\n", addr);
     if (mirroring == 0) {
       if ((addr >= 0x0000 && addr <= 0x03FF) ||
           (addr >= 0x0800 && addr <= 0x0BFF)) {
-        return vram[addr & 0x0EFF];
+        return vram[addr & 0x03FF];
       } else if ((addr >= 0x0400 && addr <= 0x07FF) ||
                  (addr >= 0x0C00 && addr <= 0x0FFF)) {
-        printf("=============== %X\n", 1024 + addr & 0x0EFF);
-        return vram[1024 + (addr & 0x0EFF)];
+        return vram[1024 + (addr & 0x03FF)];
       }
 
       // Vertical
@@ -198,7 +194,6 @@ uint8_t ppu::ppu_read(uint16_t addr) {
       } else if ((addr >= 0x0800 && addr <= 0x0BFF) ||
                  (addr >= 0x0C00 && addr <= 0x0FFF)) {
         uint16_t add = 1024 + (addr & 0x03FF);
-        printf("addx %X\n", add);
         return vram[add];
       }
     }

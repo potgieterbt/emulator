@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 
   // Create window
   window =
-      SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED,
+      SDL_CreateWindow("NES", SDL_WINDOWPOS_UNDEFINED,
                        SDL_WINDOWPOS_UNDEFINED, 512, 480, SDL_WINDOW_SHOWN);
 
   if (window == NULL) {

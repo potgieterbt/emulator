@@ -193,8 +193,7 @@ uint8_t ppu::ppu_read(uint16_t addr) {
 
       } else if ((addr >= 0x0800 && addr <= 0x0BFF) ||
                  (addr >= 0x0C00 && addr <= 0x0FFF)) {
-        uint16_t add = 1024 + (addr & 0x03FF);
-        return vram[add];
+        return vram[1024 + (addr & 0x03FF)];
       }
     }
     return 0;
@@ -226,11 +225,11 @@ void ppu::ppu_write(uint16_t addr, uint8_t val) {
     if (mirroring == 0) {
       if ((addr >= 0x0000 && addr <= 0x03FF) ||
           (addr >= 0x0800 && addr <= 0x0BFF)) {
-        vram[addr & 0x0EFF] = val;
+        vram[addr & 0x03FF] = val;
         break;
       } else if ((addr >= 0x0400 && addr <= 0x07FF) ||
                  (addr >= 0x0C00 && addr <= 0x0FFF)) {
-        vram[1024 + addr & 0x0EFF] = val;
+        vram[1024 + addr & 0x03FF] = val;
         break;
       }
 
@@ -239,13 +238,13 @@ void ppu::ppu_write(uint16_t addr, uint8_t val) {
 
       if ((addr >= 0x0000 && addr <= 0x03FF) ||
           (addr >= 0x0400 && addr <= 0x07FF)) {
-        vram[addr & 0x0EFF] = val;
+        vram[addr & 0x03FF] = val;
         break;
 
       } else if ((addr >= 0x0800 && addr <= 0x0BFF) ||
                  (addr >= 0x0C00 && addr <= 0x0FFF)) {
 
-        vram[1024 + addr & 0x0EFF] = val;
+        vram[1024 + addr & 0x03FF] = val;
         break;
       }
     }
@@ -304,8 +303,6 @@ void ppu::incrementX() {
 }
 
 void ppu::incrementY() {
-  printf("IncY\n");
-  printf("%X\n", PPUVADDR.reg);
   if (PPUVADDR.fine_y != 7) {
     PPUVADDR.fine_y++;
 
@@ -323,7 +320,6 @@ void ppu::incrementY() {
       PPUVADDR.coarse_y++;
     }
   }
-  printf("%X\n", PPUVADDR.reg);
 }
 
 void ppu::fetchTiles() {
